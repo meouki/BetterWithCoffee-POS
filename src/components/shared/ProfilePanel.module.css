@@ -1,0 +1,324 @@
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.2s ease-out;
+}
+
+.panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 380px;
+    background-color: var(--color-bg);
+    border-left: 1px solid var(--color-border);
+    z-index: 90;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    animation: slideInRight 0.26s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: -24px 0 60px rgba(0, 0, 0, 0.3);
+}
+
+/* ─── Header ─────────────────────────────── */
+
+.panelHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 20px 0;
+}
+
+.panelTitle {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--color-muted);
+    font-family: var(--font-ui);
+}
+
+.closeBtn {
+    background: transparent;
+    border: none;
+    color: var(--color-muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-base);
+}
+
+.closeBtn:hover {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+}
+
+/* ─── Identity Block ─────────────────────── */
+
+.identity {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 20px;
+    border-bottom: 1px solid var(--color-border);
+    text-align: center;
+    gap: 12px;
+}
+
+.bigAvatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 9999px;
+    background-color: var(--color-accent);
+    color: white;
+    font-size: 1.75rem;
+    font-weight: 700;
+    font-family: var(--font-ui);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 4px var(--color-accent-muted);
+}
+
+.profileName {
+    font-size: 1.25rem;
+    font-weight: 700;
+    font-family: var(--font-drama);
+}
+
+.profileAt {
+    font-size: 0.875rem;
+    color: var(--color-muted);
+    font-family: var(--font-ui);
+    margin-top: -8px;
+}
+
+.rolePill {
+    padding: 4px 14px;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: var(--font-ui);
+}
+
+.roleMaster {
+    background-color: color-mix(in srgb, var(--color-dine-in) 20%, transparent);
+    color: var(--color-dine-in);
+}
+
+.roleAdmin {
+    background-color: color-mix(in srgb, var(--color-accent) 20%, transparent);
+    color: var(--color-accent);
+}
+
+.roleCashier {
+    background-color: color-mix(in srgb, var(--color-takeout) 20%, transparent);
+    color: var(--color-takeout);
+}
+
+/* ─── Stats Row ──────────────────────────── */
+
+.statsRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 20px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.statCard {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    text-align: center;
+}
+
+.statValue {
+    font-size: 1.25rem;
+    font-weight: 700;
+    font-family: var(--font-data);
+    color: var(--color-accent);
+}
+
+.statLabel {
+    font-size: 0.7rem;
+    color: var(--color-muted);
+    font-family: var(--font-ui);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ─── DTR Calendar ───────────────────────── */
+
+.dtrSection {
+    padding: 20px;
+    flex: 1;
+}
+
+.sectionTitle {
+    font-size: 0.875rem;
+    font-weight: 600;
+    font-family: var(--font-ui);
+    margin-bottom: 4px;
+}
+
+.sectionSub {
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    font-family: var(--font-ui);
+    margin-bottom: 16px;
+}
+
+.calendarNav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.calMonth {
+    font-family: var(--font-drama);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.navBtn {
+    background: transparent;
+    border: none;
+    color: var(--color-muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-base);
+}
+
+.navBtn:hover {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+}
+
+.weekRow {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+.weekday {
+    text-align: center;
+    font-size: 0.65rem;
+    color: var(--color-muted);
+    font-family: var(--font-ui);
+    font-weight: 600;
+    padding-bottom: 4px;
+}
+
+.calGrid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.calDay {
+    aspect-ratio: 1 / 1;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-family: var(--font-data);
+    font-weight: 500;
+    position: relative;
+    border: 1.5px solid transparent;
+}
+
+.calDayEmpty {
+    /* Blank padding cell for days before month starts */
+}
+
+.calDayFuture {
+    color: var(--color-border);
+}
+
+.calDayAbsent {
+    color: var(--color-muted);
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+.calDayPresent {
+    color: white;
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+    box-shadow: 0 2px 8px var(--color-accent-muted);
+}
+
+.calDayToday {
+    /* Ring indicator for today */
+    border-color: var(--color-text);
+}
+
+.calDayToday.calDayPresent {
+    border-color: white;
+}
+
+/* ─── Footer ────────────────────────────── */
+
+.panelFooter {
+    padding: 16px 20px;
+    border-top: 1px solid var(--color-border);
+    background-color: var(--color-surface);
+}
+
+.logoutBtn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    color: var(--color-error);
+    background: transparent;
+    border: 1px solid color-mix(in srgb, var(--color-error) 25%, transparent);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 600;
+    font-family: var(--font-ui);
+    transition: background-color var(--transition-base);
+}
+
+.logoutBtn:hover {
+    background-color: color-mix(in srgb, var(--color-error) 10%, transparent);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}

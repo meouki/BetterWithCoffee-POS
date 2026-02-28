@@ -1,0 +1,54 @@
+.tabBarWrapper {
+    position: sticky;
+    top: 0px;
+    /* Height of header */
+    z-index: 30;
+    background-color: color-mix(in srgb, var(--color-bg) 80%, transparent);
+    backdrop-filter: blur(12px);
+    padding: 16px 8px 8px 8px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.tabScrollArea {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding: 0 8px;
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+}
+
+.tabScrollArea::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari and Opera */
+}
+
+.tabBtn {
+    flex-shrink: 0;
+    padding: 8px 16px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-base);
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-family: var(--font-ui);
+}
+
+.tabBtn.active {
+    background-color: var(--color-accent);
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.tabBtn.inactive {
+    background-color: transparent;
+    color: var(--color-muted);
+}
+
+.tabBtn.inactive:hover {
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+}

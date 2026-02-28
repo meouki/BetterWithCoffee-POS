@@ -1,0 +1,187 @@
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.title {
+    font-size: 1.5rem;
+    font-family: var(--font-drama);
+    font-weight: 700;
+}
+
+.actionBtn {
+    background-color: var(--color-accent);
+    color: white;
+    padding: 12px 24px;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px color-mix(in srgb, var(--color-accent) 20%, transparent);
+    transition: background-color var(--transition-base);
+}
+
+.actionBtn:hover {
+    background-color: var(--color-accent-hover);
+}
+
+.tablePanel {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.tableWrapper {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    text-align: left;
+    border-collapse: collapse;
+}
+
+.th {
+    padding: 16px 24px;
+    color: var(--color-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--color-border);
+    font-family: var(--font-ui);
+}
+
+.td {
+    padding: 16px 24px;
+    font-size: 0.875rem;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+}
+
+.tableRow:last-child .td {
+    border-bottom: none;
+}
+
+.userCell {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 9999px;
+    background-color: var(--color-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--color-accent);
+    flex-shrink: 0;
+}
+
+.userName {
+    font-weight: 600;
+    font-family: var(--font-ui);
+}
+
+.userUsername {
+    color: var(--color-muted);
+    font-size: 0.75rem;
+}
+
+.roleBadge {
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.roleAdmin {
+    background-color: color-mix(in srgb, var(--color-accent) 20%, transparent);
+    color: var(--color-accent);
+}
+
+.roleMaster {
+    background-color: color-mix(in srgb, var(--color-dine-in) 20%, transparent);
+    color: var(--color-dine-in);
+}
+
+.roleCashier {
+    background-color: color-mix(in srgb, var(--color-takeout) 20%, transparent);
+    color: var(--color-takeout);
+}
+
+.statusToggle {
+    width: 44px;
+    height: 24px;
+    border-radius: 9999px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color var(--transition-base);
+    border: none;
+}
+
+.statusActive {
+    background-color: var(--color-success);
+}
+
+.statusInactive {
+    background-color: var(--color-muted);
+}
+
+.statusNub {
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    transition: transform var(--transition-base);
+}
+
+.statusNubActive {
+    transform: translateX(22px);
+}
+
+.statusNubInactive {
+    transform: translateX(2px);
+}
+
+.dateData {
+    font-family: var(--font-data);
+    font-size: 0.75rem;
+}
+
+.actionCell {
+    display: flex;
+    gap: 12px;
+}
+
+.iconBtn {
+    color: var(--color-muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-base);
+}
+
+.iconBtn.edit:hover {
+    color: var(--color-accent);
+    background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+}
+
+.iconBtn.delete:hover {
+    color: var(--color-error);
+    background-color: color-mix(in srgb, var(--color-error) 10%, transparent);
+}

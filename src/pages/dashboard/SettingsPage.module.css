@@ -1,0 +1,155 @@
+.pageContainer {
+    /* Inherits from main layout */
+    max-width: 800px;
+}
+
+.title {
+    font-size: 1.5rem;
+    font-family: var(--font-drama);
+    font-weight: 700;
+    margin-bottom: 32px;
+}
+
+.section {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    margin-bottom: 32px;
+}
+
+.sectionHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-drama);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: var(--color-accent);
+}
+
+.settingRow {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+@media (min-width: 640px) {
+    .settingRow {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+.settingInfo {
+    flex: 1;
+}
+
+.settingTitle {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.settingDesc {
+    color: var(--color-muted);
+    font-size: 0.875rem;
+    font-family: var(--font-ui);
+}
+
+.themeToggle {
+    width: 52px;
+    height: 28px;
+    border-radius: 9999px;
+    position: relative;
+    cursor: pointer;
+    border: none;
+    background-color: var(--color-bg);
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--color-border);
+}
+
+.themeNub {
+    width: 20px;
+    height: 20px;
+    background-color: var(--color-text);
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nubIcon {
+    color: var(--color-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.themeNubLight {
+    transform: translateX(4px);
+}
+
+.themeNubDark {
+    transform: translateX(26px);
+}
+
+.colorPickerGrid {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.colorSwatch {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform var(--transition-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    padding: 0;
+    outline: none;
+}
+
+.colorSwatch:hover {
+    transform: scale(1.1);
+}
+
+.colorSwatch.active {
+    border-color: var(--color-text);
+    box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-border);
+}
+
+.divider {
+    height: 1px;
+    background-color: var(--color-border);
+    margin: 32px 0;
+}
+
+.infoGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+}
+
+.infoLabel {
+    color: var(--color-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.infoValue {
+    font-family: var(--font-data);
+    font-size: 0.875rem;
+}

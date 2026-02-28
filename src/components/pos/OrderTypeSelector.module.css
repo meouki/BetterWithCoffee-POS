@@ -1,0 +1,90 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modal {
+    background-color: var(--color-surface);
+    padding: 32px;
+    border-radius: var(--radius-xl);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    max-width: 24rem;
+    width: 100%;
+    margin: 0 16px;
+    border: 1px solid var(--color-border);
+    animation: zoomIn 0.2s ease-out;
+}
+
+.title {
+    font-size: 1.5rem;
+    font-family: var(--font-drama);
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.btnGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.typeBtn {
+    width: 100%;
+    min-height: 80px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    transition: transform var(--transition-base);
+}
+
+.typeBtn.dineIn {
+    background-color: var(--color-dine-in);
+    box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2);
+}
+
+.typeBtn.takeOut {
+    background-color: var(--color-takeout);
+    box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.2);
+}
+
+.btnText {
+    font-size: 1.125rem;
+    font-weight: 700;
+    font-family: var(--font-ui);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes zoomIn {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

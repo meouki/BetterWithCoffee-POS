@@ -1,0 +1,32 @@
+.dashboardLayout {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    background-color: var(--color-bg);
+    overflow: hidden;
+}
+
+.mainWrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    min-width: 0;
+    /* Prevents flex children from overflowing */
+    overflow: hidden;
+    position: relative;
+}
+
+.content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 24px;
+}
+
+@media (max-width: 640px) {
+    .content {
+        padding: 16px 12px;
+    }
+}

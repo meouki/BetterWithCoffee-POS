@@ -1,0 +1,37 @@
+.gridWrapper {
+    padding: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    padding-bottom: 96px;
+    /* space for floating cart button */
+    animation: fadeIn 0.15s ease-out;
+}
+
+.emptyState {
+    grid-column: span 2;
+    text-align: center;
+    padding: 40px 0;
+    color: var(--color-muted);
+    font-family: var(--font-ui);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 450px) {
+    .gridWrapper {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+
+    .emptyState {
+        grid-column: span 1;
+    }
+}

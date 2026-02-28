@@ -1,0 +1,231 @@
+.pageContainer {
+    /* Inherits from main layout wrapper */
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.title {
+    font-size: 1.5rem;
+    font-family: var(--font-drama);
+    font-weight: 700;
+}
+
+.actionBtn {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    padding: 12px 24px;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.actionBtn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.tabs {
+    display: flex;
+    gap: 32px;
+    margin-bottom: 32px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.tabBtn {
+    padding-bottom: 16px;
+    font-weight: 600;
+    font-size: 1rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-muted);
+    border-bottom: 2px solid transparent;
+    transition: all var(--transition-base);
+    font-family: var(--font-ui);
+}
+
+.tabBtn.active {
+    color: var(--color-accent);
+    border-bottom-color: var(--color-accent);
+}
+
+.tabBtn:hover:not(.active) {
+    color: var(--color-text);
+    border-bottom-color: var(--color-border);
+}
+
+.controlsRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.dateSelect {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    font-family: var(--font-ui);
+    outline: none;
+}
+
+.dateSelect:focus {
+    border-color: var(--color-accent);
+}
+
+.chartContainer {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    height: 400px;
+    margin-bottom: 24px;
+}
+
+.metricsGrid {
+    display: grid;
+    gap: 24px;
+    grid-template-columns: repeat(1, 1fr);
+}
+
+@media (min-width: 640px) {
+    .metricsGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .metricsGrid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.metricCard {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    text-align: center;
+}
+
+.metricLabel {
+    color: var(--color-muted);
+    font-size: 0.875rem;
+    margin-bottom: 8px;
+    font-family: var(--font-ui);
+}
+
+.metricValue {
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-family: var(--font-data);
+}
+
+.tablePanel {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.tableWrapper {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    text-align: left;
+    border-collapse: collapse;
+}
+
+.th {
+    padding: 16px 24px;
+    color: var(--color-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--color-border);
+    font-family: var(--font-ui);
+}
+
+.td {
+    padding: 16px 24px;
+    font-size: 0.875rem;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+}
+
+.tableRow:last-child .td {
+    border-bottom: none;
+}
+
+.rankBadge {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background-color: var(--color-bg);
+    font-family: var(--font-data);
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: var(--color-muted);
+}
+
+.rankBadge.top {
+    background-color: color-mix(in srgb, var(--color-accent) 20%, transparent);
+    color: var(--color-accent);
+}
+
+.productName {
+    font-weight: 600;
+    font-family: var(--font-ui);
+}
+
+.productCategory {
+    color: var(--color-muted);
+    font-size: 0.75rem;
+}
+
+.dataValue {
+    font-family: var(--font-data);
+}
+
+.barTrack {
+    height: 6px;
+    background-color: var(--color-bg);
+    border-radius: 9999px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.barFill {
+    height: 100%;
+    background-color: var(--color-accent);
+    border-radius: 9999px;
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 9999px;
+    background-color: var(--color-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--color-accent);
+}

@@ -1,0 +1,19 @@
+.pageContainer {
+    /* Inherits from main layout wrapper */
+}
+
+.title {
+    font-size: 1.5rem;
+    font-family: var(--font-drama);
+    font-weight: 700;
+    margin-bottom: 24px;
+}
+
+.emptyState {
+    background-color: var(--color-surface);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 48px;
+    text-align: center;
+    color: var(--color-muted);
+}

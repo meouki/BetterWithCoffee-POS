@@ -1,0 +1,22 @@
+.posLayout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+    padding-top: 52px;
+    /* Height of header */
+    position: relative;
+    background-color: var(--color-bg);
+    overflow-x: hidden;
+}
+
+.scrollArea {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+    scrollbar-width: none;
+}
+
+.scrollArea::-webkit-scrollbar {
+    display: none;
+}

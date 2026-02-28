@@ -1,0 +1,153 @@
+.topBar {
+    height: 60px;
+    background-color: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+}
+
+.leftSection {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.menuBtn {
+    display: none;
+    background: transparent;
+    border: none;
+    color: var(--color-text);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: var(--radius-sm);
+    transition: background-color var(--transition-base);
+}
+
+.menuBtn:hover {
+    background-color: var(--color-bg);
+}
+
+@media (max-width: 1024px) {
+    .menuBtn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+.pageTitle {
+    font-size: 1.5rem;
+    font-family: var(--font-drama);
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+.rightSection {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.clock {
+    font-family: var(--font-data);
+    font-size: 0.875rem;
+    color: var(--color-muted);
+}
+
+.divider {
+    width: 1px;
+    height: 24px;
+    background-color: var(--color-border);
+}
+
+.userContainer {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.notificationBtn {
+    position: relative;
+    color: var(--color-text);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    transition: background-color var(--transition-base);
+}
+
+.notificationBtn:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    /* Safe fallback */
+}
+
+@media (prefers-color-scheme: light) {
+    .notificationBtn:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+}
+
+.badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 8px;
+    height: 8px;
+    background-color: var(--color-error);
+    border-radius: 9999px;
+    border: 2px solid var(--color-surface);
+}
+
+.userPill {
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.userAvatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 9999px;
+    background-color: var(--color-accent);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: var(--font-ui);
+    flex-shrink: 0;
+}
+
+.userName {
+    font-size: 0.875rem;
+    font-weight: 500;
+    font-family: var(--font-ui);
+}
+
+@media (max-width: 640px) {
+
+    /* Hide text labels — avatars remain visible */
+    .clock,
+    .userName {
+        display: none;
+    }
+
+    .divider {
+        display: none;
+    }
+
+    .rightSection {
+        gap: 8px;
+    }
+}

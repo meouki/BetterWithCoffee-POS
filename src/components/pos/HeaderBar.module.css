@@ -1,0 +1,153 @@
+.headerBar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 52px;
+    background-color: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    z-index: 40;
+}
+
+.leftSection {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.brandContainer {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: 0.875rem;
+}
+
+.brandFull {
+    display: inline;
+}
+
+.brandShort {
+    display: none;
+    font-size: 1.125rem;
+    color: var(--color-accent);
+}
+
+.orderBadge {
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 9999px;
+    transition: background-color var(--transition-base);
+    border: none;
+    cursor: pointer;
+    color: white;
+}
+
+.orderBadge.dineIn {
+    background-color: var(--color-dine-in);
+}
+
+.orderBadge.takeOut {
+    background-color: var(--color-takeout);
+}
+
+.clock {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-data);
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+}
+
+.rightSection {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.userPill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.userAvatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 9999px;
+    background-color: var(--color-accent);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: var(--font-ui);
+    flex-shrink: 0;
+}
+
+.cashierName {
+    font-size: 0.875rem;
+    font-weight: 600;
+    max-width: 100px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.logoutBtn {
+    padding: 8px;
+    border-radius: 9999px;
+    color: var(--color-error);
+    transition: background-color var(--transition-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.logoutBtn:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+    /* Error color with opacity */
+}
+
+@media (max-width: 600px) {
+    .brandFull {
+        display: none;
+    }
+
+    .brandShort {
+        display: inline;
+    }
+
+    /* Hide the text label — the avatar bubble stays visible */
+    .cashierName {
+        display: none;
+    }
+
+    .clock {
+        position: static;
+        transform: none;
+        flex: 1;
+        text-align: center;
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .orderBadge {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+    }
+
+    .leftSection {
+        gap: 8px;
+    }
+}
