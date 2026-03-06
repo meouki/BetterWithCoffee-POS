@@ -25,6 +25,16 @@ export function OrderProvider({ children }) {
 
     const { addNotification } = useNotificationContext();
 
+    const fetchOrders = useCallback(async (startDate, endDate) => {
+        try {
+            const data = await ordersApi.getAll(startDate, endDate);
+            return data;
+        } catch (err) {
+            console.error('Failed to fetch filtered orders', err);
+            return [];
+        }
+    }, []);
+
     const createOrder = useCallback(async (orderData) => {
         try {
             const newOrder = await ordersApi.create(orderData);
@@ -64,6 +74,7 @@ export function OrderProvider({ children }) {
                 orders,
                 isLoading,
                 createOrder,
+                fetchOrders,
                 getTodayRevenue,
                 getTodayOrderCount
             }}

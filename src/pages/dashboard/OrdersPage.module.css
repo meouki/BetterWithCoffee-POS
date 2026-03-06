@@ -1,19 +1,348 @@
 .pageContainer {
-    /* Inherits from main layout wrapper */
+    animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .title {
     font-size: 1.5rem;
-    font-family: var(--font-drama);
+    font-family: var(--font-ui);
     font-weight: 700;
+}
+
+.header {
     margin-bottom: 24px;
 }
 
-.emptyState {
+/* Filters */
+.filterSection {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.pillGroup {
+    display: flex;
+    gap: 8px;
     background-color: var(--color-surface);
-    border: 1px dashed var(--color-border);
+    padding: 4px;
+    border-radius: 9999px;
+    border: 1px solid var(--color-border);
+}
+
+.filterBtn {
+    padding: 8px 16px;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    font-family: var(--font-ui);
+    color: var(--color-muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.filterBtn:hover {
+    color: var(--color-text);
+}
+
+.filterBtn.activeFilter {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom Date Range */
+.customDateInput {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: var(--color-surface);
+    padding: 4px 8px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    animation: slideIn 0.2s ease-out;
+}
+
+.dateWrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    background-color: var(--color-bg);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+}
+
+.dateIcon {
+    color: var(--color-muted);
+}
+
+.dateInput {
+    background: transparent;
+    border: none;
+    color: var(--color-text);
+    font-family: var(--font-ui);
+    font-size: 0.875rem;
+    outline: none;
+    cursor: pointer;
+}
+
+/* Make calendar picker icon blend in more */
+.dateInput::-webkit-calendar-picker-indicator {
+    filter: invert(0.5);
+    cursor: pointer;
+}
+
+.dateSeparator {
+    color: var(--color-muted);
+    font-size: 0.875rem;
+    font-style: italic;
+}
+
+.tablePanel {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    padding: 48px;
+    overflow: hidden;
+}
+
+.tableWrapper {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.th {
+    padding: 16px 24px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    color: var(--color-muted);
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+}
+
+.td {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.875rem;
+    white-space: nowrap;
+}
+
+.orderId {
+    font-weight: 600;
+    font-family: var(--font-data);
+}
+
+.orderSummaryText {
+    color: var(--color-text);
+    font-size: 0.875rem;
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+.typeBadge {
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.dineIn {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #3B82F6;
+}
+
+.takeOut {
+    background-color: rgba(139, 92, 246, 0.1);
+    color: #8B5CF6;
+}
+
+.paymentBadge {
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    background: var(--color-bg);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--color-border);
+}
+
+.viewBtn {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    padding: 6px 12px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.viewBtn:hover {
+    background: var(--color-bg);
+    border-color: var(--color-accent);
+}
+
+.emptyState {
+    padding: 64px;
     text-align: center;
     color: var(--color-muted);
+}
+
+/* Modal Overlay */
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+.modal {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: scaleIn 0.3s var(--transition-bounce) forwards;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.modalTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    font-family: var(--font-ui);
+}
+
+.closeBtn {
+    color: var(--color-muted);
+    background: transparent;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+}
+
+.closeBtn:hover {
+    color: var(--color-text);
+}
+
+.metaGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.metaItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+}
+
+.metaIcon {
+    color: var(--color-accent);
+}
+
+.itemsList {
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    padding: 16px 0;
+    margin: 16px 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.itemRowDetail {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.itemDesc {
+    display: flex;
+    gap: 16px;
+}
+
+.itemQty {
+    color: var(--color-muted);
+    font-family: var(--font-data);
+}
+
+.itemPriceDetail {
+    font-weight: 600;
+}
+
+.totalsArea {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.875rem;
+}
+
+.totalRowDetail {
+    display: flex;
+    justify-content: space-between;
+    color: var(--color-muted);
+}
+
+.grandTotalDetail {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin-top: 8px;
+}
+
+.accentText {
+    color: var(--color-accent);
 }

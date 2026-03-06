@@ -146,6 +146,7 @@
 .itemPrice {
     font-weight: 600;
     font-family: var(--font-data);
+    white-space: nowrap;
 }
 
 .qtyControl {
@@ -219,6 +220,7 @@
     margin-bottom: 8px;
     color: var(--color-muted);
     font-size: 0.875rem;
+    white-space: nowrap;
 }
 
 .summaryTotal {
@@ -230,6 +232,7 @@
     font-weight: 700;
     color: var(--color-text);
     font-family: var(--font-data);
+    white-space: nowrap;
 }
 
 .checkoutBtn {

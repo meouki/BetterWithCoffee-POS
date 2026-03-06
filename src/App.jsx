@@ -11,6 +11,7 @@ import './App.css';
 import POSLayout from './layouts/POSLayout';
 import DashboardLayout from './layouts/DashboardLayout';
 import PublicLayout from './layouts/PublicLayout';
+import ProtectedRoute from './components/shared/ProtectedRoute';
 
 // POS Pages
 import POSInterface from './pages/pos/POSInterface';
@@ -28,6 +29,7 @@ import NotificationsPage from './pages/dashboard/NotificationsPage';
 // Public Pages
 import LandingPage from './pages/public/LandingPage';
 import AccountCreationPage from './pages/public/AccountCreationPage';
+import LoginPage from './pages/public/LoginPage';
 
 function App() {
   // Initialize Global Theme & Accent
@@ -64,9 +66,9 @@ function App() {
     <AuthProvider>
       <NotificationProvider>
         <Toaster
-          position="bottom-right"
+          position="bottom-left"
           toastOptions={{
-            duration: 3000,
+            duration: 4000,
             style: {
               background: 'var(--color-surface)',
               color: 'var(--color-text)',
@@ -94,25 +96,36 @@ function App() {
                 {/* Public Routes */}
                 <Route path="/" element={<PublicLayout />}>
                   <Route index element={<LandingPage />} />
-                  <Route path="register" element={<AccountCreationPage />} />
+                </Route>
+                <Route path="/login" element={<LoginPage />} />
+
+                {/* Registration - Protected (Master only typically, allowing Admin for demo) */}
+                <Route element={<ProtectedRoute allowedRoles={['Master', 'Admin']} />}>
+                  <Route element={<PublicLayout />}>
+                    <Route path="/register" element={<AccountCreationPage />} />
+                  </Route>
                 </Route>
 
-                {/* POS Routes */}
-                <Route path="/pos" element={<POSLayout />}>
-                  <Route index element={<POSInterface />} />
+                {/* POS Routes - All authenticated roles */}
+                <Route element={<ProtectedRoute allowedRoles={['Master', 'Admin', 'Cashier']} />}>
+                  <Route path="/pos" element={<POSLayout />}>
+                    <Route index element={<POSInterface />} />
+                  </Route>
                 </Route>
 
-                {/* Dashboard Routes */}
-                <Route path="/dashboard" element={<DashboardLayout />}>
-                  <Route index element={<Navigate to="overview" replace />} />
-                  <Route path="overview" element={<OverviewPage />} />
-                  <Route path="orders" element={<OrdersPage />} />
-                  <Route path="menu" element={<MenuManagementPage />} />
-                  <Route path="inventory" element={<InventoryPage />} />
-                  <Route path="reports" element={<ReportsPage />} />
-                  <Route path="users" element={<UserManagementPage />} />
-                  <Route path="settings" element={<SettingsPage />} />
-                  <Route path="notifications" element={<NotificationsPage />} />
+                {/* Dashboard Routes - Master & Admin Only */}
+                <Route element={<ProtectedRoute allowedRoles={['Master', 'Admin']} />}>
+                  <Route path="/dashboard" element={<DashboardLayout />}>
+                    <Route index element={<Navigate to="overview" replace />} />
+                    <Route path="overview" element={<OverviewPage />} />
+                    <Route path="orders" element={<OrdersPage />} />
+                    <Route path="menu" element={<MenuManagementPage />} />
+                    <Route path="inventory" element={<InventoryPage />} />
+                    <Route path="reports" element={<ReportsPage />} />
+                    <Route path="users" element={<UserManagementPage />} />
+                    <Route path="settings" element={<SettingsPage />} />
+                    <Route path="notifications" element={<NotificationsPage />} />
+                  </Route>
                 </Route>
               </Routes>
             </BrowserRouter>

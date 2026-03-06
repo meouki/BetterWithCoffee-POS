@@ -13,9 +13,9 @@ export default function CartDrawer({
 }) {
     if (!isOpen) return null;
 
-    const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const vat = subtotal * 0.12;
-    const total = subtotal + vat;
+    const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const vat = total - (total / 1.12);
+    const subtotal = total - vat;
 
     return (
         <div className={styles.overlay}>

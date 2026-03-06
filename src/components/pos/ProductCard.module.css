@@ -89,6 +89,7 @@
     font-family: var(--font-data);
     font-weight: 500;
     color: var(--color-accent);
+    white-space: nowrap;
 }
 
 .addBtn {

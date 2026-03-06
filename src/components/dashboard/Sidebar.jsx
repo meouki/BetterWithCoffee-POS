@@ -17,7 +17,7 @@ import ProfilePanel from '../shared/ProfilePanel';
 import styles from './Sidebar.module.css';
 
 export default function Sidebar({ isOpen, onClose }) {
-    const { currentUser, isMaster, isAdmin } = useAuth();
+    const { currentUser, isMaster, isAdmin, logout } = useAuth();
     const [isProfileOpen, setIsProfileOpen] = useState(false);
 
     const handleProfileClick = () => {
@@ -89,7 +89,7 @@ export default function Sidebar({ isOpen, onClose }) {
                             <div className={styles.roleBadge}>{currentUser?.role}</div>
                         </div>
                     </button>
-                    <button className={styles.logoutBtn}>
+                    <button className={styles.logoutBtn} onClick={logout}>
                         <LogOut size={16} />
                         Logout
                     </button>

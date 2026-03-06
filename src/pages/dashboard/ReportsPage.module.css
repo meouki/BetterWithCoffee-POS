@@ -1,5 +1,5 @@
 .pageContainer {
-    /* Inherits from main layout wrapper */
+    min-height: auto;
 }
 
 .header {
@@ -64,25 +64,104 @@
     border-bottom-color: var(--color-border);
 }
 
-.controlsRow {
+/* Filters (Reused from Orders) */
+.filterSection {
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
     align-items: center;
+    gap: 16px;
     margin-bottom: 24px;
 }
 
-.dateSelect {
+.pillGroup {
+    display: flex;
+    gap: 8px;
     background-color: var(--color-surface);
+    padding: 4px;
+    border-radius: 9999px;
     border: 1px solid var(--color-border);
-    color: var(--color-text);
-    padding: 8px 16px;
-    border-radius: var(--radius-md);
-    font-family: var(--font-ui);
-    outline: none;
 }
 
-.dateSelect:focus {
-    border-color: var(--color-accent);
+.filterBtnPill {
+    padding: 8px 16px;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    font-family: var(--font-ui);
+    color: var(--color-muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.filterBtnPill:hover {
+    color: var(--color-text);
+}
+
+.filterBtnPill.activeFilter {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom Date Range */
+.customDateInput {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: var(--color-surface);
+    padding: 4px 8px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    animation: slideIn 0.2s ease-out;
+}
+
+.dateWrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    background-color: var(--color-bg);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+}
+
+.dateIcon {
+    color: var(--color-muted);
+}
+
+.dateInput {
+    background: transparent;
+    border: none;
+    color: var(--color-text);
+    font-family: var(--font-ui);
+    font-size: 0.875rem;
+    outline: none;
+    cursor: pointer;
+}
+
+.dateInput::-webkit-calendar-picker-indicator {
+    filter: invert(0.5);
+    cursor: pointer;
+}
+
+.dateSeparator {
+    color: var(--color-muted);
+    font-size: 0.875rem;
+    font-style: italic;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .chartContainer {

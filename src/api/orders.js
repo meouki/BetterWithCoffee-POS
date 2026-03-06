@@ -33,14 +33,44 @@ export const ordersApi = {
     /**
      * Fetch all orders
      */
-    getAll: async () => {
+    /**
+     * Fetch all orders, filtered by optional date range
+     */
+    getAll: async (startDate = null, endDate = null) => {
         await delay(100);
+        let orders = [];
         const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+
         if (stored) {
-            return JSON.parse(stored);
+            orders = JSON.parse(stored);
+        } else {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialOrders));
+            orders = initialOrders;
         }
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialOrders));
-        return initialOrders;
+
+        // Apply date filtering if provided
+        if (startDate || endDate) {
+            orders = orders.filter(order => {
+                const orderDate = new Date(order.timestamp);
+                let isValid = true;
+
+                if (startDate) {
+                    const start = new Date(startDate);
+                    start.setHours(0, 0, 0, 0); // Start of day
+                    isValid = isValid && orderDate >= start;
+                }
+
+                if (endDate) {
+                    const end = new Date(endDate);
+                    end.setHours(23, 59, 59, 999); // End of day
+                    isValid = isValid && orderDate <= end;
+                }
+
+                return isValid;
+            });
+        }
+
+        return orders;
     },
 
     /**

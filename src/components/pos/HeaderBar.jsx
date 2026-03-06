@@ -5,7 +5,7 @@ import ProfilePanel from '../shared/ProfilePanel';
 import styles from './HeaderBar.module.css';
 
 export default function HeaderBar({ orderType, onOrderTypeClick }) {
-    const { currentUser } = useAuth();
+    const { currentUser, logout } = useAuth();
     const [time, setTime] = useState(new Date());
     const [isProfileOpen, setIsProfileOpen] = useState(false);
 
@@ -53,7 +53,7 @@ export default function HeaderBar({ orderType, onOrderTypeClick }) {
                         <div className={styles.userAvatar}>{initial}</div>
                         <span className={styles.cashierName}>{displayName}</span>
                     </button>
-                    <button className={styles.logoutBtn} title="Logout">
+                    <button className={styles.logoutBtn} onClick={logout} title="Logout">
                         <LogOut size={18} />
                     </button>
                 </div>

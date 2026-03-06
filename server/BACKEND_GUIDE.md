@@ -37,14 +37,15 @@ Submitted when a sale is finalized.
       "snapshot_price": 180.00
     }
   ],
-  "subtotal": 360.00,
-  "vat": 43.20,
-  "total": 403.20,
+  "subtotal": 357.14,
+  "vat": 42.86,
+  "total": 400.00,
   "payment_method": "Cash",
   "order_type": "Dine-In",
   "cashier": "Admin User"
 }
 ```
+*Note: VAT is inclusive. In this example, ₱400.00 total includes ₱42.86 VAT (400 * 12/112).*
 
 ### C. System Log (Notification)
 Created automatically on Sales or Menu edits.
@@ -82,7 +83,7 @@ Tracks raw materials and packaging.
 | **POST** | `/api/products` | Add new item (with `multipart/form-data` for images) |
 | **PATCH** | `/api/products/:id` | Update price/availability |
 | **POST** | `/api/orders` | Submit transaction |
-| **GET** | `/api/orders` | Fetch full history for reports |
+| **GET** | `/api/orders` | Fetch full history for reports (requires `?from=YYYY-MM-DD&to=YYYY-MM-DD`) |
 | **GET** | `/api/inventory` | Get current stock levels |
 | **PATCH** | `/api/inventory/:id` | Adjust stock/threshold |
 | **POST** | `/api/logs` | Append to notification text file |

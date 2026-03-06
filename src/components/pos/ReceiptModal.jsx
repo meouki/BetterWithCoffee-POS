@@ -62,6 +62,14 @@ export default function ReceiptModal({ isOpen, receiptData, onNewOrder }) {
                             <span>Total</span>
                             <span>₱{total.toFixed(2)}</span>
                         </div>
+                        <div className={styles.totalRow} style={{ marginTop: '8px' }}>
+                            <span>Cash</span>
+                            <span>{payment_method === 'Cash' ? `₱${receiptData.amount_tendered?.toFixed(2)}` : '---'}</span>
+                        </div>
+                        <div className={styles.totalRow}>
+                            <span>Change</span>
+                            <span>₱{receiptData.change?.toFixed(2) ?? '0.00'}</span>
+                        </div>
                     </div>
 
                     <div className={styles.divider}></div>

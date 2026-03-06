@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useOrderContext } from '../../context/OrderContext';
-import { Download } from 'lucide-react';
+import { Download, Calendar } from 'lucide-react';
+import Loader from '../../components/shared/Loader';
 import {
     BarChart,
     Bar,
@@ -16,19 +17,44 @@ import styles from './ReportsPage.module.css';
 export default function ReportsPage() {
     const { orders } = useOrderContext();
     const [activeTab, setActiveTab] = useState('Sales');
-    const [dateRange, setDateRange] = useState('7days');
+    const [dateRange, setDateRange] = useState('7Days'); // 'Today', '7Days', '30Days', 'Custom'
+    const [customStart, setCustomStart] = useState('');
+    const [customEnd, setCustomEnd] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Simulate loading on range change for a "premium" feel
+    useEffect(() => {
+        setIsLoading(true);
+        const timer = setTimeout(() => setIsLoading(false), 400);
+        return () => clearTimeout(timer);
+    }, [dateRange, customStart, customEnd]);
 
     const filteredOrders = useMemo(() => {
         const now = new Date();
-        const start = new Date();
+        let start = new Date();
+        let end = new Date();
 
-        if (dateRange === 'today') start.setHours(0, 0, 0, 0);
-        else if (dateRange === '7days') start.setDate(now.getDate() - 7);
-        else if (dateRange === '30days') start.setDate(now.getDate() - 30);
-        else if (dateRange === 'month') start.setDate(1);
+        if (dateRange === 'Today') {
+            start.setHours(0, 0, 0, 0);
+            end.setHours(23, 59, 59, 999);
+        } else if (dateRange === '7Days') {
+            start.setDate(now.getDate() - 7);
+        } else if (dateRange === '30Days') {
+            start.setDate(now.getDate() - 30);
+        } else if (dateRange === 'Custom' && customStart && customEnd) {
+            start = new Date(customStart);
+            start.setHours(0, 0, 0, 0);
+            end = new Date(customEnd);
+            end.setHours(23, 59, 59, 999);
+        } else {
+            return orders; // Default/Fallback
+        }
 
-        return orders.filter(o => new Date(o.timestamp) >= start);
-    }, [orders, dateRange]);
+        return orders.filter(o => {
+            const d = new Date(o.timestamp);
+            return d >= start && d <= end;
+        });
+    }, [orders, dateRange, customStart, customEnd]);
 
     const revenueData = useMemo(() => {
         // Simple day-based aggregation for the chart
@@ -154,146 +180,176 @@ export default function ReportsPage() {
                 ))}
             </div>
 
-            <div className={styles.controlsRow}>
-                <select
-                    value={dateRange}
-                    onChange={(e) => setDateRange(e.target.value)}
-                    className={styles.dateSelect}
-                >
-                    <option value="today">Today</option>
-                    <option value="7days">Last 7 Days</option>
-                    <option value="30days">Last 30 Days</option>
-                    <option value="month">This Month</option>
-                </select>
+            {/* Date Filters (Consistent with Orders) */}
+            <div className={styles.filterSection}>
+                <div className={styles.pillGroup}>
+                    <button className={`${styles.filterBtnPill} ${dateRange === 'Today' ? styles.activeFilter : ''}`} onClick={() => setDateRange('Today')}>Today</button>
+                    <button className={`${styles.filterBtnPill} ${dateRange === '7Days' ? styles.activeFilter : ''}`} onClick={() => setDateRange('7Days')}>Last 7 Days</button>
+                    <button className={`${styles.filterBtnPill} ${dateRange === '30Days' ? styles.activeFilter : ''}`} onClick={() => setDateRange('30Days')}>This Month</button>
+                    <button className={`${styles.filterBtnPill} ${dateRange === 'Custom' ? styles.activeFilter : ''}`} onClick={() => setDateRange('Custom')}>Custom</button>
+                </div>
+
+                {dateRange === 'Custom' && (
+                    <div className={styles.customDateInput}>
+                        <div className={styles.dateWrapper}>
+                            <Calendar size={16} className={styles.dateIcon} />
+                            <input
+                                type="date"
+                                className={styles.dateInput}
+                                value={customStart}
+                                onChange={(e) => setCustomStart(e.target.value)}
+                                max={customEnd || undefined}
+                            />
+                        </div>
+                        <span className={styles.dateSeparator}>to</span>
+                        <div className={styles.dateWrapper}>
+                            <Calendar size={16} className={styles.dateIcon} />
+                            <input
+                                type="date"
+                                className={styles.dateInput}
+                                value={customEnd}
+                                onChange={(e) => setCustomEnd(e.target.value)}
+                                min={customStart || undefined}
+                            />
+                        </div>
+                    </div>
+                )}
             </div>
 
-            {activeTab === 'Sales' && (
-                <div>
-                    <div className={styles.chartContainer}>
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={revenueData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="color-mix(in srgb, var(--color-border) 50%, transparent)" vertical={false} />
-                                <XAxis dataKey="name" stroke="var(--color-muted)" tickLine={false} axisLine={false} />
-                                <YAxis
-                                    stroke="var(--color-muted)"
-                                    tickLine={false}
-                                    axisLine={false}
-                                    tickFormatter={(value) => `₱${value / 1000}k`}
-                                />
-                                <Tooltip
-                                    cursor={{ fill: 'color-mix(in srgb, var(--color-surface) 50%, transparent)' }}
-                                    contentStyle={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)', borderRadius: '8px', color: 'var(--color-text)' }}
-                                />
-                                <Bar dataKey="revenue" fill={getAccentColor()} radius={[4, 4, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-
-                    <div className={styles.metricsGrid}>
-                        <div className={styles.metricCard}>
-                            <div className={styles.metricLabel}>Total Period Revenue</div>
-                            <div className={styles.metricValue}>₱{metrics.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
-                        </div>
-                        <div className={styles.metricCard}>
-                            <div className={styles.metricLabel}>Total Orders</div>
-                            <div className={styles.metricValue}>{metrics.totalOrders}</div>
-                        </div>
-                        <div className={styles.metricCard}>
-                            <div className={styles.metricLabel}>Avg. Order Value</div>
-                            <div className={styles.metricValue}>₱{metrics.aov.toFixed(2)}</div>
-                        </div>
-                        <div className={styles.metricCard}>
-                            <div className={styles.metricLabel}>Top Payment Method</div>
-                            <div className={styles.metricValue} style={{ fontFamily: 'var(--font-ui)' }}>{metrics.topPayment}</div>
-                        </div>
-                    </div>
+            {isLoading ? (
+                <div style={{ padding: '80px 0' }}>
+                    <Loader size="large" text="Updating reports..." />
                 </div>
-            )}
+            ) : (
+                <>
+                    {activeTab === 'Sales' && (
+                        <div>
+                            <div className={styles.chartContainer}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={revenueData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="color-mix(in srgb, var(--color-border) 50%, transparent)" vertical={false} />
+                                        <XAxis dataKey="name" stroke="var(--color-muted)" tickLine={false} axisLine={false} />
+                                        <YAxis
+                                            stroke="var(--color-muted)"
+                                            tickLine={false}
+                                            axisLine={false}
+                                            tickFormatter={(value) => `₱${value / 1000}k`}
+                                        />
+                                        <Tooltip
+                                            cursor={{ fill: 'color-mix(in srgb, var(--color-surface) 50%, transparent)' }}
+                                            contentStyle={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)', borderRadius: '8px', color: 'var(--color-text)' }}
+                                        />
+                                        <Bar dataKey="revenue" fill={getAccentColor()} radius={[4, 4, 0, 0]} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
 
-            {activeTab === 'Best Sellers' && (
-                <div className={styles.tablePanel}>
-                    <div className={styles.tableWrapper}>
-                        <table className={styles.table}>
-                            <thead>
-                                <tr>
-                                    <th className={styles.th}>Rank</th>
-                                    <th className={styles.th}>Product</th>
-                                    <th className={styles.th}>Units Sold</th>
-                                    <th className={styles.th}>Revenue Generated</th>
-                                    <th className={styles.th}>Performance</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {bestSellers.map((item, idx) => (
-                                    <tr key={item.rank} className={styles.tableRow}>
-                                        <td className={styles.td}>
-                                            <div className={`${styles.rankBadge} ${idx < 3 ? styles.top : ''}`}>
-                                                #{item.rank}
-                                            </div>
-                                        </td>
-                                        <td className={styles.td}>
-                                            <div className={styles.productName}>{item.name}</div>
-                                            <div className={styles.productCategory}>{item.category}</div>
-                                        </td>
-                                        <td className={`${styles.td} ${styles.dataValue}`}>{item.units}</td>
-                                        <td className={`${styles.td} ${styles.dataValue} text-[var(--color-accent)]`}>
-                                            ₱{item.revenue.toLocaleString()}
-                                        </td>
-                                        <td className={styles.td} style={{ width: '30%' }}>
-                                            <div className={styles.dataValue}>{((item.units / bestSellers[0].units) * 100).toFixed(0)}% of top</div>
-                                            <div className={styles.barTrack}>
-                                                <div
-                                                    className={styles.barFill}
-                                                    style={{ width: `${(item.units / bestSellers[0].units) * 100}%` }}
-                                                />
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
+                            <div className={styles.metricsGrid}>
+                                <div className={styles.metricCard}>
+                                    <div className={styles.metricLabel}>Total Period Revenue</div>
+                                    <div className={styles.metricValue}>₱{metrics.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                                </div>
+                                <div className={styles.metricCard}>
+                                    <div className={styles.metricLabel}>Total Orders</div>
+                                    <div className={styles.metricValue}>{metrics.totalOrders}</div>
+                                </div>
+                                <div className={styles.metricCard}>
+                                    <div className={styles.metricLabel}>Avg. Order Value</div>
+                                    <div className={styles.metricValue}>₱{metrics.aov.toFixed(2)}</div>
+                                </div>
+                                <div className={styles.metricCard}>
+                                    <div className={styles.metricLabel}>Top Payment Method</div>
+                                    <div className={styles.metricValue} style={{ fontFamily: 'var(--font-ui)' }}>{metrics.topPayment}</div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
-            {activeTab === 'Cashiers' && (
-                <div className={styles.tablePanel}>
-                    <div className={styles.tableWrapper}>
-                        <table className={styles.table}>
-                            <thead>
-                                <tr>
-                                    <th className={styles.th}>Cashier</th>
-                                    <th className={styles.th}>Orders Processed</th>
-                                    <th className={styles.th}>Total Handled</th>
-                                    <th className={styles.th}>AOV</th>
-                                    <th className={styles.th}>Most Sold Item</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {cashierPerformance.map((cashier) => (
-                                    <tr key={cashier.id} className={styles.tableRow}>
-                                        <td className={styles.td}>
-                                            <div className="flex items-center gap-3">
-                                                <div className={styles.avatar}>
-                                                    {cashier.name.charAt(0)}
-                                                </div>
-                                                <div className={styles.productName}>{cashier.name}</div>
-                                            </div>
-                                        </td>
-                                        <td className={`${styles.td} ${styles.dataValue}`}>{cashier.orders}</td>
-                                        <td className={`${styles.td} ${styles.dataValue} text-[var(--color-accent)]`}>
-                                            ₱{cashier.revenue.toLocaleString()}
-                                        </td>
-                                        <td className={`${styles.td} ${styles.dataValue}`}>₱{cashier.aov}</td>
-                                        <td className={styles.td}>{cashier.top}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
+                    {activeTab === 'Best Sellers' && (
+                        <div className={styles.tablePanel}>
+                            <div className={styles.tableWrapper}>
+                                <table className={styles.table}>
+                                    <thead>
+                                        <tr>
+                                            <th className={styles.th}>Rank</th>
+                                            <th className={styles.th}>Product</th>
+                                            <th className={styles.th}>Units Sold</th>
+                                            <th className={styles.th}>Revenue Generated</th>
+                                            <th className={styles.th}>Performance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {bestSellers.map((item, idx) => (
+                                            <tr key={item.rank} className={styles.tableRow}>
+                                                <td className={styles.td}>
+                                                    <div className={`${styles.rankBadge} ${idx < 3 ? styles.top : ''}`}>
+                                                        #{item.rank}
+                                                    </div>
+                                                </td>
+                                                <td className={styles.td}>
+                                                    <div className={styles.productName}>{item.name}</div>
+                                                    <div className={styles.productCategory}>{item.category}</div>
+                                                </td>
+                                                <td className={`${styles.td} ${styles.dataValue}`}>{item.units}</td>
+                                                <td className={`${styles.td} ${styles.dataValue} text-[var(--color-accent)]`}>
+                                                    ₱{item.revenue.toLocaleString()}
+                                                </td>
+                                                <td className={styles.td} style={{ width: '30%' }}>
+                                                    <div className={styles.dataValue}>{((item.units / bestSellers[0].units) * 100).toFixed(0)}% of top</div>
+                                                    <div className={styles.barTrack}>
+                                                        <div
+                                                            className={styles.barFill}
+                                                            style={{ width: `${(item.units / bestSellers[0].units) * 100}%` }}
+                                                        />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
 
+                    {activeTab === 'Cashiers' && (
+                        <div className={styles.tablePanel}>
+                            <div className={styles.tableWrapper}>
+                                <table className={styles.table}>
+                                    <thead>
+                                        <tr>
+                                            <th className={styles.th}>Cashier</th>
+                                            <th className={styles.th}>Orders Processed</th>
+                                            <th className={styles.th}>Total Handled</th>
+                                            <th className={styles.th}>AOV</th>
+                                            <th className={styles.th}>Most Sold Item</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {cashierPerformance.map((cashier) => (
+                                            <tr key={cashier.id} className={styles.tableRow}>
+                                                <td className={styles.td}>
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={styles.avatar}>
+                                                            {cashier.name.charAt(0)}
+                                                        </div>
+                                                        <div className={styles.productName}>{cashier.name}</div>
+                                                    </div>
+                                                </td>
+                                                <td className={`${styles.td} ${styles.dataValue}`}>{cashier.orders}</td>
+                                                <td className={`${styles.td} ${styles.dataValue} text-[var(--color-accent)]`}>
+                                                    ₱{cashier.revenue.toLocaleString()}
+                                                </td>
+                                                <td className={`${styles.td} ${styles.dataValue}`}>₱{cashier.aov}</td>
+                                                <td className={styles.td}>{cashier.top}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+                </>
+            )}
         </div>
     );
 }
