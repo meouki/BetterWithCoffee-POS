@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { ProductProvider } from './context/ProductContext';
 import './App.css';
 
 // Layouts
@@ -57,32 +58,34 @@ function App() {
 
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<PublicLayout />}>
-            <Route index element={<LandingPage />} />
-            <Route path="register" element={<AccountCreationPage />} />
-          </Route>
+      <ProductProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<PublicLayout />}>
+              <Route index element={<LandingPage />} />
+              <Route path="register" element={<AccountCreationPage />} />
+            </Route>
 
-          {/* POS Routes */}
-          <Route path="/pos" element={<POSLayout />}>
-            <Route index element={<POSInterface />} />
-          </Route>
+            {/* POS Routes */}
+            <Route path="/pos" element={<POSLayout />}>
+              <Route index element={<POSInterface />} />
+            </Route>
 
-          {/* Dashboard Routes */}
-          <Route path="/dashboard" element={<DashboardLayout />}>
-            <Route index element={<Navigate to="overview" replace />} />
-            <Route path="overview" element={<OverviewPage />} />
-            <Route path="orders" element={<OrdersPage />} />
-            <Route path="menu" element={<MenuManagementPage />} />
-            <Route path="inventory" element={<InventoryPage />} />
-            <Route path="reports" element={<ReportsPage />} />
-            <Route path="users" element={<UserManagementPage />} />
-            <Route path="settings" element={<SettingsPage />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+            {/* Dashboard Routes */}
+            <Route path="/dashboard" element={<DashboardLayout />}>
+              <Route index element={<Navigate to="overview" replace />} />
+              <Route path="overview" element={<OverviewPage />} />
+              <Route path="orders" element={<OrdersPage />} />
+              <Route path="menu" element={<MenuManagementPage />} />
+              <Route path="inventory" element={<InventoryPage />} />
+              <Route path="reports" element={<ReportsPage />} />
+              <Route path="users" element={<UserManagementPage />} />
+              <Route path="settings" element={<SettingsPage />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </ProductProvider>
     </AuthProvider>
   );
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Camera, Upload, Trash2 } from 'lucide-react';
 import styles from './ProductDrawer.module.css';
 
 const CATEGORIES = ['Cold Drinks', 'Hot Drinks', 'Blended Drinks', 'Frappe Drinks', 'Pastries'];
@@ -9,6 +9,7 @@ const emptyForm = {
     category: 'Hot Drinks',
     base_price: '',
     is_available: true,
+    image_url: '',
 };
 
 export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
@@ -25,6 +26,7 @@ export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
                     category: product.category,
                     base_price: String(product.base_price),
                     is_available: product.is_available,
+                    image_url: product.image_url || '',
                 });
                 setOriginalPrice(product.base_price);
             } else {
@@ -33,6 +35,21 @@ export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
             }
         }
     }, [isOpen, product]);
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // In a real app, you'd upload to server here.
+        // For now, we'll create a local preview URL.
+        const previewUrl = URL.createObjectURL(file);
+        handleChange('image_url', previewUrl);
+    };
+
+    const removeImage = (e) => {
+        e.stopPropagation();
+        handleChange('image_url', '');
+    };
 
     const handleChange = (field, value) => {
         setForm(prev => ({ ...prev, [field]: value }));
@@ -49,6 +66,7 @@ export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
             category: form.category,
             base_price: parsedPrice,
             is_available: form.is_available,
+            image_url: form.image_url,
         });
         onClose();
     };
@@ -69,6 +87,33 @@ export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
                 </div>
 
                 <div className={styles.drawerBody}>
+                    {/* Image Upload */}
+                    <div className={styles.fieldGroup}>
+                        <label className={styles.label}>Product Image</label>
+                        <div className={styles.imageUploadContainer}>
+                            {form.image_url ? (
+                                <>
+                                    <img src={form.image_url} alt="Preview" className={styles.previewImage} />
+                                    <button className={styles.removeImageBtn} onClick={removeImage} title="Remove image">
+                                        <Trash2 size={16} />
+                                    </button>
+                                </>
+                            ) : (
+                                <div className={styles.uploadPlaceholder}>
+                                    <Camera size={32} />
+                                    <span>Click to upload photo</span>
+                                    <span style={{ fontSize: '0.7rem' }}>(WebP, PNG, JPG)</span>
+                                </div>
+                            )}
+                            <input
+                                type="file"
+                                className={styles.hiddenInput}
+                                accept="image/webp, image/png, image/jpeg"
+                                onChange={handleFileChange}
+                            />
+                        </div>
+                    </div>
+
                     {/* Product Name */}
                     <div className={styles.fieldGroup}>
                         <label className={styles.label}>Product Name</label>

@@ -55,6 +55,72 @@
     color: var(--color-text);
 }
 
+.imageUploadContainer {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background-color: var(--color-surface);
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all var(--transition-base);
+    position: relative;
+}
+
+.imageUploadContainer:hover {
+    border-color: var(--color-accent);
+    background-color: var(--color-accent-muted);
+}
+
+.previewImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.uploadPlaceholder {
+    color: var(--color-muted);
+    font-size: 0.875rem;
+    font-family: var(--font-ui);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.hiddenInput {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.removeImageBtn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    z-index: 2;
+}
+
+.removeImageBtn:hover {
+    background-color: var(--color-error);
+}
+
 .drawerBody {
     flex: 1;
     overflow-y: auto;
