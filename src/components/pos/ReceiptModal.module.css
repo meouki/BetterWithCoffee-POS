@@ -1,0 +1,195 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 200;
+}
+
+.modal {
+    background: var(--color-bg);
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 420px;
+    padding: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    /* Slide up animation */
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transform: translateY(20px);
+    opacity: 0;
+}
+
+@keyframes slideUp {
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.successTitle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-success);
+}
+
+.successIcon {
+    color: var(--color-success);
+}
+
+.receiptPaper {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    font-family: var(--font-data);
+    /* monospace for receipt feel */
+    font-size: 0.875rem;
+    color: var(--color-text);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* Jagged bottom edge effect for receipt paper */
+.receiptPaper::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background-size: 12px 12px;
+    background-image: radial-gradient(circle at 6px 0, transparent 6px, var(--color-surface) 7px);
+}
+
+.receiptHeader {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.receiptHeader h3 {
+    font-family: var(--font-ui);
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.receiptHeader p {
+    color: var(--color-muted);
+}
+
+.divider {
+    border-top: 1px dashed var(--color-border);
+    margin: 8px 0;
+}
+
+.receiptItems {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.receiptItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.itemMain {
+    display: flex;
+    gap: 12px;
+}
+
+.itemQty {
+    color: var(--color-muted);
+    min-width: 20px;
+}
+
+.itemName {
+    font-weight: 500;
+}
+
+.itemPrice {
+    font-weight: 500;
+}
+
+.receiptTotals {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.totalRow {
+    display: flex;
+    justify-content: space-between;
+    color: var(--color-muted);
+}
+
+.grandTotal {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 700;
+    font-size: 1.125rem;
+    margin-top: 4px;
+    color: var(--color-text);
+}
+
+.receiptFooter {
+    text-align: center;
+    color: var(--color-muted);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.actions {
+    display: flex;
+    gap: 12px;
+}
+
+.actions button {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 52px;
+    font-weight: 500;
+    border-radius: var(--radius-md);
+    transition: all 0.2s;
+}
+
+.printBtn {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+}
+
+.printBtn:hover {
+    background: var(--color-surface);
+}
+
+.newOrderBtn {
+    background: var(--color-accent);
+    color: white;
+    border: none;
+}
+
+.newOrderBtn:hover {
+    filter: brightness(1.1);
+}

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useOrderContext } from '../../context/OrderContext';
 import { Download } from 'lucide-react';
 import {
     BarChart,
@@ -12,33 +13,120 @@ import {
 import styles from './ReportsPage.module.css';
 
 // Mock Data
-const revenueData = [
-    { name: 'Mon', revenue: 12400 },
-    { name: 'Tue', revenue: 14200 },
-    { name: 'Wed', revenue: 11800 },
-    { name: 'Thu', revenue: 18500 },
-    { name: 'Fri', revenue: 24300 },
-    { name: 'Sat', revenue: 32100 },
-    { name: 'Sun', revenue: 28400 },
-];
-
-const bestSellers = [
-    { rank: 1, name: 'Spanish Latte', category: 'Hot Drinks', units: 145, revenue: 27550 },
-    { rank: 2, name: 'Caramel Macchiato', category: 'Hot Drinks', units: 120, revenue: 21600 },
-    { rank: 3, name: 'Matcha Frappe', category: 'Frappe Drinks', units: 95, revenue: 20900 },
-    { rank: 4, name: 'Cold Brew', category: 'Cold Drinks', units: 88, revenue: 14080 },
-    { rank: 5, name: 'Butter Croissant', category: 'Pastries', units: 64, revenue: 7680 },
-];
-
-const cashierPerformance = [
-    { id: 1, name: 'Alex Rivera', orders: 485, revenue: 125400, aov: 258, top: 'Spanish Latte' },
-    { id: 2, name: 'Sam Chen', orders: 412, revenue: 98500, aov: 239, top: 'Caramel Macchiato' },
-    { id: 3, name: 'Jordan Lee', orders: 380, revenue: 95000, aov: 250, top: 'Matcha Frappe' },
-];
-
 export default function ReportsPage() {
+    const { orders } = useOrderContext();
     const [activeTab, setActiveTab] = useState('Sales');
     const [dateRange, setDateRange] = useState('7days');
+
+    const filteredOrders = useMemo(() => {
+        const now = new Date();
+        const start = new Date();
+
+        if (dateRange === 'today') start.setHours(0, 0, 0, 0);
+        else if (dateRange === '7days') start.setDate(now.getDate() - 7);
+        else if (dateRange === '30days') start.setDate(now.getDate() - 30);
+        else if (dateRange === 'month') start.setDate(1);
+
+        return orders.filter(o => new Date(o.timestamp) >= start);
+    }, [orders, dateRange]);
+
+    const revenueData = useMemo(() => {
+        // Simple day-based aggregation for the chart
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const data = days.map(day => ({ name: day, revenue: 0 }));
+
+        filteredOrders.forEach(o => {
+            const dayIdx = new Date(o.timestamp).getDay();
+            data[dayIdx].revenue += o.total;
+        });
+
+        // Reorder to start from 6 days ago
+        const todayIdx = new Date().getDay();
+        const reordered = [];
+        for (let i = 6; i >= 0; i--) {
+            const idx = (todayIdx - i + 7) % 7;
+            reordered.push(data[idx]);
+        }
+        return reordered;
+    }, [filteredOrders]);
+
+    const metrics = useMemo(() => {
+        const totalRevenue = filteredOrders.reduce((sum, o) => sum + o.total, 0);
+        const totalOrders = filteredOrders.length;
+        const aov = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+        const payments = filteredOrders.reduce((acc, o) => {
+            acc[o.payment_method] = (acc[o.payment_method] || 0) + 1;
+            return acc;
+        }, {});
+        const topPayment = Object.entries(payments).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
+
+        return { totalRevenue, totalOrders, aov, topPayment };
+    }, [filteredOrders]);
+
+    const bestSellers = useMemo(() => {
+        const items = {};
+        filteredOrders.forEach(o => {
+            o.items.forEach(item => {
+                if (!items[item.name]) {
+                    items[item.name] = { name: item.name, units: 0, revenue: 0, category: 'Product' };
+                }
+                items[item.name].units += item.quantity;
+                items[item.name].revenue += item.quantity * item.price;
+            });
+        });
+        return Object.values(items).sort((a, b) => b.units - a.units).map((item, idx) => ({
+            ...item,
+            rank: idx + 1
+        })).slice(0, 10);
+    }, [filteredOrders]);
+
+    const cashierPerformance = useMemo(() => {
+        const cashiers = {};
+        filteredOrders.forEach(o => {
+            if (!cashiers[o.cashier]) {
+                cashiers[o.cashier] = { name: o.cashier, orders: 0, revenue: 0, items: {} };
+            }
+            cashiers[o.cashier].orders += 1;
+            cashiers[o.cashier].revenue += o.total;
+            o.items.forEach(item => {
+                cashiers[o.cashier].items[item.name] = (cashiers[o.cashier].items[item.name] || 0) + item.quantity;
+            });
+        });
+        return Object.values(cashiers).map((c, idx) => ({
+            id: idx + 1,
+            name: c.name,
+            orders: c.orders,
+            revenue: c.revenue,
+            aov: c.revenue / c.orders,
+            top: Object.entries(c.items).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A'
+        }));
+    }, [filteredOrders]);
+
+    const handleExportCSV = () => {
+        const headers = ['Order ID', 'Timestamp', 'Items Count', 'Subtotal', 'VAT', 'Total', 'Payment', 'Type', 'Cashier'];
+        const rows = filteredOrders.map(o => [
+            o.id,
+            o.timestamp,
+            o.items.reduce((s, i) => s + i.quantity, 0),
+            o.subtotal.toFixed(2),
+            o.vat.toFixed(2),
+            o.total.toFixed(2),
+            o.payment_method,
+            o.order_type,
+            o.cashier
+        ]);
+
+        const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `bwc_report_${dateRange}_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
 
     // Utility to get main CSS variable for charts
     const getAccentColor = () => {
@@ -49,7 +137,7 @@ export default function ReportsPage() {
         <div className={styles.pageContainer}>
             <div className={styles.header}>
                 <h2 className={styles.title}>Reports & Analytics</h2>
-                <button className={styles.actionBtn}>
+                <button className={styles.actionBtn} onClick={handleExportCSV}>
                     <Download size={18} /> Export CSV
                 </button>
             </div>
@@ -104,19 +192,19 @@ export default function ReportsPage() {
                     <div className={styles.metricsGrid}>
                         <div className={styles.metricCard}>
                             <div className={styles.metricLabel}>Total Period Revenue</div>
-                            <div className={styles.metricValue}>₱141,700</div>
+                            <div className={styles.metricValue}>₱{metrics.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                         </div>
                         <div className={styles.metricCard}>
                             <div className={styles.metricLabel}>Total Orders</div>
-                            <div className={styles.metricValue}>568</div>
+                            <div className={styles.metricValue}>{metrics.totalOrders}</div>
                         </div>
                         <div className={styles.metricCard}>
                             <div className={styles.metricLabel}>Avg. Order Value</div>
-                            <div className={styles.metricValue}>₱249.47</div>
+                            <div className={styles.metricValue}>₱{metrics.aov.toFixed(2)}</div>
                         </div>
                         <div className={styles.metricCard}>
                             <div className={styles.metricLabel}>Top Payment Method</div>
-                            <div className={styles.metricValue} style={{ fontFamily: 'var(--font-ui)' }}>GCash (62%)</div>
+                            <div className={styles.metricValue} style={{ fontFamily: 'var(--font-ui)' }}>{metrics.topPayment}</div>
                         </div>
                     </div>
                 </div>

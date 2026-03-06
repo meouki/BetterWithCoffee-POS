@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useOrderContext } from '../../context/OrderContext';
 import {
     TrendingUp,
     TrendingDown,
@@ -18,35 +19,64 @@ import {
 } from 'recharts';
 import styles from './OverviewPage.module.css';
 
-// Mock Data
-const revenueData = [
-    { name: 'Mon', revenue: 12400 },
-    { name: 'Tue', revenue: 14200 },
-    { name: 'Wed', revenue: 11800 },
-    { name: 'Thu', revenue: 18500 },
-    { name: 'Fri', revenue: 24300 },
-    { name: 'Sat', revenue: 32100 },
-    { name: 'Sun', revenue: 28400 },
-];
-
-const bestSellers = [
-    { rank: 1, name: 'Spanish Latte', sales: 145, percent: 100 },
-    { rank: 2, name: 'Caramel Macchiato', sales: 120, percent: 85 },
-    { rank: 3, name: 'Matcha Frappe', sales: 95, percent: 65 },
-    { rank: 4, name: 'Cold Brew', sales: 88, percent: 60 },
-    { rank: 5, name: 'Butter Croissant', sales: 64, percent: 45 },
-];
-
-const recentOrders = [
-    { id: 'ORD-1045', time: '10:42 AM', cashier: 'Alex', items: 3, total: 560, type: 'Dine-In', payment: 'Cash' },
-    { id: 'ORD-1044', time: '10:35 AM', cashier: 'Sam', items: 1, total: 180, type: 'Take-Out', payment: 'GCash' },
-    { id: 'ORD-1043', time: '10:15 AM', cashier: 'Alex', items: 4, total: 850, type: 'Dine-In', payment: 'Cash' },
-    { id: 'ORD-1042', time: '09:50 AM', cashier: 'Sam', items: 2, total: 340, type: 'Take-Out', payment: 'Cash' },
-    { id: 'ORD-1041', time: '09:30 AM', cashier: 'Alex', items: 1, total: 220, type: 'Dine-In', payment: 'Maya' },
-];
-
 export default function OverviewPage() {
+    const { orders } = useOrderContext();
     const [chartRange, setChartRange] = useState('Weekly');
+
+    const todayOrders = useMemo(() => {
+        const today = new Date().toDateString();
+        return orders.filter(o => new Date(o.timestamp).toDateString() === today);
+    }, [orders]);
+
+    const todayRevenue = useMemo(() => {
+        return todayOrders.reduce((sum, o) => sum + o.total, 0);
+    }, [todayOrders]);
+
+    const topSellingItem = useMemo(() => {
+        const counts = {};
+        todayOrders.forEach(order => {
+            order.items.forEach(item => {
+                counts[item.name] = (counts[item.name] || 0) + item.quantity;
+            });
+        });
+
+        const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+        return sorted.length > 0 ? { name: sorted[0][0], count: sorted[0][1] } : { name: 'None', count: 0 };
+    }, [todayOrders]);
+
+    const recentOrders = useMemo(() => {
+        return orders.slice(0, 10);
+    }, [orders]);
+
+    // Aggregating data for Best Sellers Widget (All time)
+    const bestSellers = useMemo(() => {
+        const counts = {};
+        orders.forEach(order => {
+            order.items.forEach(item => {
+                counts[item.name] = (counts[item.name] || 0) + item.quantity;
+            });
+        });
+        const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+        if (sorted.length === 0) return [];
+        const max = sorted[0][1];
+        return sorted.map(([name, sales], idx) => ({
+            rank: idx + 1,
+            name,
+            sales,
+            percent: (sales / max) * 100
+        }));
+    }, [orders]);
+
+    // Mock data for chart for now, as we don't have enough history usually
+    const revenueData = [
+        { name: 'Mon', revenue: 12400 },
+        { name: 'Tue', revenue: 14200 },
+        { name: 'Wed', revenue: 11800 },
+        { name: 'Thu', revenue: 18500 },
+        { name: 'Fri', revenue: 24300 },
+        { name: 'Sat', revenue: 32100 },
+        { name: 'Sun', revenue: 28400 },
+    ];
 
     // Utility to get main CSS variable for charts
     const getAccentColor = () => {
@@ -62,9 +92,9 @@ export default function OverviewPage() {
                         <span className={styles.kpiLabel}>Today's Revenue</span>
                         <DollarSign size={20} className="text-[var(--color-accent)]" />
                     </div>
-                    <div className={styles.kpiValue}>₱24,500.00</div>
+                    <div className={styles.kpiValue}>₱{todayRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                     <div className={`${styles.kpiChange} ${styles.positive}`}>
-                        <TrendingUp size={14} /> +12.5% vs yesterday
+                        <TrendingUp size={14} /> Live tracking active
                     </div>
                 </div>
 
@@ -73,9 +103,9 @@ export default function OverviewPage() {
                         <span className={styles.kpiLabel}>Total Orders</span>
                         <ShoppingBag size={20} className="text-[var(--color-accent)]" />
                     </div>
-                    <div className={styles.kpiValue}>142</div>
+                    <div className={styles.kpiValue}>{todayOrders.length}</div>
                     <div className={`${styles.kpiChange} ${styles.positive}`}>
-                        <TrendingUp size={14} /> +8.2% vs yesterday
+                        <TrendingUp size={14} /> Today
                     </div>
                 </div>
 
@@ -84,9 +114,9 @@ export default function OverviewPage() {
                         <span className={styles.kpiLabel}>Top Item Today</span>
                         <Award size={20} className="text-[var(--color-accent)]" />
                     </div>
-                    <div className={styles.kpiValue} style={{ fontSize: '1.25rem' }}>Spanish Latte</div>
+                    <div className={styles.kpiValue} style={{ fontSize: '1.25rem' }}>{topSellingItem.name}</div>
                     <div className={styles.kpiChange} style={{ color: 'var(--color-muted)' }}>
-                        45 units sold
+                        {topSellingItem.count} units sold today
                     </div>
                 </div>
 
@@ -194,21 +224,27 @@ export default function OverviewPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {recentOrders.map((order, idx) => (
-                                <tr key={idx} className={styles.tableRow}>
-                                    <td className={`${styles.td} ${styles.orderId}`}>{order.id}</td>
-                                    <td className={styles.td}>{order.time}</td>
-                                    <td className={styles.td}>{order.cashier}</td>
-                                    <td className={styles.td}>{order.items}</td>
-                                    <td className={`${styles.td} ${styles.amount}`}>₱{order.total.toFixed(2)}</td>
-                                    <td className={styles.td}>
-                                        <span className={`${styles.typeBadge} ${order.type === 'Dine-In' ? styles.dineIn : styles.takeOut}`}>
-                                            {order.type}
-                                        </span>
-                                    </td>
-                                    <td className={styles.td}>{order.payment}</td>
+                            {recentOrders.length === 0 ? (
+                                <tr>
+                                    <td colSpan="7" className={styles.emptyMessage}>No orders found.</td>
                                 </tr>
-                            ))}
+                            ) : (
+                                recentOrders.map((order, idx) => (
+                                    <tr key={idx} className={styles.tableRow}>
+                                        <td className={`${styles.td} ${styles.orderId}`}>{order.id}</td>
+                                        <td className={styles.td}>{new Date(order.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+                                        <td className={styles.td}>{order.cashier}</td>
+                                        <td className={styles.td}>{order.items.reduce((sum, item) => sum + item.quantity, 0)}</td>
+                                        <td className={`${styles.td} ${styles.amount}`}>₱{order.total.toFixed(2)}</td>
+                                        <td className={styles.td}>
+                                            <span className={`${styles.typeBadge} ${order.order_type === 'Dine-In' ? styles.dineIn : styles.takeOut}`}>
+                                                {order.order_type}
+                                            </span>
+                                        </td>
+                                        <td className={styles.td}>{order.payment_method}</td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>

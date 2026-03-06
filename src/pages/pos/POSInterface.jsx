@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { useProductContext } from '../../context/ProductContext';
+import { useOrderContext } from '../../context/OrderContext';
+import { useAuth } from '../../context/AuthContext';
 import HeaderBar from '../../components/pos/HeaderBar';
 import OrderTypeSelector from '../../components/pos/OrderTypeSelector';
 import CategoryTabBar from '../../components/pos/CategoryTabBar';
@@ -7,17 +10,23 @@ import FloatingCartButton from '../../components/pos/FloatingCartButton';
 import CartDrawer from '../../components/pos/CartDrawer';
 import ModifierSheet from '../../components/pos/ModifierSheet';
 import CheckoutModal from '../../components/pos/CheckoutModal';
+import ReceiptModal from '../../components/pos/ReceiptModal';
+import toast from 'react-hot-toast';
 import styles from './POSInterface.module.css';
 
 export default function POSInterface() {
     const [orderType, setOrderType] = useState(null);
     const [activeCategory, setActiveCategory] = useState('All');
     const [cartItems, setCartItems] = useState([]);
+    const { products } = useProductContext();
+    const { createOrder } = useOrderContext();
+    const { currentUser } = useAuth();
 
     // Modals state
     const [isOrderTypeModalOpen, setIsOrderTypeModalOpen] = useState(true);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+    const [activeReceipt, setActiveReceipt] = useState(null);
 
     // Modifier sheet state
     const [activeProduct, setActiveProduct] = useState(null);
@@ -25,6 +34,7 @@ export default function POSInterface() {
     const handleOrderTypeSelect = (type) => {
         setOrderType(type);
         setIsOrderTypeModalOpen(false);
+        toast.success(`Started ${type} Order`);
     };
 
     const handleChangeOrderType = () => {
@@ -42,26 +52,22 @@ export default function POSInterface() {
 
     const addToCart = (item) => {
         setCartItems(prev => {
-            // Very basic add, real app would check modifiers array equality
             const existing = prev.find(i => i.id === item.id && JSON.stringify(i.modifiers) === JSON.stringify(item.modifiers));
             if (existing) {
                 return prev.map(i => i === existing ? { ...i, quantity: i.quantity + 1 } : i);
             }
             return [...prev, { ...item, quantity: 1 }];
         });
+        toast.success(<span>Added <b>{item.name}</b></span>, { duration: 1500 });
     };
 
     // Cart operations
     const updateQuantity = (index, delta) => {
         setCartItems(prev => {
-            const newItems = [...prev];
-            const newQty = newItems[index].quantity + delta;
-            if (newQty <= 0) {
-                newItems.splice(index, 1);
-            } else {
-                newItems[index].quantity = newQty;
-            }
-            return newItems;
+            return prev.map((item, i) => {
+                if (i !== index) return item;
+                return { ...item, quantity: item.quantity + delta };
+            }).filter(item => item.quantity > 0);
         });
     };
 
@@ -69,13 +75,33 @@ export default function POSInterface() {
         setCartItems(prev => prev.filter((_, i) => i !== index));
     };
 
-    const clearCart = () => setCartItems([]);
-
-    const completeCheckout = () => {
+    const clearCart = () => {
         setCartItems([]);
-        setIsCheckoutOpen(false);
-        setIsCartOpen(false);
-        // Real app: Navigate or show success toast
+        toast("Cart Cleared", { icon: "🧹" });
+    };
+
+    const completeCheckout = async (orderData) => {
+        try {
+            const savedOrder = await createOrder({
+                ...orderData,
+                order_type: orderType,
+                cashier: currentUser?.name || 'Unknown Staff'
+            });
+            setIsCheckoutOpen(false);
+            setIsCartOpen(false);
+            setActiveReceipt(savedOrder);
+            toast.success("Payment Received");
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to save order.");
+        }
+    };
+
+    const handleNewOrder = () => {
+        setCartItems([]);
+        setActiveReceipt(null);
+        setOrderType(null);
+        setIsOrderTypeModalOpen(true);
     };
 
     return (
@@ -132,6 +158,12 @@ export default function POSInterface() {
                 onClose={() => setIsCheckoutOpen(false)}
                 cartItems={cartItems}
                 onComplete={completeCheckout}
+            />
+
+            <ReceiptModal
+                isOpen={!!activeReceipt}
+                receiptData={activeReceipt}
+                onNewOrder={handleNewOrder}
             />
         </div>
     );

@@ -12,9 +12,9 @@ const AuthContext = createContext(null);
 // Simulate a logged-in user. In production this comes from the backend session.
 const DEMO_USER = {
     id: 1,
-    name: 'Master User',
-    username: 'master',
-    role: 'Master', // Change to 'Admin' or 'Cashier' to test restrictions
+    name: 'Admin User',
+    username: 'admin',
+    role: 'Admin', // Change to 'Admin' or 'Cashier' to test restrictions
 };
 
 export function AuthProvider({ children }) {

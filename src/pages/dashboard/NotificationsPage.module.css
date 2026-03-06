@@ -1,0 +1,196 @@
+.pageContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    height: 100%;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.actions {
+    display: flex;
+    gap: 12px;
+}
+
+.downloadBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.downloadBtn:hover:not(:disabled) {
+    background-color: var(--color-bg);
+}
+
+.downloadBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.clearBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: transparent;
+    color: var(--color-error);
+    border: 1px solid var(--color-error);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.clearBtn:hover:not(:disabled) {
+    background-color: var(--color-error);
+    color: white;
+}
+
+.clearBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: var(--color-muted);
+    color: var(--color-muted);
+}
+
+.listContainer {
+    flex: 1;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 64px 24px;
+    color: var(--color-muted);
+    text-align: center;
+}
+
+.emptyIcon {
+    opacity: 0.2;
+    margin-bottom: 16px;
+}
+
+.emptyState p {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: var(--color-text);
+    margin-bottom: 8px;
+}
+
+.emptyState span {
+    font-size: 0.875rem;
+}
+
+.logList {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.logItem {
+    display: flex;
+    gap: 16px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--color-border);
+    transition: background-color var(--transition-fast);
+}
+
+.logItem:hover {
+    background-color: var(--color-bg);
+}
+
+.logItem:last-child {
+    border-bottom: none;
+}
+
+.logIconWrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--color-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.iconSale {
+    color: var(--color-success);
+}
+
+.iconEdit {
+    color: var(--color-accent);
+}
+
+.iconAlert {
+    color: var(--color-error);
+}
+
+.iconDefault {
+    color: var(--color-muted);
+}
+
+.logContent {
+    flex: 1;
+    min-width: 0;
+}
+
+.logTopRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 4px;
+}
+
+.logMessage {
+    font-weight: 600;
+    color: var(--color-text);
+    font-size: 0.9375rem;
+}
+
+.logTime {
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    white-space: nowrap;
+    margin-left: 16px;
+}
+
+.logDetails {
+    font-size: 0.875rem;
+    color: var(--color-text);
+    opacity: 0.8;
+    margin-bottom: 6px;
+}
+
+.logActor {
+    font-size: 0.75rem;
+    color: var(--color-muted);
+}

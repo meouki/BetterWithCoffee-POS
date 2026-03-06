@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { Bell, Menu } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useNotificationContext } from '../../context/NotificationContext';
 import ProfilePanel from '../shared/ProfilePanel';
 import styles from './TopBar.module.css';
 
@@ -9,6 +10,7 @@ export default function TopBar({ onToggleSidebar }) {
     const location = useLocation();
     const path = location.pathname.split('/').pop();
     const { currentUser } = useAuth();
+    const { unreadCount } = useNotificationContext();
 
     const [time, setTime] = useState(new Date());
     const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -43,10 +45,10 @@ export default function TopBar({ onToggleSidebar }) {
                     <div className={styles.divider} />
 
                     <div className={styles.userContainer}>
-                        <button className={styles.notificationBtn}>
+                        <Link to="/dashboard/notifications" className={styles.notificationBtn} aria-label="Notifications">
                             <Bell size={20} />
-                            <span className={styles.badge} />
-                        </button>
+                            {unreadCount > 0 && <span className={styles.badge}>{unreadCount > 99 ? '99+' : unreadCount}</span>}
+                        </Link>
 
                         {/* Clickable user pill → opens profile panel */}
                         <button

@@ -9,7 +9,8 @@ import {
     Users,
     Settings,
     LogOut,
-    X
+    X,
+    Bell
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import ProfilePanel from '../shared/ProfilePanel';
@@ -31,6 +32,7 @@ export default function Sidebar({ isOpen, onClose }) {
         { name: 'Inventory', path: '/dashboard/inventory', icon: Package, roles: ['Master'] },
         { name: 'Reports', path: '/dashboard/reports', icon: BarChart2, roles: ['Master', 'Admin'] },
         { name: 'Users', path: '/dashboard/users', icon: Users, roles: ['Master'] },
+        { name: 'Notifications', path: '/dashboard/notifications', icon: Bell, roles: ['Master', 'Admin'] },
         { name: 'Settings', path: '/dashboard/settings', icon: Settings, roles: ['Master', 'Admin'] },
     ];
 

@@ -93,6 +93,7 @@
 
 .cashierName {
     font-size: 0.875rem;
+    color: var(--color-text);
     font-weight: 600;
     max-width: 100px;
     white-space: nowrap;

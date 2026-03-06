@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Moon, Sun, Monitor, Check } from 'lucide-react';
+import { Moon, Sun, Monitor, Check, Zap } from 'lucide-react';
 import styles from './SettingsPage.module.css';
 
 const ACCENT_PRESETS = [
@@ -20,6 +20,14 @@ export default function SettingsPage() {
     });
 
     const [activeTheme, setActiveTheme] = useState('light');
+
+    const [animationDuration, setAnimationDuration] = useState(() => {
+        return localStorage.getItem('bwc_page_animation_duration') || '0.5';
+    });
+
+    const [animationType, setAnimationType] = useState(() => {
+        return localStorage.getItem('bwc_page_animation_type') || 'slide-in-left';
+    });
 
     useEffect(() => {
         const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -48,6 +56,16 @@ export default function SettingsPage() {
             localStorage.setItem('bwc_accent', accent);
         }
     }, [accent]);
+
+    // Handle Animation Changes
+    useEffect(() => {
+        document.documentElement.style.setProperty('--transition-page-duration', `${animationDuration}s`);
+        localStorage.setItem('bwc_page_animation_duration', animationDuration);
+    }, [animationDuration]);
+
+    useEffect(() => {
+        localStorage.setItem('bwc_page_animation_type', animationType);
+    }, [animationType]);
 
     return (
         <div className={styles.pageContainer}>
@@ -101,6 +119,49 @@ export default function SettingsPage() {
                                 {accent === preset.name && <Check size={16} />}
                             </button>
                         ))}
+                    </div>
+                </div>
+
+                <div className={styles.divider} />
+
+                <div className={styles.settingRow}>
+                    <div className={styles.settingInfo}>
+                        <div className={styles.settingTitle}>Page Transitions</div>
+                        <div className={styles.settingDesc}>
+                            Configure how pages behave when navigating between views.
+                        </div>
+                    </div>
+
+                    <div className={styles.animationControls}>
+                        <div className={styles.controlGroup}>
+                            <label className={styles.controlLabel}>Style</label>
+                            <div className={styles.typeSelector}>
+                                {['slide-in-left', 'slide-in-up', 'fade-in'].map(type => (
+                                    <button
+                                        key={type}
+                                        onClick={() => setAnimationType(type)}
+                                        className={`${styles.typeBtn} ${animationType === type ? styles.active : ''}`}
+                                    >
+                                        {type.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className={styles.controlGroup}>
+                            <label className={styles.controlLabel}>
+                                Duration <span className={styles.valueLabel}>{animationDuration}s</span>
+                            </label>
+                            <input
+                                type="range"
+                                min="0.1"
+                                max="1.0"
+                                step="0.1"
+                                value={animationDuration}
+                                onChange={(e) => setAnimationDuration(e.target.value)}
+                                className={styles.rangeInput}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
