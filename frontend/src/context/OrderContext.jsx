@@ -9,19 +9,28 @@ export function OrderProvider({ children }) {
     const [isLoading, setIsLoading] = useState(true);
 
     // Initial load
-    useEffect(() => {
-        const loadOrders = async () => {
-            try {
-                const data = await ordersApi.getAll();
-                setOrders(data);
-                setIsLoading(false);
-            } catch (err) {
-                console.error('Failed to load orders', err);
-                setIsLoading(false);
-            }
-        };
-        loadOrders();
+    const loadOrders = useCallback(async (silent = false) => {
+        if (!silent) setIsLoading(true);
+        try {
+            const data = await ordersApi.getAll();
+            setOrders(data);
+        } catch (err) {
+            console.error('Failed to load orders', err);
+        } finally {
+            setIsLoading(false);
+        }
     }, []);
+
+    useEffect(() => {
+        loadOrders();
+        
+        // Polling for "Live Tracking" across devices
+        const interval = setInterval(() => {
+            loadOrders(true); // Silent update
+        }, 10000); // Every 10 seconds
+
+        return () => clearInterval(interval);
+    }, [loadOrders]);
 
     const { addNotification } = useNotificationContext();
 
@@ -75,6 +84,7 @@ export function OrderProvider({ children }) {
                 isLoading,
                 createOrder,
                 fetchOrders,
+                refreshOrders: loadOrders,
                 getTodayRevenue,
                 getTodayOrderCount
             }}

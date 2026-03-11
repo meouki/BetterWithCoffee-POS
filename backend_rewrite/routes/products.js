@@ -60,7 +60,7 @@ router.post('/', upload.single('image'), async (req, res) => {
 
         const newProduct = await Product.create({
             name: data.name,
-            category: data.category,
+            category_name: data.category_name,
             base_price: parseFloat(data.base_price),
             is_available: data.is_available === 'true' || data.is_available === true,
             modifiers: data.modifiers === 'true' || data.modifiers === true,
@@ -98,7 +98,7 @@ router.patch('/:id', upload.single('image'), async (req, res) => {
 
         // Update allowed fields
         if (updates.name !== undefined) product.name = updates.name;
-        if (updates.category !== undefined) product.category = updates.category;
+        if (updates.category_name !== undefined) product.category_name = updates.category_name;
         if (updates.base_price !== undefined) product.base_price = parseFloat(updates.base_price);
         if (updates.is_available !== undefined) {
             product.is_available = updates.is_available === 'true' || updates.is_available === true;

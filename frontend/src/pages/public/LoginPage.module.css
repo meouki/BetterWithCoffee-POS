@@ -1,170 +1,208 @@
-.container {
+.loginPage {
     min-height: 100vh;
     display: flex;
-    align-items: center;
-    justify-content: center;
     background-color: var(--color-bg);
+    overflow: hidden;
+    border-radius: 20px;
+}
+
+/* Left Side - Hero (Desktop) */
+.heroSide {
+    display: none;
     position: relative;
+    flex: 1.2;
     overflow: hidden;
 }
 
-/* Big ambient blob for depth */
-.bgGlow {
+@media (min-width: 1024px) {
+    .heroSide {
+        display: block;
+    }
+}
+
+.heroImage {
     position: absolute;
-    width: 60vw;
-    height: 60vw;
-    background: radial-gradient(circle, var(--color-accent-muted) 0%, transparent 60%);
-    top: -20vh;
-    left: -20vw;
-    z-index: 0;
-    pointer-events: none;
-    opacity: 0.6;
-}
-
-.card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    padding: 48px 32px;
+    top: 0;
+    left: 0;
     width: 100%;
-    max-width: 400px;
+    height: 100%;
+    background-image: url('/hero-bg.png');
+    background-size: cover;
+    background-position: center;
+    transition: transform 10s ease-out;
+}
+
+.heroSide:hover .heroImage {
+    transform: scale(1.1);
+}
+
+.heroOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(13, 15, 20, 0.8) 0%, rgba(13, 15, 20, 0.4) 50%, transparent 100%);
+    backdrop-filter: blur(2px);
+}
+
+.heroText {
+    position: absolute;
+    bottom: 80px;
+    left: 80px;
     z-index: 10;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    /* Slide up */
-    animation: slideUp 0.6s var(--transition-bounce) forwards;
+    max-width: 400px;
+    animation: slideUp 0.8s ease-out;
 }
 
-@keyframes slideUp {
-    from {
-        transform: translateY(30px);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+.heroTitle {
+    font-size: 3.5rem;
+    font-family: var(--font-drama);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    color: white;
 }
 
-/* Error shaker */
-.shake {
-    animation: shake 0.5s var(--transition-bounce) forwards;
+.accent {
+    color: var(--color-accent);
+    font-style: italic;
 }
 
-@keyframes shake {
-
-    0%,
-    100% {
-        transform: translateX(0);
-    }
-
-    10%,
-    30%,
-    50%,
-    70%,
-    90% {
-        transform: translateX(-6px);
-    }
-
-    20%,
-    40%,
-    60%,
-    80% {
-        transform: translateX(6px);
-    }
+.heroSubtitle {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 300;
 }
 
-.header {
+/* Right Side - Form */
+.formSide {
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    justify-content: center;
+    position: relative;
+    padding: 40px;
+    z-index: 5;
+}
+
+.bgGlow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--color-accent) 15%, transparent) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--color-surface);
+    padding: 48px;
+    border-radius: 20px;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.6s ease-out;
+}
+
+.header {
     text-align: center;
-    margin-bottom: 8px;
+    margin-bottom: 40px;
 }
 
 .logoWrapper {
     width: 64px;
     height: 64px;
-    border-radius: var(--radius-lg);
     background: var(--color-accent-muted);
     color: var(--color-accent);
+    border-radius: var(--radius-xl);
     display: flex;
     align-items: center;
     justify-content: center;
+    margin: 0 auto 24px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
 .title {
-    font-size: 1.5rem;
+    font-size: 2rem;
     font-weight: 700;
     font-family: var(--font-ui);
     color: var(--color-text);
+    margin-bottom: 8px;
 }
 
 .subtitle {
-    font-size: 0.95rem;
+    font-size: 0.875rem;
     color: var(--color-muted);
 }
 
 .inputGroup {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    margin-bottom: 24px;
 }
 
 .inputGroup label {
+    display: block;
     font-size: 0.875rem;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--color-text);
+    margin-bottom: 8px;
+    font-family: var(--font-ui);
 }
 
 .inputGroup input {
+    width: 100%;
     height: 52px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: 0 16px;
     background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 0 16px;
     color: var(--color-text);
+    font-family: var(--font-ui);
     font-size: 1rem;
-    transition: all var(--transition-fast) var(--transition-snap);
+    transition: all var(--transition-base);
 }
 
 .inputGroup input:focus {
     outline: none;
     border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px var(--color-accent-muted);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent) 15%, transparent);
 }
 
 .loginBtn {
-    height: 52px;
-    background: var(--color-accent);
+    width: 100%;
+    height: 56px;
+    background-color: var(--color-accent);
     color: white;
     border: none;
-    border-radius: var(--radius-md);
-    font-weight: 600;
+    border-radius: var(--radius-lg);
     font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 12px;
-    margin-top: 8px;
-    transition: all var(--transition-fast) var(--transition-snap);
+    transition: all var(--transition-base);
+    box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--color-accent) 30%, transparent);
 }
 
 .loginBtn:hover:not(:disabled) {
-    transform: scale(1.02);
-    filter: brightness(1.1);
+    background-color: var(--color-accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 20px 25px -5px color-mix(in srgb, var(--color-accent) 40%, transparent);
 }
 
 .loginBtn:active:not(:disabled) {
-    transform: scale(0.98);
+    transform: translateY(0);
 }
 
 .loginBtn:disabled {
-    opacity: 0.7;
+    opacity: 0.6;
     cursor: not-allowed;
 }
 
@@ -172,25 +210,97 @@
     width: 20px;
     height: 20px;
     border: 3px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
     border-top-color: white;
-    animation: spin 1s infinite linear;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
 }
 
+.footer {
+    margin-top: 40px;
+    color: var(--color-muted);
+    font-size: 0.75rem;
+    text-align: center;
+}
+
+/* Animations */
 @keyframes spin {
     to {
         transform: rotate(360deg);
     }
 }
 
-.helpText {
-    margin-top: 8px;
-    padding: 16px;
-    background: var(--color-bg);
-    border-radius: var(--radius-md);
-    font-family: var(--font-data);
-    font-size: 0.75rem;
-    color: var(--color-muted);
-    text-align: center;
-    line-height: 1.5;
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.shake {
+    animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+}
+
+@keyframes shake {
+
+    10%,
+    90% {
+        transform: translate3d(-1px, 0, 0);
+    }
+
+    20%,
+    80% {
+        transform: translate3d(2px, 0, 0);
+    }
+
+    30%,
+    50%,
+    70% {
+        transform: translate3d(-4px, 0, 0);
+    }
+
+    40%,
+    60% {
+        transform: translate3d(4px, 0, 0);
+    }
+}
+
+/* Mobile Tweaks */
+@media screen and (max-width: 768px) {
+    .formSide {
+        padding: 20px;
+        border-radius: 20px;
+    }
+
+    .card {
+        padding: 32px 24px;
+        border-radius: 20px;
+        box-shadow: none;
+        border: none;
+        background: transparent;
+    }
+
+    .title {
+        font-size: 1.75rem;
+    }
+
+    .subtitle {
+        font-size: 0.875rem;
+    }
 }

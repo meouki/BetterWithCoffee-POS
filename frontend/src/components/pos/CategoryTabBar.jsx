@@ -1,19 +1,14 @@
+import { useProductContext } from '../../context/ProductContext';
 import styles from './CategoryTabBar.module.css';
 
 export default function CategoryTabBar({ activeCategory, onSelectCategory }) {
-    const categories = [
-        'All',
-        'Cold Drinks',
-        'Hot Drinks',
-        'Blended Drinks',
-        'Frappe Drinks',
-        'Pastries'
-    ];
+    const { categories } = useProductContext();
+    const allCategories = ['All', ...categories.map(c => c.name)];
 
     return (
         <div className={styles.tabBarWrapper}>
             <div className={styles.tabScrollArea}>
-                {categories.map((category) => (
+                {allCategories.map((category) => (
                     <button
                         key={category}
                         onClick={() => onSelectCategory(category)}

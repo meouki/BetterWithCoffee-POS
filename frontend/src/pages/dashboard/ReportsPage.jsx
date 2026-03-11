@@ -239,7 +239,12 @@ export default function ReportsPage() {
                                             cursor={{ fill: 'color-mix(in srgb, var(--color-surface) 50%, transparent)' }}
                                             contentStyle={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)', borderRadius: '8px', color: 'var(--color-text)' }}
                                         />
-                                        <Bar dataKey="revenue" fill={getAccentColor()} radius={[4, 4, 0, 0]} />
+                                        <Bar 
+                                            dataKey="revenue" 
+                                            fill={getAccentColor()} 
+                                            radius={[6, 6, 0, 0]} 
+                                            barSize={45}
+                                        />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>

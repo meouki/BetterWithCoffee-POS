@@ -72,9 +72,43 @@ CREATE TABLE IF NOT EXISTS notifications (
     updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- 6. Users Table
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('Master', 'Admin', 'Cashier') NOT NULL DEFAULT 'Cashier',
+    is_active BOOLEAN DEFAULT TRUE,
+    last_login DATETIME DEFAULT NULL,
+    avatar_icon VARCHAR(50) DEFAULT 'User',
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 7. Attendance Table
+CREATE TABLE IF NOT EXISTS attendance (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    date DATE NOT NULL,
+    clock_in DATETIME DEFAULT NULL,
+    clock_out DATETIME DEFAULT NULL,
+    type ENUM('Work', 'DayOff') DEFAULT 'Work',
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY (user_id, date),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- Initial Data for Testing
 INSERT INTO products (name, category, base_price, is_available, modifiers) VALUES 
 ('Caramel Macchiato', 'Hot Drinks', 180, 1, 1),
 ('Spanish Latte', 'Hot Drinks', 190, 1, 1),
 ('Matcha Frappe', 'Frappe Drinks', 220, 1, 1),
 ('Blueberry Cheesecake', 'Pastries', 250, 1, 0);
+
+-- Initial Users
+INSERT INTO users (name, username, password, role) VALUES 
+('Master User', 'master', 'master123', 'Master'),
+('Admin User', 'admin', 'admin123', 'Admin'),
+('Cashier One', 'cashier1', 'cashier123', 'Cashier');

@@ -71,9 +71,11 @@
     gap: 12px;
 }
 
+/* ─── Avatar ────────────────────────────── */
+
 .bigAvatar {
-    width: 72px;
-    height: 72px;
+    width: 80px;
+    height: 80px;
     border-radius: 9999px;
     background-color: var(--color-accent);
     color: white;
@@ -84,8 +86,49 @@
     align-items: center;
     justify-content: center;
     box-shadow: 0 0 0 4px var(--color-accent-muted);
+    cursor: pointer;
+    transition: transform var(--transition-base);
 }
 
+.bigAvatar:hover {
+    transform: scale(1.05);
+}
+
+.avatarPicker {
+    margin-top: 12px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 12px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    animation: fadeIn 0.3s ease;
+}
+
+.iconOption {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    color: var(--color-muted);
+}
+
+.iconOption:hover {
+    background: var(--color-bg);
+    color: var(--color-text);
+}
+
+.iconOptionActive {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: var(--color-accent-muted);
+}
+
+/* ─── Identity Tweak ─── */
 .profileName {
     font-size: 1.25rem;
     font-weight: 700;
@@ -156,7 +199,56 @@
     letter-spacing: 0.05em;
 }
 
-/* ─── DTR Calendar ───────────────────────── */
+/* ─── DTR Actions ────────────────────────── */
+
+.dtrActions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.dtrBtn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    cursor: pointer;
+    font-family: var(--font-ui);
+    transition: all var(--transition-base);
+}
+
+.dtrBtn i {
+    color: var(--color-muted);
+}
+
+.dtrBtn:hover:not(:disabled) {
+    border-color: var(--color-accent);
+    background: var(--color-accent-muted);
+}
+
+.dtrBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.clockInActive {
+    background: color-mix(in srgb, var(--color-takeout) 15%, transparent);
+    border-color: var(--color-takeout);
+    color: var(--color-takeout);
+}
+
+.clockOutActive {
+    background: color-mix(in srgb, var(--color-error) 15%, transparent);
+    border-color: var(--color-error);
+    color: var(--color-error);
+}
+
+/* ─── Calendar Section ───────────────────── */
 
 .dtrSection {
     padding: 20px;
@@ -238,23 +330,9 @@
     justify-content: center;
     font-size: 0.7rem;
     font-family: var(--font-data);
-    font-weight: 500;
+    font-weight: 600;
     position: relative;
     border: 1.5px solid transparent;
-}
-
-.calDayEmpty {
-    /* Blank padding cell for days before month starts */
-}
-
-.calDayFuture {
-    color: var(--color-border);
-}
-
-.calDayAbsent {
-    color: var(--color-muted);
-    background-color: var(--color-surface);
-    border-color: var(--color-border);
 }
 
 .calDayPresent {
@@ -265,7 +343,6 @@
 }
 
 .calDayToday {
-    /* Ring indicator for today */
     border-color: var(--color-text);
 }
 
@@ -273,20 +350,57 @@
     border-color: white;
 }
 
-/* ─── Footer ────────────────────────────── */
+/* ─── Calendar Status Colors ──────────────── */
 
-.panelFooter {
-    padding: 16px 20px;
-    border-top: 1px solid var(--color-border);
+.calDayAbsent {
+    color: white;
+    background-color: var(--color-error);
+    border-color: var(--color-error);
+    box-shadow: 0 2px 6px color-mix(in srgb, var(--color-error) 30%, transparent);
+}
+
+.calDayDayOff {
+    color: var(--color-muted);
     background-color: var(--color-surface);
+    border-color: var(--color-border);
+    font-style: italic;
+}
+
+.calDayPending {
+    color: var(--color-muted);
+    background-color: var(--color-bg);
+    border: 1px dashed var(--color-border);
+}
+
+/* Export Button */
+.exportRow {
+    margin-top: 16px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.exportBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--color-accent);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.exportBtn:hover {
+    text-decoration: underline;
 }
 
 .logoutBtn {
-    width: 100%;
+    width: 98%;
     display: flex;
+    margin: 10px auto;
     align-items: center;
     justify-content: center;
-    gap: 8px;
     padding: 12px;
     color: var(--color-error);
     background: transparent;

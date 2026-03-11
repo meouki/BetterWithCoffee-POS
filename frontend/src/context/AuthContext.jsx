@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from 'react';
+import { usersApi } from '../api/users';
 
 /**
  * Role Hierarchy:
@@ -9,12 +10,8 @@ import { createContext, useContext, useState } from 'react';
 
 const AuthContext = createContext(null);
 
-// Mock Users Database
-const MOCK_USERS = [
-    { id: 1, name: 'Master User', username: 'master', role: 'Master', password: 'master123' },
-    { id: 2, name: 'Admin User', username: 'admin', role: 'Admin', password: 'admin123' },
-    { id: 3, name: 'Cashier One', username: 'cashier1', role: 'Cashier', password: 'cashier123' },
-];
+// Role permissions logic moved into a helper or keep here
+// MOCK_USERS removed as we use the database now
 
 export function AuthProvider({ children }) {
     const [currentUser, setCurrentUser] = useState(() => {
@@ -23,17 +20,14 @@ export function AuthProvider({ children }) {
     });
 
     const login = async (username, password) => {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 800));
-
-        const user = MOCK_USERS.find(u => u.username === username && u.password === password);
-        if (user) {
-            const { password, ...safeUser } = user; // Don't store password in state/localStorage
-            setCurrentUser(safeUser);
-            localStorage.setItem('bwc_user', JSON.stringify(safeUser));
-            return safeUser;
+        try {
+            const user = await usersApi.login(username, password);
+            setCurrentUser(user);
+            localStorage.setItem('bwc_user', JSON.stringify(user));
+            return user;
+        } catch (error) {
+            throw error;
         }
-        throw new Error('Invalid username or password');
     };
 
     const logout = () => {

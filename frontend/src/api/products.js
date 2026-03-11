@@ -92,10 +92,21 @@ export const productsApi = {
      */
     update: async (id, updateData) => {
         try {
+            let body;
+            let headers = {};
+
+            if (updateData instanceof FormData) {
+                body = updateData;
+                // No Content-Type header needed for FormData
+            } else {
+                body = JSON.stringify(updateData);
+                headers['Content-Type'] = 'application/json';
+            }
+
             const response = await fetch(`${API_URL}/api/products/${id}`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updateData)
+                headers,
+                body
             });
             if (!response.ok) throw new Error('Failed to update product');
 

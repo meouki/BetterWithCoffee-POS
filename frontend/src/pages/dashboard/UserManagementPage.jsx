@@ -1,15 +1,13 @@
-import { useState } from 'react';
-import { UserPlus, Edit2, Trash2 } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { UserPlus, Edit2, Trash2, Calendar } from 'lucide-react';
 import UserDrawer from '../../components/dashboard/UserDrawer';
+import UserDTRModal from '../../components/dashboard/UserDTRModal';
+import { usersApi } from '../../api/users';
+import { useNotificationContext } from '../../context/NotificationContext';
+import toast from 'react-hot-toast';
 import styles from './UserManagementPage.module.css';
 
-const mockUsers = [
-    { id: 1, name: 'master', username: 'master', role: 'Master', is_active: true, created: '2026-01-01', last_login: 'Today 08:30 AM' },
-    { id: 2, name: 'admin', username: 'admin', role: 'Admin', is_active: true, created: '2026-01-10', last_login: 'Today 09:15 AM' },
-    { id: 3, name: 'arivera', username: 'arivera', role: 'Cashier', is_active: true, created: '2026-02-15', last_login: 'Today 07:15 AM' },
-    { id: 4, name: 'schen', username: 'schen', role: 'Cashier', is_active: true, created: '2026-03-20', last_login: 'Yesterday' },
-    { id: 5, name: 'jlee', username: 'jlee', role: 'Cashier', is_active: false, created: '2026-05-05', last_login: '2 mos ago' },
-];
+// mockUsers removed, now using API
 
 const ROLE_STYLES = {
     Master: styles.roleMaster,
@@ -18,9 +16,29 @@ const ROLE_STYLES = {
 };
 
 export default function UserManagementPage() {
-    const [users, setUsers] = useState(mockUsers);
+    const { addNotification } = useNotificationContext();
+    const [users, setUsers] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [isDTRModalOpen, setIsDTRModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
+    const [viewingUser, setViewingUser] = useState(null);
+
+    const loadUsers = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const data = await usersApi.getAll();
+            setUsers(data);
+        } catch (error) {
+            toast.error('Failed to load users');
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        loadUsers();
+    }, [loadUsers]);
 
     const PROTECTED_ID = 1; // Master account — cannot be deleted/disabled
 
@@ -39,28 +57,69 @@ export default function UserManagementPage() {
         setEditingUser(null);
     };
 
-    const handleSave = (savedUser) => {
-        if (editingUser) {
-            setUsers(prev => prev.map(u => u.id === savedUser.id ? savedUser : u));
-        } else {
-            setUsers(prev => [...prev, savedUser]);
+    const handleOpenDTR = (user) => {
+        setViewingUser(user);
+        setIsDTRModalOpen(true);
+    };
+
+    const handleCloseDTR = () => {
+        setIsDTRModalOpen(false);
+        setViewingUser(null);
+    };
+
+    const handleSave = async (userData) => {
+        try {
+            if (editingUser) {
+                const updated = await usersApi.update(editingUser.id, userData);
+                setUsers(prev => prev.map(u => u.id === updated.id ? updated : u));
+                addNotification('ALERT', 'Staff Updated', `User @${updated.username} (${updated.role}) was modified.`);
+                toast.success('User updated');
+            } else {
+                const newUser = await usersApi.create(userData);
+                setUsers(prev => [newUser, ...prev]);
+                addNotification('ALERT', 'Staff Created', `New user @${newUser.username} added as ${newUser.role}.`);
+                toast.success('User created');
+            }
+            handleCloseDrawer();
+        } catch (error) {
+            toast.error(error.message);
         }
     };
 
-    const toggleStatus = (id) => {
-        if (id === PROTECTED_ID) return;
-        setUsers(prev => prev.map(u =>
-            u.id === id ? { ...u, is_active: !u.is_active } : u
-        ));
+    const toggleStatus = async (user) => {
+        if (user.id === PROTECTED_ID) return;
+        try {
+            const updated = await usersApi.update(user.id, { is_active: !user.is_active });
+            setUsers(prev => prev.map(u => u.id === updated.id ? updated : u));
+            
+            const statusLabel = updated.is_active ? 'Enabled' : 'Disabled';
+            addNotification('ALERT', `Staff ${statusLabel}`, `Account @${updated.username} was ${statusLabel.toLowerCase()}.`);
+            
+            toast.success(`User ${updated.is_active ? 'enabled' : 'disabled'}`);
+        } catch (error) {
+            toast.error('Failed to update status');
+        }
     };
 
-    const deleteUser = (id) => {
+    const deleteUser = async (id) => {
         if (id === PROTECTED_ID) {
-            alert('Cannot delete the primary master account.');
+            toast.error('Cannot delete the primary master account.');
             return;
         }
         if (window.confirm('Delete this user? This action cannot be undone.')) {
-            setUsers(prev => prev.filter(u => u.id !== id));
+            try {
+                const targetUser = users.find(u => u.id === id);
+                await usersApi.delete(id);
+                setUsers(prev => prev.filter(u => u.id !== id));
+                
+                if (targetUser) {
+                    addNotification('ALERT', 'Staff Deleted', `User @${targetUser.username} was permanently removed.`);
+                }
+                
+                toast.success('User deleted');
+            } catch (error) {
+                toast.error('Failed to delete user');
+            }
         }
     };
 
@@ -90,7 +149,7 @@ export default function UserManagementPage() {
                             {users.map(user => (
                                 <tr key={user.id} className={styles.tableRow}>
                                     <td className={styles.td}>
-                                        <div className={styles.userCell}>
+                                        <div className={styles.userCell} onClick={() => handleOpenDTR(user)} style={{ cursor: 'pointer' }}>
                                             <div className={styles.avatar}>{user.name.charAt(0).toUpperCase()}</div>
                                             <div>
                                                 <div className={styles.userName}>{user.name}</div>
@@ -106,16 +165,18 @@ export default function UserManagementPage() {
                                     <td className={styles.td}>
                                         <button
                                             className={`${styles.statusToggle} ${user.is_active ? styles.statusActive : styles.statusInactive}`}
-                                            onClick={() => toggleStatus(user.id)}
+                                            onClick={() => toggleStatus(user)}
                                             disabled={user.id === PROTECTED_ID}
                                             title={user.id === PROTECTED_ID ? 'Cannot disable master account' : 'Toggle Status'}
                                         >
                                             <div className={`${styles.statusNub} ${user.is_active ? styles.statusNubActive : styles.statusNubInactive}`} />
                                         </button>
                                     </td>
-                                    <td className={`${styles.td} ${styles.dateData}`}>{user.created}</td>
+                                    <td className={`${styles.td} ${styles.dateData}`}>
+                                        {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}
+                                    </td>
                                     <td className={`${styles.td} ${styles.dateData}`} style={{ color: 'var(--color-muted)' }}>
-                                        {user.last_login}
+                                        {user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}
                                     </td>
                                     <td className={styles.td}>
                                         <div className={styles.actionCell}>
@@ -147,6 +208,12 @@ export default function UserManagementPage() {
                 user={editingUser}
                 onClose={handleCloseDrawer}
                 onSave={handleSave}
+            />
+
+            <UserDTRModal
+                isOpen={isDTRModalOpen}
+                user={viewingUser}
+                onClose={handleCloseDTR}
             />
         </div>
     );

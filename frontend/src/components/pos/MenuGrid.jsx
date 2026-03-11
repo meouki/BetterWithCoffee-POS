@@ -8,7 +8,7 @@ export default function MenuGrid({ category, onProductClick }) {
 
     const filtered = category === 'All'
         ? products
-        : products.filter(p => p.category === category);
+        : products.filter(p => p.category_name === category);
 
     if (isLoading) {
         return (

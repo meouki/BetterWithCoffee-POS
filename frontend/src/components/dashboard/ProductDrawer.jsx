@@ -1,21 +1,22 @@
 import { useState, useEffect } from 'react';
-import { X, Camera, Upload, Trash2 } from 'lucide-react';
+import { X, Camera, Trash2 } from 'lucide-react';
+import { useProductContext } from '../../context/ProductContext';
 import styles from './ProductDrawer.module.css';
-
-const CATEGORIES = ['Cold Drinks', 'Hot Drinks', 'Blended Drinks', 'Frappe Drinks', 'Pastries'];
 
 const emptyForm = {
     name: '',
-    category: 'Hot Drinks',
+    category_name: '', // Will be set to first category in useEffect
     base_price: '',
     is_available: true,
     image_url: '',
 };
 
 export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
+    const { categories } = useProductContext();
     const isEditing = !!product;
     const [form, setForm] = useState(emptyForm);
     const [originalPrice, setOriginalPrice] = useState(null);
+    const [selectedFile, setSelectedFile] = useState(null);
 
     // Sync form with product being edited
     useEffect(() => {
@@ -23,18 +24,22 @@ export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
             if (product) {
                 setForm({
                     name: product.name,
-                    category: product.category,
+                    category_name: product.category_name,
                     base_price: String(product.base_price),
                     is_available: product.is_available,
                     image_url: product.image_url || '',
                 });
                 setOriginalPrice(product.base_price);
             } else {
-                setForm(emptyForm);
+                setForm({
+                    ...emptyForm,
+                    category_name: categories.length > 0 ? categories[0].name : ''
+                });
                 setOriginalPrice(null);
             }
+            setSelectedFile(null);
         }
-    }, [isOpen, product]);
+    }, [isOpen, product, categories]);
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -43,11 +48,13 @@ export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
         // In a real app, you'd upload to server here.
         // For now, we'll create a local preview URL.
         const previewUrl = URL.createObjectURL(file);
+        setSelectedFile(file);
         handleChange('image_url', previewUrl);
     };
 
     const removeImage = (e) => {
         e.stopPropagation();
+        setSelectedFile(null);
         handleChange('image_url', '');
     };
 
@@ -63,10 +70,11 @@ export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
             ...(product || {}),
             id: product?.id ?? Date.now(), // Temp ID for new products
             name: form.name.trim(),
-            category: form.category,
+            category_name: form.category_name,
             base_price: parsedPrice,
             is_available: form.is_available,
             image_url: form.image_url,
+            imageFile: selectedFile // Pass the actual file
         });
         onClose();
     };
@@ -131,11 +139,11 @@ export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
                         <label className={styles.label}>Category</label>
                         <select
                             className={styles.select}
-                            value={form.category}
-                            onChange={e => handleChange('category', e.target.value)}
+                            value={form.category_name}
+                            onChange={e => handleChange('category_name', e.target.value)}
                         >
-                            {CATEGORIES.map(cat => (
-                                <option key={cat} value={cat}>{cat}</option>
+                            {categories.map(cat => (
+                                <option key={cat.id} value={cat.name}>{cat.name}</option>
                             ))}
                         </select>
                     </div>

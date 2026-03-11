@@ -1,0 +1,284 @@
+.modalBackdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal {
+    background: var(--color-bg);
+    width: 100%;
+    max-width: 440px;
+    border-radius: 24px;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modalHeader {
+    padding: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.userInfo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.modalAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--color-accent-muted);
+    color: var(--color-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modalTitle {
+    font-size: 1.125rem;
+    font-weight: 700;
+    font-family: var(--font-drama);
+    margin: 0;
+}
+
+.modalSubtitle {
+    font-size: 0.8125rem;
+    color: var(--color-muted);
+    margin: 2px 0 0 0;
+}
+
+.closeBtn {
+    background: transparent;
+    border: none;
+    color: var(--color-muted);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 999px;
+    transition: all 0.2s;
+}
+
+.closeBtn:hover {
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+
+.modalBody {
+    padding: 24px;
+}
+
+.statsRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.statCard {
+    background: var(--color-surface);
+    padding: 16px;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    text-align: center;
+}
+
+.statLabel {
+    font-size: 0.6875rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.statValue {
+    font-size: 1.25rem;
+    font-weight: 700;
+    font-family: var(--font-data);
+    color: var(--color-accent);
+}
+
+.calendarHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.calMonth {
+    font-weight: 700;
+    font-family: var(--font-drama);
+    font-size: 1rem;
+}
+
+.navBtn {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--color-text);
+    transition: all 0.2s;
+}
+
+.navBtn:hover:not(:disabled) {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.navBtn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.calendarGrid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.weekday {
+    text-align: center;
+    font-size: 0.625rem;
+    font-weight: 700;
+    color: var(--color-muted);
+    text-transform: uppercase;
+}
+
+.calDay {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: var(--font-data);
+    border-radius: 8px;
+    border: 1.5px solid transparent;
+}
+
+.calDayEmpty {
+    aspect-ratio: 1;
+}
+
+.calDayPending {
+    background: var(--color-surface);
+    color: var(--color-muted);
+}
+
+.calDayPresent {
+    background: var(--color-accent);
+    color: white;
+}
+
+.calDayAbsent {
+    background: var(--color-error);
+    color: white;
+}
+
+.calDayDayOff {
+    background: var(--color-bg);
+    border: 1.5px solid var(--color-border);
+    color: var(--color-muted);
+    font-style: italic;
+}
+
+.calDayToday {
+    border-color: var(--color-text);
+}
+
+.legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.legendItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    font-weight: 500;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+}
+
+.present { background: var(--color-accent); }
+.absent { background: var(--color-error); }
+.dayOff { background: var(--color-surface); border: 1px solid var(--color-border); }
+
+.modalFooter {
+    padding: 20px 24px;
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    gap: 12px;
+}
+
+.exportBtn {
+    flex: 1;
+    height: 44px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    color: var(--color-text);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.exportBtn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.closeActionBtn {
+    flex: 1;
+    height: 44px;
+    background: var(--color-accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.closeActionBtn:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}

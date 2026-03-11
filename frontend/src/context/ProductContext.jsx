@@ -1,34 +1,40 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { productsApi } from '../api/products';
+import { categoriesApi } from '../api/categories';
 import { useNotificationContext } from './NotificationContext';
 
 const ProductContext = createContext();
 
 export function ProductProvider({ children }) {
     const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
     // Initial load
     useEffect(() => {
         let mounted = true;
-        const loadProducts = async () => {
+        const loadData = async () => {
             try {
-                const data = await productsApi.getAll();
+                const [pData, cData] = await Promise.all([
+                    productsApi.getAll(),
+                    categoriesApi.getAll()
+                ]);
                 if (mounted) {
-                    setProducts(data);
+                    setProducts(pData);
+                    setCategories(cData);
                     setIsLoading(false);
                 }
             } catch (err) {
                 if (mounted) {
-                    console.error('Failed to load products', err);
+                    console.error('Failed to load menu data', err);
                     setError(err.message);
                     setIsLoading(false);
                 }
             }
         };
 
-        loadProducts();
+        loadData();
 
         return () => {
             mounted = false;
@@ -39,10 +45,21 @@ export function ProductProvider({ children }) {
 
     const addProduct = useCallback(async (productData) => {
         try {
-            const newProduct = await productsApi.create(productData);
+            let dataToSend = productData;
+            if (productData.imageFile) {
+                const formData = new FormData();
+                formData.append('name', productData.name);
+                formData.append('category_name', productData.category_name);
+                formData.append('base_price', productData.base_price);
+                formData.append('is_available', productData.is_available);
+                formData.append('image', productData.imageFile);
+                dataToSend = formData;
+            }
+
+            const newProduct = await productsApi.create(dataToSend);
             setProducts(prev => [...prev, newProduct]);
 
-            addNotification('MENU_EDIT', `Product Added: ${newProduct.name}`, `Added to ${newProduct.category} at ₱${newProduct.base_price}`);
+            addNotification('MENU_EDIT', `Product Added: ${newProduct.name}`, `Added to ${newProduct.category_name} at ₱${newProduct.base_price}`);
 
             return newProduct;
         } catch (err) {
@@ -53,7 +70,19 @@ export function ProductProvider({ children }) {
 
     const updateProduct = useCallback(async (id, updateData) => {
         try {
-            const updatedProduct = await productsApi.update(id, updateData);
+            let dataToSend = updateData;
+            if (updateData.imageFile) {
+                const formData = new FormData();
+                formData.append('name', updateData.name);
+                formData.append('category_name', updateData.category_name);
+                formData.append('base_price', updateData.base_price);
+                formData.append('is_available', updateData.is_available);
+                formData.append('image', updateData.imageFile);
+                if (updateData.image_url === '') formData.append('image_url', ''); // Handle image removal
+                dataToSend = formData;
+            }
+
+            const updatedProduct = await productsApi.update(id, dataToSend);
             setProducts(prev => prev.map(p => p.id === id ? updatedProduct : p));
 
             addNotification('MENU_EDIT', `Product Edited: ${updatedProduct.name}`, `Details updated by Admin`);
@@ -105,7 +134,17 @@ export function ProductProvider({ children }) {
                 addProduct,
                 updateProduct,
                 deleteProduct,
-                toggleAvailability
+                toggleAvailability,
+                categories,
+                addCategory: async (name) => {
+                    const newCat = await categoriesApi.create({ name });
+                    setCategories(prev => [...prev, newCat]);
+                    addNotification('MENU_EDIT', 'New Category', `Created "${name}" group.`);
+                },
+                deleteCategory: async (id) => {
+                    await categoriesApi.delete(id);
+                    setCategories(prev => prev.filter(c => c.id !== id));
+                }
             }}
         >
             {children}

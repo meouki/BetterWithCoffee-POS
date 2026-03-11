@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Moon, Sun, Monitor, Check, Zap } from 'lucide-react';
+import { Moon, Sun, Monitor, Check } from 'lucide-react';
+import { useNotificationContext } from '../../context/NotificationContext';
 import styles from './SettingsPage.module.css';
 
 const ACCENT_PRESETS = [
@@ -11,6 +11,7 @@ const ACCENT_PRESETS = [
 ];
 
 export default function SettingsPage() {
+    const { addNotification } = useNotificationContext();
     const [theme, setTheme] = useState(() => {
         return localStorage.getItem('bwc_theme') || 'system';
     });
@@ -41,8 +42,10 @@ export default function SettingsPage() {
 
         if (theme !== 'system') {
             localStorage.setItem('bwc_theme', theme);
+            addNotification('ALERT', 'Theme Changed', `System appearance set to ${theme} mode.`);
         } else {
             localStorage.removeItem('bwc_theme');
+            addNotification('ALERT', 'Theme Reset', `System appearance reset to follow OS theme.`);
         }
     }, [theme]);
 
@@ -54,6 +57,7 @@ export default function SettingsPage() {
             document.documentElement.style.setProperty('--color-accent-hover', selected.hover);
             document.documentElement.style.setProperty('--color-accent-muted', selected.muted);
             localStorage.setItem('bwc_accent', accent);
+            addNotification('ALERT', 'Accent Color Updated', `System branding updated to ${accent}.`);
         }
     }, [accent]);
 

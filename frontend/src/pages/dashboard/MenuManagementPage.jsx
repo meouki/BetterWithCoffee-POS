@@ -2,13 +2,18 @@ import { useState } from 'react';
 import { Plus, Edit2, Trash2, Loader2 } from 'lucide-react';
 import ProductDrawer from '../../components/dashboard/ProductDrawer';
 import { useProductContext } from '../../context/ProductContext';
+import { useNotificationContext } from '../../context/NotificationContext';
 import styles from './MenuManagementPage.module.css';
 
-const categories = ['All', 'Cold Drinks', 'Hot Drinks', 'Blended Drinks', 'Frappe Drinks', 'Pastries'];
-
 export default function MenuManagementPage() {
-    const { products, isLoading, error, addProduct, updateProduct, deleteProduct, toggleAvailability } = useProductContext();
+    const { 
+        products, isLoading, error, addProduct, updateProduct, deleteProduct, toggleAvailability,
+        categories, addCategory, deleteCategory
+    } = useProductContext();
+    const { addNotification } = useNotificationContext();
     const [activeTab, setActiveTab] = useState('All');
+    const [isManagingCats, setIsManagingCats] = useState(false);
+    const [newCatName, setNewCatName] = useState('');
 
     // Drawer state
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -16,7 +21,7 @@ export default function MenuManagementPage() {
 
     const filteredProducts = activeTab === 'All'
         ? products
-        : products.filter(p => p.category === activeTab);
+        : products.filter(p => p.category_name === activeTab);
 
     // --- Handlers ---
 
@@ -40,10 +45,12 @@ export default function MenuManagementPage() {
             if (editingProduct) {
                 // Edit existing
                 await updateProduct(savedProduct.id, savedProduct);
+                addNotification('MENU_EDIT', 'Product Updated', `Menu item "${savedProduct.name}" was modified.`);
             } else {
                 // Add new
                 const { id, ...newProductObj } = savedProduct; // strip temp ID
                 await addProduct(newProductObj);
+                addNotification('MENU_EDIT', 'Product Created', `New menu item "${savedProduct.name}" was added.`);
             }
         } catch (err) {
             console.error(err);
@@ -54,7 +61,11 @@ export default function MenuManagementPage() {
     const handleDelete = async (id) => {
         if (!window.confirm('Remove this product from the menu? Existing orders are not affected.')) return;
         try {
+            const product = products.find(p => p.id === id);
             await deleteProduct(id);
+            if (product) {
+                addNotification('MENU_EDIT', 'Product Deleted', `Menu item "${product.name}" was removed.`);
+            }
         } catch (err) {
             console.error(err);
             alert("Failed to delete product.");
@@ -64,6 +75,11 @@ export default function MenuManagementPage() {
     const handleToggleAvailability = async (id) => {
         try {
             await toggleAvailability(id);
+            const product = products.find(p => p.id === id);
+            if (product) {
+                const status = !product.is_available ? 'Available' : 'Sold Out';
+                addNotification('MENU_EDIT', 'Status Changed', `Product "${product.name}" marked as ${status}.`);
+            }
         } catch (err) {
             console.error(err);
             alert("Failed to update availability.");
@@ -74,19 +90,76 @@ export default function MenuManagementPage() {
         <div className={styles.pageContainer}>
             <div className={styles.header}>
                 <h2 className={styles.title}>Menu Management</h2>
-                <button className={`pos-btn ${styles.addBtn}`} onClick={handleOpenAdd}>
-                    <Plus size={18} /> Add Product
-                </button>
+                <div className={styles.headerActions}>
+                    <button className={styles.secondaryBtn} onClick={() => setIsManagingCats(!isManagingCats)}>
+                        {isManagingCats ? 'Close Categories' : 'Manage Categories'}
+                    </button>
+                    <button className={`pos-btn ${styles.addBtn}`} onClick={handleOpenAdd}>
+                        <Plus size={18} /> Add Product
+                    </button>
+                </div>
             </div>
 
+            {isManagingCats && (
+                <div className={styles.categoryManager}>
+                    <div className={styles.catInputRow}>
+                        <input 
+                            type="text" 
+                            placeholder="New category name (e.g. Fries)" 
+                            className={styles.catInput}
+                            value={newCatName}
+                            onChange={(e) => setNewCatName(e.target.value)}
+                        />
+                        <button 
+                            className={styles.addCatBtn}
+                            onClick={async () => {
+                                if (!newCatName.trim()) return;
+                                try {
+                                    await addCategory(newCatName);
+                                    setNewCatName('');
+                                } catch (err) {
+                                    alert(err.message);
+                                }
+                            }}
+                        >
+                            <Plus size={16} /> Add
+                        </button>
+                    </div>
+                    <div className={styles.catPillList}>
+                        {categories.map(cat => (
+                            <div key={cat.id} className={styles.catPill}>
+                                {cat.name}
+                                <button 
+                                    className={styles.delCatBtn}
+                                    onClick={async () => {
+                                        if (window.confirm(`Delete "${cat.name}"? Only empty categories can be deleted.`)) {
+                                            try { await deleteCategory(cat.id); } 
+                                            catch (err) { alert(err.message); }
+                                        }
+                                    }}
+                                >
+                                    <Trash2 size={12} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             <div className={styles.tabs}>
+                <button
+                    onClick={() => setActiveTab('All')}
+                    className={`${styles.tabBtn} ${activeTab === 'All' ? styles.active : ''}`}
+                >
+                    All
+                </button>
                 {categories.map(cat => (
                     <button
-                        key={cat}
-                        onClick={() => setActiveTab(cat)}
-                        className={`${styles.tabBtn} ${activeTab === cat ? styles.active : ''}`}
+                        key={cat.id}
+                        onClick={() => setActiveTab(cat.name)}
+                        className={`${styles.tabBtn} ${activeTab === cat.name ? styles.active : ''}`}
                     >
-                        {cat}
+                        {cat.name}
                     </button>
                 ))}
             </div>
@@ -125,7 +198,7 @@ export default function MenuManagementPage() {
                                                 </div>
                                                 <div>
                                                     <div className={styles.productName}>{product.name}</div>
-                                                    <div className={styles.productCategory}>{product.category}</div>
+                                                    <div className={styles.productCategory}>{product.category_name}</div>
                                                 </div>
                                             </div>
                                         </td>

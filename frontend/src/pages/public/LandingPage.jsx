@@ -22,7 +22,7 @@ export default function LandingPage() {
                         <span className={styles.titleItalic}>Coffee.</span>
                     </h1>
                     <p className={styles.subtitle}>
-                        The ultimate craft coffee experience, powered by a seamless, touch-first point-of-sale system engineered for speed and precision.
+                        The ultimate craft coffee experience, powered by a seamless, touch-first point-of-sale system.
                     </p>
 
                     <div className={styles.buttonGroup}>
@@ -79,7 +79,7 @@ export default function LandingPage() {
             {/* Footer */}
             <footer className={styles.footer}>
                 <p className={styles.footerText}>
-                    © 2026 Better with Coffee POS System. Cinematic Aesthetics Pattern.
+                    © 2026 PulsePoint POS System.
                 </p>
             </footer>
         </div>

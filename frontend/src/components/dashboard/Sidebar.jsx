@@ -29,7 +29,6 @@ export default function Sidebar({ isOpen, onClose }) {
         { name: 'Overview', path: '/dashboard/overview', icon: LayoutDashboard, roles: ['Master', 'Admin'] },
         { name: 'Orders', path: '/dashboard/orders', icon: ShoppingBag, roles: ['Master'] },
         { name: 'Menu', path: '/dashboard/menu', icon: UtensilsCrossed, roles: ['Master'] },
-        { name: 'Inventory', path: '/dashboard/inventory', icon: Package, roles: ['Master'] },
         { name: 'Reports', path: '/dashboard/reports', icon: BarChart2, roles: ['Master', 'Admin'] },
         { name: 'Users', path: '/dashboard/users', icon: Users, roles: ['Master'] },
         { name: 'Notifications', path: '/dashboard/notifications', icon: Bell, roles: ['Master', 'Admin'] },

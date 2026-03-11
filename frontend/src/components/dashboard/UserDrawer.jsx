@@ -81,13 +81,13 @@ export default function UserDrawer({ isOpen, user, onClose, onSave }) {
 
         onSave({
             ...(user || {}),
-            id: user?.id ?? Date.now(),
+            id: user?.id ?? undefined, // Let backend assign ID if new
             name: form.username, // Name defaults to username
             username: form.username.toLowerCase().trim(),
+            password: form.password, // IMPORTANT: Send the password
             role: form.role,
             is_active: form.is_active,
-            created: user?.created ?? new Date().toISOString().split('T')[0],
-            last_login: user?.last_login ?? 'Never',
+            // created/last_login are handled by database
         });
         onClose();
     };
