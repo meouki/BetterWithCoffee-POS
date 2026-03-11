@@ -1,4 +1,4 @@
-// API Service for Notifications (Logs)
+// API Service for Notifications — Connected to Express Backend
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const LOCAL_STORAGE_KEY = 'bwc_offline_logs';
 
@@ -30,7 +30,7 @@ const saveOfflineLog = (logData) => {
 
 export const notificationsApi = {
     /**
-     * Fetch all logs from the backend text files
+     * Fetch all notifications from the backend database
      */
     getAll: async () => {
         const now = Date.now();
@@ -39,8 +39,8 @@ export const notificationsApi = {
         }
 
         try {
-            const response = await fetch(`${API_URL}/api/logs`);
-            if (!response.ok) throw new Error('Failed to fetch logs');
+            const response = await fetch(`${API_URL}/api/notifications`);
+            if (!response.ok) throw new Error('Failed to fetch notifications');
 
             isServerOffline = false; // Reset on success
             const serverLogs = await response.json();
@@ -54,7 +54,7 @@ export const notificationsApi = {
     },
 
     /**
-     * Add a new log entry to the backend text file
+     * Add a new notification entry to the backend
      * @param {Object} logData - { type: 'SALE'|'MENU_EDIT'|'ALERT', message: string, details: string, cashier: string }
      */
     add: async (logData) => {
@@ -65,12 +65,12 @@ export const notificationsApi = {
         }
 
         try {
-            const response = await fetch(`${API_URL}/api/logs`, {
+            const response = await fetch(`${API_URL}/api/notifications`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(logData)
             });
-            if (!response.ok) throw new Error('Failed to save log');
+            if (!response.ok) throw new Error('Failed to save notification');
 
             isServerOffline = false; // Reset on success
             // Also keep it locally just in case they go offline later
@@ -86,15 +86,15 @@ export const notificationsApi = {
     },
 
     /**
-     * Clear all logs on the backend
+     * Clear all notifications on the backend
      */
     clearAll: async () => {
         try {
             localStorage.removeItem(LOCAL_STORAGE_KEY); // Clear offline logs
-            const response = await fetch(`${API_URL}/api/logs`, {
+            const response = await fetch(`${API_URL}/api/notifications`, {
                 method: 'DELETE'
             });
-            if (!response.ok) throw new Error('Failed to clear logs');
+            if (!response.ok) throw new Error('Failed to clear notifications');
             return await response.json();
         } catch (error) {
             return { success: true, fake: true };

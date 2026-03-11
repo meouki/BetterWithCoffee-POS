@@ -67,16 +67,75 @@ export default function OverviewPage() {
         }));
     }, [orders]);
 
-    // Mock data for chart for now, as we don't have enough history usually
-    const revenueData = [
-        { name: 'Mon', revenue: 12400 },
-        { name: 'Tue', revenue: 14200 },
-        { name: 'Wed', revenue: 11800 },
-        { name: 'Thu', revenue: 18500 },
-        { name: 'Fri', revenue: 24300 },
-        { name: 'Sat', revenue: 32100 },
-        { name: 'Sun', revenue: 28400 },
-    ];
+    // Revenue chart data based on selected range
+    const revenueData = useMemo(() => {
+        const now = new Date();
+
+        if (chartRange === 'Daily') {
+            // Last 24 hours broken into 2-hour blocks
+            const hours = [];
+            for (let i = 12; i >= 0; i--) {
+                const blockStart = new Date(now);
+                blockStart.setHours(now.getHours() - i * 2, 0, 0, 0);
+                const blockEnd = new Date(blockStart);
+                blockEnd.setHours(blockStart.getHours() + 2);
+
+                const revenue = orders
+                    .filter(o => {
+                        const d = new Date(o.timestamp);
+                        return d >= blockStart && d < blockEnd;
+                    })
+                    .reduce((sum, o) => sum + o.total, 0);
+
+                hours.push({
+                    name: blockStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    revenue
+                });
+            }
+            return hours;
+        } else if (chartRange === 'Weekly') {
+            // Last 7 days
+            const days = [];
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            for (let i = 6; i >= 0; i--) {
+                const day = new Date(now);
+                day.setDate(now.getDate() - i);
+                day.setHours(0, 0, 0, 0);
+                const end = new Date(day);
+                end.setHours(23, 59, 59, 999);
+
+                const revenue = orders
+                    .filter(o => {
+                        const d = new Date(o.timestamp);
+                        return d >= day && d <= end;
+                    })
+                    .reduce((sum, o) => sum + o.total, 0);
+
+                days.push({ name: dayNames[day.getDay()], revenue });
+            }
+            return days;
+        } else {
+            // Monthly — last 4 weeks
+            const weeks = [];
+            for (let i = 3; i >= 0; i--) {
+                const weekStart = new Date(now);
+                weekStart.setDate(now.getDate() - (i + 1) * 7);
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekStart.getDate() + 7);
+
+                const revenue = orders
+                    .filter(o => {
+                        const d = new Date(o.timestamp);
+                        return d >= weekStart && d < weekEnd;
+                    })
+                    .reduce((sum, o) => sum + o.total, 0);
+
+                const label = `${weekStart.toLocaleDateString([], { month: 'short', day: 'numeric' })}`;
+                weeks.push({ name: label, revenue });
+            }
+            return weeks;
+        }
+    }, [orders, chartRange]);
 
     // Utility to get main CSS variable for charts
     const getAccentColor = () => {
@@ -160,7 +219,7 @@ export default function OverviewPage() {
                                     fontSize={12}
                                     tickLine={false}
                                     axisLine={false}
-                                    tickFormatter={(value) => `₱${value / 1000}k`}
+                                    tickFormatter={(value) => value >= 1000 ? `₱${(value / 1000).toFixed(1)}k` : `₱${value}`}
                                 />
                                 <Tooltip
                                     contentStyle={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)', borderRadius: '8px', color: 'var(--color-text)' }}

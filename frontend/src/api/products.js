@@ -1,80 +1,141 @@
-// Simulated API Service for Products
-// This file acts as the single source of truth for product data operations.
-
+// API Service for Products — Connected to Express Backend
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const LOCAL_STORAGE_KEY = 'bwc_products';
 
-const defaultProducts = [
-    { id: 1, name: 'Caramel Macchiato', base_price: 180, is_available: true, category: 'Hot Drinks', modifiers: true },
-    { id: 2, name: 'Spanish Latte', base_price: 190, is_available: true, category: 'Hot Drinks', modifiers: true },
-    { id: 3, name: 'Matcha Frappe', base_price: 220, is_available: true, category: 'Frappe Drinks', modifiers: true },
-    { id: 4, name: 'Cold Brew', base_price: 160, is_available: false, category: 'Cold Drinks', modifiers: false },
-    { id: 5, name: 'Blueberry Cheesecake', base_price: 250, is_available: true, category: 'Pastries', modifiers: false },
-    { id: 6, name: 'Butter Croissant', base_price: 120, is_available: true, category: 'Pastries', modifiers: false },
-];
+// Circuit breaker for offline fallback
+let isServerOffline = false;
+let lastRetryTime = 0;
+const RETRY_COOLDOWN = 60000; // 1 minute
 
-/**
- * Simulates a network delay to make the UI behave like it's connected to a real API.
- */
-const delay = (ms = 300) => new Promise(resolve => setTimeout(resolve, ms));
+const getOfflineProducts = () => {
+    try {
+        return JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || [];
+    } catch {
+        return [];
+    }
+};
+
+const saveOfflineProducts = (products) => {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(products));
+};
 
 export const productsApi = {
     /**
-     * Fetch all products
+     * Fetch all products from the backend
      */
     getAll: async () => {
-        await delay(100);
-        const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (stored) {
-            return JSON.parse(stored);
+        const now = Date.now();
+        if (isServerOffline && (now - lastRetryTime < RETRY_COOLDOWN)) {
+            return getOfflineProducts();
         }
-        // Initialize if empty
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(defaultProducts));
-        return defaultProducts;
+
+        try {
+            const response = await fetch(`${API_URL}/api/products`);
+            if (!response.ok) throw new Error('Failed to fetch products');
+
+            isServerOffline = false;
+            const products = await response.json();
+
+            // Cache locally for offline fallback
+            saveOfflineProducts(products);
+            return products;
+        } catch (error) {
+            isServerOffline = true;
+            lastRetryTime = now;
+            console.warn('Backend offline, using cached products');
+            return getOfflineProducts();
+        }
     },
 
     /**
-     * Create a new product
+     * Create a new product (supports image upload via FormData)
      */
     create: async (productData) => {
-        await delay();
-        const products = await productsApi.getAll();
-        const newProduct = {
-            ...productData,
-            id: Date.now(), // Generate mock ID
-        };
-        const updatedProducts = [...products, newProduct];
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedProducts));
-        return newProduct;
+        try {
+            let body;
+            let headers = {};
+
+            // If productData is already FormData (image upload), use it directly
+            if (productData instanceof FormData) {
+                body = productData;
+                // Don't set Content-Type — browser will set it with boundary
+            } else {
+                // Regular JSON
+                body = JSON.stringify(productData);
+                headers['Content-Type'] = 'application/json';
+            }
+
+            const response = await fetch(`${API_URL}/api/products`, {
+                method: 'POST',
+                headers,
+                body
+            });
+            if (!response.ok) throw new Error('Failed to create product');
+
+            isServerOffline = false;
+            const newProduct = await response.json();
+
+            // Update local cache
+            const cached = getOfflineProducts();
+            cached.push(newProduct);
+            saveOfflineProducts(cached);
+
+            return newProduct;
+        } catch (error) {
+            console.error('Failed to create product:', error);
+            throw error;
+        }
     },
 
     /**
      * Update an existing product
      */
     update: async (id, updateData) => {
-        await delay();
-        const products = await productsApi.getAll();
-        const index = products.findIndex(p => p.id === id);
-        if (index === -1) throw new Error('Product not found');
+        try {
+            const response = await fetch(`${API_URL}/api/products/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updateData)
+            });
+            if (!response.ok) throw new Error('Failed to update product');
 
-        const updatedProduct = { ...products[index], ...updateData };
-        const updatedProducts = [
-            ...products.slice(0, index),
-            updatedProduct,
-            ...products.slice(index + 1)
-        ];
+            isServerOffline = false;
+            const updatedProduct = await response.json();
 
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedProducts));
-        return updatedProduct;
+            // Update local cache
+            const cached = getOfflineProducts();
+            const index = cached.findIndex(p => p.id === id);
+            if (index !== -1) cached[index] = updatedProduct;
+            saveOfflineProducts(cached);
+
+            return updatedProduct;
+        } catch (error) {
+            console.error('Failed to update product:', error);
+            throw error;
+        }
     },
 
     /**
      * Delete a product
      */
     delete: async (id) => {
-        await delay();
-        const products = await productsApi.getAll();
-        const updatedProducts = products.filter(p => p.id !== id);
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedProducts));
-        return id;
+        try {
+            const response = await fetch(`${API_URL}/api/products/${id}`, {
+                method: 'DELETE'
+            });
+            if (!response.ok) throw new Error('Failed to delete product');
+
+            isServerOffline = false;
+
+            // Update local cache
+            const cached = getOfflineProducts();
+            const updatedCache = cached.filter(p => p.id !== id);
+            saveOfflineProducts(updatedCache);
+
+            return id;
+        } catch (error) {
+            console.error('Failed to delete product:', error);
+            throw error;
+        }
     }
 };

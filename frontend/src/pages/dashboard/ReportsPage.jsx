@@ -233,7 +233,7 @@ export default function ReportsPage() {
                                             stroke="var(--color-muted)"
                                             tickLine={false}
                                             axisLine={false}
-                                            tickFormatter={(value) => `₱${value / 1000}k`}
+                                            tickFormatter={(value) => value >= 1000 ? `₱${(value / 1000).toFixed(1)}k` : `₱${value}`}
                                         />
                                         <Tooltip
                                             cursor={{ fill: 'color-mix(in srgb, var(--color-surface) 50%, transparent)' }}
