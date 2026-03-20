@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Moon, Sun, Monitor, Check } from 'lucide-react';
 import { useNotificationContext } from '../../context/NotificationContext';
 import styles from './SettingsPage.module.css';
