@@ -52,6 +52,7 @@ export function ProductProvider({ children }) {
                 formData.append('category_name', productData.category_name);
                 formData.append('base_price', productData.base_price);
                 formData.append('is_available', productData.is_available);
+                formData.append('modifiers', productData.modifiers);
                 formData.append('image', productData.imageFile);
                 dataToSend = formData;
             }
@@ -77,6 +78,7 @@ export function ProductProvider({ children }) {
                 formData.append('category_name', updateData.category_name);
                 formData.append('base_price', updateData.base_price);
                 formData.append('is_available', updateData.is_available);
+                formData.append('modifiers', updateData.modifiers);
                 formData.append('image', updateData.imageFile);
                 if (updateData.image_url === '') formData.append('image_url', ''); // Handle image removal
                 dataToSend = formData;

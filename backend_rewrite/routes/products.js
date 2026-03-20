@@ -54,8 +54,8 @@ router.post('/', upload.single('image'), async (req, res) => {
                 .webp({ quality: 80 })
                 .toFile(uploadPath);
 
-            const baseUrl = `${req.protocol}://${req.get('host')}`;
-            imageUrl = `${baseUrl}/uploads/${filename}`;
+            // Store as relative path so it survives IP changes
+            imageUrl = `/uploads/${filename}`;
         }
 
         const newProduct = await Product.create({
@@ -92,8 +92,8 @@ router.patch('/:id', upload.single('image'), async (req, res) => {
                 .webp({ quality: 80 })
                 .toFile(uploadPath);
 
-            const baseUrl = `${req.protocol}://${req.get('host')}`;
-            updates.image_url = `${baseUrl}/uploads/${filename}`;
+            // Store as relative path so it survives IP changes
+            updates.image_url = `/uploads/${filename}`;
         }
 
         // Update allowed fields

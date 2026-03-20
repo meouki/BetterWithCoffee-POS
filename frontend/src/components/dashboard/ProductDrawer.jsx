@@ -8,6 +8,7 @@ const emptyForm = {
     category_name: '', // Will be set to first category in useEffect
     base_price: '',
     is_available: true,
+    modifiers: false,
     image_url: '',
 };
 
@@ -27,6 +28,7 @@ export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
                     category_name: product.category_name,
                     base_price: String(product.base_price),
                     is_available: product.is_available,
+                    modifiers: product.modifiers || false,
                     image_url: product.image_url || '',
                 });
                 setOriginalPrice(product.base_price);
@@ -73,6 +75,7 @@ export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
             category_name: form.category_name,
             base_price: parsedPrice,
             is_available: form.is_available,
+            modifiers: form.modifiers,
             image_url: form.image_url,
             imageFile: selectedFile // Pass the actual file
         });
@@ -182,6 +185,22 @@ export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
                                 onClick={() => handleChange('is_available', !form.is_available)}
                             >
                                 <div className={`${styles.toggleNub} ${form.is_available ? styles.nubOn : styles.nubOff}`} />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Customizations */}
+                    <div className={styles.fieldGroup}>
+                        <label className={styles.label}>Customizations</label>
+                        <div className={styles.availRow}>
+                            <span className={styles.availLabel}>
+                                {form.modifiers ? 'Sugar, Milk, & Add-ons enabled' : 'No customizations'}
+                            </span>
+                            <button
+                                className={`${styles.toggle} ${form.modifiers ? styles.toggleOn : styles.toggleOff}`}
+                                onClick={() => handleChange('modifiers', !form.modifiers)}
+                            >
+                                <div className={`${styles.toggleNub} ${form.modifiers ? styles.nubOn : styles.nubOff}`} />
                             </button>
                         </div>
                     </div>

@@ -42,6 +42,9 @@ Source: "..\backend_rewrite\*"; DestDir: "{app}\backend_rewrite"; Flags: ignorev
 ; 4. Bundle Pre-built Frontend
 Source: "..\frontend\dist\*"; DestDir: "{app}\frontend\dist"; Flags: ignoreversion recursesubdirs createallsubdirs
 
+[Dirs]
+Name: "{app}"; Permissions: users-modify
+
 [Icons]
 ; Desktop Shortcut
 Name: "{autodesktop}\Start PulsePoint"; Filename: "{app}\start.bat"; WorkingDir: "{app}"; Comment: "Launch PulsePoint POS"
