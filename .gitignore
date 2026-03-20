@@ -1,0 +1,23 @@
+# Node.js
+node_modules/
+.env
+.env.*
+!.env.example
+
+# Build outputs
+dist/
+/installer/Output/
+
+# External binaries / installers
+/installer/*.msi
+/installer/*.exe
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# OS Files
+.DS_Store
+Thumbs.db

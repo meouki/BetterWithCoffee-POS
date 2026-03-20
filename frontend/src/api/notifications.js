@@ -1,5 +1,5 @@
 // API Service for Notifications — Connected to Express Backend
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = import.meta.env.VITE_API_URL || '';
 const LOCAL_STORAGE_KEY = 'bwc_offline_logs';
 
 // Circuit breaker to avoid console spam when backend is off

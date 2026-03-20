@@ -1,5 +1,5 @@
 // API Service for Products — Connected to Express Backend
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = import.meta.env.VITE_API_URL || '';
 const LOCAL_STORAGE_KEY = 'bwc_products';
 
 // Circuit breaker for offline fallback

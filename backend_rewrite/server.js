@@ -15,7 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // Health check
-app.get('/', (req, res) => {
+app.get('/api/health', (req, res) => {
     res.json({ status: 'PulsePoint Backend is running!', timestamp: new Date().toISOString() });
 });
 
@@ -35,6 +35,14 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/categories', categoryRoutes);
+
+// Serve built React frontend (production)
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
+// Catch-all: let React Router handle client-side routes
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+});
 
 // Start Server
 const PORT = process.env.PORT || 5000;

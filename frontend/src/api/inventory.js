@@ -1,5 +1,5 @@
 // API Service for Inventory — Connected to Express Backend
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 // Circuit breaker for offline fallback
 let isServerOffline = false;
