@@ -184,8 +184,17 @@ export default function OrdersPage() {
                 <div className={styles.overlay}>
                     <div className={styles.modal}>
                         <div className={styles.modalHeader}>
-                            <h3 className={styles.modalTitle}>Order Details</h3>
+                            <h3 className={styles.modalTitle}>Order History Detail</h3>
                             <button onClick={() => setSelectedOrder(null)} className={styles.closeBtn}>✕</button>
+                        </div>
+
+                        <div className={styles.receiptSummary}>
+                            <h3 className={styles.brandTitle}>Better with Coffee</h3>
+                            <p className={styles.receiptType}>ACKNOWLEDGMENT RECEIPT</p>
+                            <div className={styles.businessInfo}>
+                                <p>TIN: 000-000-000-000</p>
+                                <p>123 Coffee Lane, Metro Manila</p>
+                            </div>
                         </div>
 
                         <div className={styles.metaGrid}>
@@ -236,6 +245,11 @@ export default function OrdersPage() {
                                 <span>Change</span>
                                 <span>₱{selectedOrder.change?.toFixed(2) ?? '0.00'}</span>
                             </div>
+                        </div>
+
+                        <div className={styles.footerInfo}>
+                            <p className={styles.legalDisclaimer}>THIS IS NOT AN OFFICIAL RECEIPT</p>
+                            <p className={styles.personalityQuote}>"Fueling your passion, one cup at a time."</p>
                         </div>
                     </div>
                 </div>

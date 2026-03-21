@@ -81,11 +81,26 @@
     gap: 4px;
 }
 
-.receiptHeader h3 {
+.brandTitle {
     font-family: var(--font-ui);
-    font-size: 1.125rem;
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin-bottom: 2px;
+    color: var(--color-accent);
+}
+
+.receiptType {
+    font-size: 0.75rem;
     font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--color-text);
     margin-bottom: 4px;
+}
+
+.businessInfo {
+    font-size: 0.7rem;
+    color: var(--color-muted);
+    line-height: 1.4;
 }
 
 .receiptHeader p {
@@ -154,7 +169,33 @@
     color: var(--color-muted);
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
+}
+
+.legalDisclaimer {
+    font-weight: 800;
+    font-size: 0.75rem;
+    color: var(--color-text);
+    margin-bottom: 4px;
+}
+
+.footerDivider {
+    width: 40px;
+    height: 1px;
+    background: var(--color-border);
+    margin: 4px auto;
+}
+
+.personalityQuote {
+    font-style: italic;
+    font-size: 0.8rem;
+    color: var(--color-accent);
+    margin-bottom: 4px;
+}
+
+.footerBrand {
+    font-weight: 700;
+    color: var(--color-text);
 }
 
 .actions {

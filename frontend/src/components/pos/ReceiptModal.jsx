@@ -26,8 +26,12 @@ export default function ReceiptModal({ isOpen, receiptData, onNewOrder }) {
 
                 <div className={styles.receiptPaper}>
                     <div className={styles.receiptHeader}>
-                        <h3>Better with Coffee</h3>
-                        <p>POS System</p>
+                        <h3 className={styles.brandTitle}>Better with Coffee</h3>
+                        <p className={styles.receiptType}>ACKNOWLEDGMENT RECEIPT</p>
+                        <div className={styles.businessInfo}>
+                            <p>TIN: 000-000-000-000</p>
+                            <p>Business Address: Mexico, Pampanga</p>
+                        </div>
                         <div className={styles.divider}></div>
                         <p>Order #{id}</p>
                         <p>{dateOpts}</p>
@@ -75,9 +79,11 @@ export default function ReceiptModal({ isOpen, receiptData, onNewOrder }) {
                     <div className={styles.divider}></div>
 
                     <div className={styles.receiptFooter}>
-                        <p>Payment: {payment_method}</p>
+                        <p className={styles.legalDisclaimer}>THIS IS NOT AN OFFICIAL RECEIPT</p>
+                        <div className={styles.footerDivider}></div>
+                        <p className={styles.personalityQuote}>"Fueling your passion, one cup at a time."</p>
                         <p>Thank you for choosing</p>
-                        <p>Better with Coffee!</p>
+                        <p className={styles.footerBrand}>Better with Coffee!</p>
                     </div>
                 </div>
 

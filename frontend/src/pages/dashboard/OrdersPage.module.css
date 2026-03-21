@@ -275,6 +275,33 @@
     color: var(--color-text);
 }
 
+.receiptSummary {
+    text-align: center;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px dashed var(--color-border);
+}
+
+.brandTitle {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--color-accent);
+    margin-bottom: 4px;
+}
+
+.receiptType {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+}
+
+.businessInfo {
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    line-height: 1.4;
+}
+
 .metaGrid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -344,5 +371,27 @@
 }
 
 .accentText {
+    color: var(--color-accent);
+}
+
+.footerInfo {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--color-border);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.legalDisclaimer {
+    font-weight: 800;
+    font-size: 0.7rem;
+    color: var(--color-text);
+}
+
+.personalityQuote {
+    font-style: italic;
+    font-size: 0.8rem;
     color: var(--color-accent);
 }

@@ -169,21 +169,33 @@ export default function SettingsPage() {
             <div className={styles.section}>
                 <h3 className={styles.sectionHeader}>System Information</h3>
                 <div className={styles.infoGrid}>
-                    <div>
+                    <div className={styles.infoBox}>
                         <div className={styles.infoLabel}>App Version</div>
-                        <div className={styles.infoValue}>1.0.0-beta.c</div>
+                        <div className={styles.infoValue}>1.0.0 (Production)</div>
                     </div>
-                    <div>
-                        <div className={styles.infoLabel}>Build Hash</div>
-                        <div className={styles.infoValue}>fc8b29a</div>
+                    <div className={styles.infoBox}>
+                        <div className={styles.infoLabel}>Environment</div>
+                        <div className={styles.infoValue}>{import.meta.env.MODE === 'production' ? 'Release Build' : 'Development'}</div>
                     </div>
-                    <div>
-                        <div className={styles.infoLabel}>API Base URL</div>
-                        <div className={styles.infoValue}>http://localhost:3000/api</div>
+                    <div className={styles.infoBox}>
+                        <div className={styles.infoLabel}>Database Dialect</div>
+                        <div className={styles.infoValue}>SQLite (Local)</div>
                     </div>
-                    <div>
-                        <div className={styles.infoLabel}>Printer Target</div>
-                        <div className={styles.infoValue}>bwc_kitchen_thermal_1</div>
+                    <div className={styles.infoBox}>
+                        <div className={styles.infoLabel}>API URL</div>
+                        <div className={styles.infoValue}>{import.meta.env.VITE_API_URL || window.location.origin}</div>
+                    </div>
+                    <div className={styles.infoBox} style={{ gridColumn: 'span 2' }}>
+                        <div className={styles.infoLabel}>Browser & Client</div>
+                        <div className={styles.infoValue} style={{ fontSize: '0.75rem', lineHeight: '1.4' }}>
+                            {navigator.userAgent}
+                        </div>
+                    </div>
+                    <div className={styles.infoBox}>
+                        <div className={styles.infoLabel}>Network Status</div>
+                        <div className={`${styles.statusBadge} ${navigator.onLine ? styles.statusOnline : styles.statusOffline}`}>
+                            {navigator.onLine ? 'Connected' : 'Offline Mode'}
+                        </div>
                     </div>
                 </div>
             </div>
