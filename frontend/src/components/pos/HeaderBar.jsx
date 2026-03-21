@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import { LogOut } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { LogOut, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import ProfilePanel from '../shared/ProfilePanel';
 import styles from './HeaderBar.module.css';
 
 export default function HeaderBar({ orderType, onOrderTypeClick }) {
-    const { currentUser, logout } = useAuth();
+    const { currentUser, logout, isMaster, isAdmin } = useAuth();
+    const canSwitch = isMaster || isAdmin;
     const [time, setTime] = useState(new Date());
     const [isProfileOpen, setIsProfileOpen] = useState(false);
 
@@ -44,6 +46,12 @@ export default function HeaderBar({ orderType, onOrderTypeClick }) {
                 <div className={styles.clock}>{formatTime(time)}</div>
 
                 <div className={styles.rightSection}>
+                    {canSwitch && (
+                        <Link to="/dashboard/overview" className={styles.switchBtn} title="Switch to Dashboard">
+                            <LayoutDashboard size={18} />
+                            <span className={styles.switchText}>Go to Dashboard</span>
+                        </Link>
+                    )}
                     <button
                         className={styles.userPill}
                         onClick={() => setIsProfileOpen(true)}

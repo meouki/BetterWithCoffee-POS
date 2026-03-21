@@ -64,6 +64,9 @@ router.post('/', upload.single('image'), async (req, res) => {
             base_price: parseFloat(data.base_price),
             is_available: data.is_available === 'true' || data.is_available === true,
             modifiers: data.modifiers === 'true' || data.modifiers === true,
+            has_sugar_selector: data.has_sugar_selector === 'true' || data.has_sugar_selector === true,
+            has_milk_selector: data.has_milk_selector === 'true' || data.has_milk_selector === true,
+            addons: data.addons, // Handled by model setter
             image_url: imageUrl
         });
 
@@ -81,7 +84,7 @@ router.patch('/:id', upload.single('image'), async (req, res) => {
         if (!product) return res.status(404).json({ error: 'Product not found' });
 
         const updates = req.body;
-
+        
         // Handle image upload if provided
         if (req.file) {
             const filename = `${Date.now()}-${Math.round(Math.random() * 1E9)}.webp`;
@@ -105,6 +108,15 @@ router.patch('/:id', upload.single('image'), async (req, res) => {
         }
         if (updates.modifiers !== undefined) {
             product.modifiers = updates.modifiers === 'true' || updates.modifiers === true;
+        }
+        if (updates.has_sugar_selector !== undefined) {
+            product.has_sugar_selector = updates.has_sugar_selector === 'true' || updates.has_sugar_selector === true;
+        }
+        if (updates.has_milk_selector !== undefined) {
+            product.has_milk_selector = updates.has_milk_selector === 'true' || updates.has_milk_selector === true;
+        }
+        if (updates.addons !== undefined) {
+            product.addons = updates.addons;
         }
         if (updates.image_url !== undefined) product.image_url = updates.image_url;
 

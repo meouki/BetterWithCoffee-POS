@@ -71,7 +71,9 @@ router.post('/', async (req, res) => {
             product_id: item.id,
             name: item.name,
             quantity: item.quantity,
-            price: parseFloat(item.price)
+            price: parseFloat(item.price),
+            original_price: item.original_price ? parseFloat(item.original_price) : null,
+            modifiers: item.modifiers // JSON handled by model setter
         }));
 
         await OrderItem.bulkCreate(orderItems, { transaction: t });

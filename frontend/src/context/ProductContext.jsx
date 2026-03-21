@@ -53,6 +53,9 @@ export function ProductProvider({ children }) {
                 formData.append('base_price', productData.base_price);
                 formData.append('is_available', productData.is_available);
                 formData.append('modifiers', productData.modifiers);
+                formData.append('has_sugar_selector', productData.has_sugar_selector);
+                formData.append('has_milk_selector', productData.has_milk_selector);
+                formData.append('addons', JSON.stringify(productData.addons || []));
                 formData.append('image', productData.imageFile);
                 dataToSend = formData;
             }
@@ -79,6 +82,9 @@ export function ProductProvider({ children }) {
                 formData.append('base_price', updateData.base_price);
                 formData.append('is_available', updateData.is_available);
                 formData.append('modifiers', updateData.modifiers);
+                formData.append('has_sugar_selector', updateData.has_sugar_selector);
+                formData.append('has_milk_selector', updateData.has_milk_selector);
+                formData.append('addons', JSON.stringify(updateData.addons || []));
                 formData.append('image', updateData.imageFile);
                 if (updateData.image_url === '') formData.append('image_url', ''); // Handle image removal
                 dataToSend = formData;

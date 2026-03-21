@@ -59,6 +59,30 @@
     color: var(--color-muted);
 }
 
+.switchBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: var(--color-accent-muted);
+    border: 1px solid var(--color-accent);
+    color: var(--color-accent);
+    border-radius: var(--radius-md);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+    text-decoration: none;
+}
+
+.switchBtn:hover {
+    background: var(--color-accent);
+    color: white;
+}
+
+.switchText {
+    display: inline;
+}
+
 .divider {
     width: 1px;
     height: 24px;
@@ -139,8 +163,13 @@
 
     /* Hide text labels — avatars remain visible */
     .clock,
-    .userName {
+    .userName,
+    .switchText {
         display: none;
+    }
+
+    .switchBtn {
+        padding: 6px;
     }
 
     .divider {

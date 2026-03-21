@@ -26,6 +26,24 @@ const OrderItem = sequelize.define('order_item', {
     price: {
         type: DataTypes.FLOAT,
         allowNull: false
+    },
+    original_price: {
+        type: DataTypes.FLOAT,
+        allowNull: true
+    },
+    modifiers: {
+        type: DataTypes.TEXT,
+        defaultValue: '[]',
+        get() {
+            const rawValue = this.getDataValue('modifiers');
+            if (!rawValue) return [];
+            try { return typeof rawValue === 'string' ? JSON.parse(rawValue) : rawValue; } 
+            catch (e) { return []; }
+        },
+        set(value) {
+            const finalValue = typeof value === 'string' ? value : JSON.stringify(value || []);
+            this.setDataValue('modifiers', finalValue);
+        }
     }
 }, {
     tableName: 'order_items'

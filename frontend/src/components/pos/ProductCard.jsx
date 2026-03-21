@@ -1,10 +1,11 @@
 import { Plus } from 'lucide-react';
 import styles from './ProductCard.module.css';
 
-export default function ProductCard({ id, name, base_price, image_url, is_available, modifiers, onAdd }) {
+export default function ProductCard(props) {
+    const { id, name, base_price, image_url, is_available, onAdd } = props;
     return (
         <button
-            onClick={() => onAdd({ id, name, base_price, modifiers })}
+            onClick={() => onAdd(props)}
             disabled={!is_available}
             className={`pos-btn ${styles.cardWrapper} ${is_available ? styles.available : styles.unavailable}`}
         >

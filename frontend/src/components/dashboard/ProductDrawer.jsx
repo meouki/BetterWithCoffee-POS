@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Camera, Trash2 } from 'lucide-react';
+import { X, Camera, Trash2, Plus } from 'lucide-react';
 import { useProductContext } from '../../context/ProductContext';
 import styles from './ProductDrawer.module.css';
 
@@ -9,6 +9,9 @@ const emptyForm = {
     base_price: '',
     is_available: true,
     modifiers: false,
+    has_sugar_selector: false,
+    has_milk_selector: false,
+    addons: [],
     image_url: '',
 };
 
@@ -29,6 +32,9 @@ export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
                     base_price: String(product.base_price),
                     is_available: product.is_available,
                     modifiers: product.modifiers || false,
+                    has_sugar_selector: product.has_sugar_selector || false,
+                    has_milk_selector: product.has_milk_selector || false,
+                    addons: product.addons || [],
                     image_url: product.image_url || '',
                 });
                 setOriginalPrice(product.base_price);
@@ -75,11 +81,36 @@ export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
             category_name: form.category_name,
             base_price: parsedPrice,
             is_available: form.is_available,
-            modifiers: form.modifiers,
+            modifiers: form.modifiers || form.addons.length > 0 || form.has_sugar_selector || form.has_milk_selector,
+            has_sugar_selector: form.has_sugar_selector,
+            has_milk_selector: form.has_milk_selector,
+            addons: form.addons,
             image_url: form.image_url,
             imageFile: selectedFile // Pass the actual file
         });
         onClose();
+    };
+
+    const handleAddAddon = () => {
+        setForm(prev => ({
+            ...prev,
+            addons: [...prev.addons, { name: '', price: '0' }]
+        }));
+    };
+
+    const handleUpdateAddon = (index, field, value) => {
+        setForm(prev => {
+            const newAddons = [...prev.addons];
+            newAddons[index] = { ...newAddons[index], [field]: value };
+            return { ...prev, addons: newAddons };
+        });
+    };
+
+    const handleRemoveAddon = (index) => {
+        setForm(prev => ({
+            ...prev,
+            addons: prev.addons.filter((_, i) => i !== index)
+        }));
     };
 
     if (!isOpen) return null;
@@ -189,19 +220,73 @@ export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
                         </div>
                     </div>
 
-                    {/* Customizations */}
+                    {/* Customizations Section */}
+                    <div className={styles.sectionDivider}>Customizations</div>
+
                     <div className={styles.fieldGroup}>
-                        <label className={styles.label}>Customizations</label>
                         <div className={styles.availRow}>
-                            <span className={styles.availLabel}>
-                                {form.modifiers ? 'Sugar, Milk, & Add-ons enabled' : 'No customizations'}
-                            </span>
+                            <div>
+                                <div className={styles.availLabel}>Sugar Level Selector</div>
+                                <div className={styles.availDesc}>Enable 0% - 100% options in POS</div>
+                            </div>
                             <button
-                                className={`${styles.toggle} ${form.modifiers ? styles.toggleOn : styles.toggleOff}`}
-                                onClick={() => handleChange('modifiers', !form.modifiers)}
+                                className={`${styles.toggle} ${form.has_sugar_selector ? styles.toggleOn : styles.toggleOff}`}
+                                onClick={() => handleChange('has_sugar_selector', !form.has_sugar_selector)}
                             >
-                                <div className={`${styles.toggleNub} ${form.modifiers ? styles.nubOn : styles.nubOff}`} />
+                                <div className={`${styles.toggleNub} ${form.has_sugar_selector ? styles.nubOn : styles.nubOff}`} />
                             </button>
+                        </div>
+                    </div>
+
+                    <div className={styles.fieldGroup}>
+                        <div className={styles.availRow}>
+                            <div>
+                                <div className={styles.availLabel}>Milk Alternative Selector</div>
+                                <div className={styles.availDesc}>Enable Oat/Almond options in POS</div>
+                            </div>
+                            <button
+                                className={`${styles.toggle} ${form.has_milk_selector ? styles.toggleOn : styles.toggleOff}`}
+                                onClick={() => handleChange('has_milk_selector', !form.has_milk_selector)}
+                            >
+                                <div className={`${styles.toggleNub} ${form.has_milk_selector ? styles.nubOn : styles.nubOff}`} />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className={styles.fieldGroup}>
+                        <div className={styles.addonHeader}>
+                            <label className={styles.label}>Product Add-ons</label>
+                            <button className={styles.addAddonBtn} onClick={handleAddAddon}>
+                                <Plus size={14} /> Add Row
+                            </button>
+                        </div>
+                        
+                        <div className={styles.addonList}>
+                            {form.addons.map((addon, index) => (
+                                <div key={index} className={styles.addonRow}>
+                                    <input 
+                                        className={styles.addonNameInput} 
+                                        placeholder="Add-on Name (e.g. Hot Sauce)"
+                                        value={addon.name}
+                                        onChange={(e) => handleUpdateAddon(index, 'name', e.target.value)}
+                                    />
+                                    <div className={styles.addonPriceWrapper}>
+                                        <span>₱</span>
+                                        <input 
+                                            type="number"
+                                            className={styles.addonPriceInput}
+                                            value={addon.price}
+                                            onChange={(e) => handleUpdateAddon(index, 'price', e.target.value)}
+                                        />
+                                    </div>
+                                    <button className={styles.removeAddonBtn} onClick={() => handleRemoveAddon(index)}>
+                                        <X size={16} />
+                                    </button>
+                                </div>
+                            ))}
+                            {form.addons.length === 0 && (
+                                <div className={styles.emptyAddons}>No specific add-ons defined for this product.</div>
+                            )}
                         </div>
                     </div>
                 </div>

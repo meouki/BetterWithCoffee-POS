@@ -43,7 +43,21 @@ export default function POSInterface() {
     };
 
     const handleProductClick = (product) => {
-        if (product.modifiers) {
+        // Open modifier sheet if product has any customizations enabled
+        let addonCount = 0;
+        try {
+            const parsedAddons = typeof product.addons === 'string' ? JSON.parse(product.addons || '[]') : (product.addons || []);
+            addonCount = Array.isArray(parsedAddons) ? parsedAddons.length : 0;
+        } catch (e) {
+            addonCount = 0;
+        }
+
+        const hasCustomizations = 
+            product.has_sugar_selector || 
+            product.has_milk_selector || 
+            addonCount > 0;
+
+        if (hasCustomizations) {
             setActiveProduct(product);
         } else {
             addToCart({ ...product, price: product.base_price, quantity: 1 });

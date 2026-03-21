@@ -44,11 +44,14 @@ export default function CartDrawer({
                             <div key={index} className={styles.itemRow}>
                                 <div className={styles.itemInfo}>
                                     <div className={styles.itemName}>{item.name}</div>
-                                    {item.modifiers && item.modifiers.length > 0 && (
                                         <div className={styles.modList}>
-                                            {item.modifiers.join(', ')}
+                                            {item.modifiers.map((mod, midx) => (
+                                                <div key={midx} className={styles.modItem}>
+                                                    <span>{mod.name}</span>
+                                                    {parseFloat(mod.price) > 0 && <span>+₱{parseFloat(mod.price).toFixed(2)}</span>}
+                                                </div>
+                                            ))}
                                         </div>
-                                    )}
                                 </div>
 
                                 <div className={styles.itemActions}>

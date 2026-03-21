@@ -76,7 +76,9 @@ export const ordersApi = {
                 id: item.id,
                 name: item.name,
                 quantity: item.quantity,
-                price: item.price
+                price: item.price,
+                original_price: item.original_price,
+                modifiers: item.modifiers
             }))
         };
 

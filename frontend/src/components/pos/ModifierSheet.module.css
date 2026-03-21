@@ -166,6 +166,18 @@
     border-radius: var(--radius-md);
 }
 
+.emptyMods {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--color-muted);
+    font-size: 0.875rem;
+    font-style: italic;
+    background: var(--color-bg);
+    border-radius: var(--radius-md);
+    border: 1px dashed var(--color-border);
+    margin-top: 12px;
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;

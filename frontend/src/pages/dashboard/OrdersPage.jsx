@@ -214,12 +214,27 @@ export default function OrdersPage() {
 
                         <div className={styles.itemsList}>
                             {selectedOrder.items.map((item, idx) => (
-                                <div key={idx} className={styles.itemRowDetail}>
-                                    <div className={styles.itemDesc}>
-                                        <span className={styles.itemQty}>{item.quantity}x</span>
-                                        <span>{item.name}</span>
+                                <div key={idx} className={styles.itemWrapperDetail}>
+                                    <div className={styles.itemRowDetail}>
+                                        <div className={styles.itemDesc}>
+                                            <span className={styles.itemQty}>{item.quantity}x</span>
+                                            <span className="font-medium">{item.name}</span>
+                                        </div>
+                                        <span className={styles.itemPriceDetail}>₱{(item.original_price ? item.original_price * item.quantity : item.price * item.quantity).toFixed(2)}</span>
                                     </div>
-                                    <span className={styles.itemPriceDetail}>₱{(item.price * item.quantity).toFixed(2)}</span>
+                                    
+                                    {item.modifiers && item.modifiers.length > 0 && (
+                                        <div className={styles.itemModifiersDetail}>
+                                            {item.modifiers.map((mod, midx) => (
+                                                <div key={midx} className={styles.modifierRowDetail}>
+                                                    <span className={styles.modifierNameDetail}>{mod.name}</span>
+                                                    {parseFloat(mod.price) > 0 && (
+                                                        <span>+₱{(parseFloat(mod.price) * item.quantity).toFixed(2)}</span>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>

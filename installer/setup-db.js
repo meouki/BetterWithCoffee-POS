@@ -38,8 +38,8 @@ async function setup() {
 
     let models;
     try {
-        models = require('../backend_rewrite/models');
-        await models.sequelize.sync({ force: false, alter: false });
+        models = require('./backend_rewrite/models');
+        await models.sequelize.sync({ force: false, alter: true });
         console.log('      ✅ All tables created.\n');
     } catch (err) {
         console.error(`      ❌ Failed to sync tables: ${err.message}`);

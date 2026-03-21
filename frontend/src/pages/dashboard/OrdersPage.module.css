@@ -346,7 +346,36 @@
 }
 
 .itemPriceDetail {
-    font-weight: 600;
+    font-weight: 500;
+}
+
+.itemWrapperDetail {
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 12px;
+}
+
+.itemWrapperDetail:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.itemModifiersDetail {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-left: 32px;
+    margin-top: 4px;
+}
+
+.modifierRowDetail {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--color-muted);
+}
+
+.modifierNameDetail {
+    font-style: italic;
 }
 
 .totalsArea {

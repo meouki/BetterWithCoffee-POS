@@ -41,12 +41,27 @@ export default function ReceiptModal({ isOpen, receiptData, onNewOrder }) {
 
                     <div className={styles.receiptItems}>
                         {items.map((item, idx) => (
-                            <div key={idx} className={styles.receiptItem}>
-                                <div className={styles.itemMain}>
-                                    <span className={styles.itemQty}>{item.quantity}x</span>
-                                    <span className={styles.itemName}>{item.name}</span>
+                            <div key={idx} className={styles.itemWrapper}>
+                                <div className={styles.receiptItem}>
+                                    <div className={styles.itemMain}>
+                                        <span className={styles.itemQty}>{item.quantity}x</span>
+                                        <span className={styles.itemName}>{item.name}</span>
+                                    </div>
+                                    <span className={styles.itemPrice}>₱{(item.original_price ? item.original_price * item.quantity : item.price * item.quantity).toFixed(2)}</span>
                                 </div>
-                                <span className={styles.itemPrice}>₱{(item.price * item.quantity).toFixed(2)}</span>
+                                
+                                {item.modifiers && item.modifiers.length > 0 && (
+                                    <div className={styles.itemModifiers}>
+                                        {item.modifiers.map((mod, midx) => (
+                                            <div key={midx} className={styles.modifierRow}>
+                                                <span className={styles.modifierName}>{mod.name}</span>
+                                                {parseFloat(mod.price) > 0 && (
+                                                    <span className={styles.modifierPrice}>+₱{(parseFloat(mod.price) * item.quantity).toFixed(2)}</span>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>

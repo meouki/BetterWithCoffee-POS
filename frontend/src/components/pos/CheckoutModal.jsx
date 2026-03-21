@@ -31,7 +31,9 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, onComplete }
                 id: item.id,
                 name: item.name,
                 quantity: item.quantity,
-                price: item.price // Snapshot price
+                price: item.price, // Snapshot total price
+                original_price: item.original_price, // Base price
+                modifiers: item.modifiers // Array of {name, price}
             })),
             subtotal,
             vat,

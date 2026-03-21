@@ -143,6 +143,26 @@
     font-weight: 500;
 }
 
+.itemModifiers {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-left: 32px;
+    margin-top: -8px;
+    margin-bottom: 4px;
+}
+
+.modifierRow {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--color-muted);
+}
+
+.modifierName {
+    font-style: italic;
+}
+
 .receiptTotals {
     display: flex;
     flex-direction: column;

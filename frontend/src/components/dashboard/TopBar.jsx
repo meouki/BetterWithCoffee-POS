@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { Bell, Menu } from 'lucide-react';
+import { Bell, Menu, Monitor } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotificationContext } from '../../context/NotificationContext';
 import ProfilePanel from '../shared/ProfilePanel';
@@ -9,8 +9,9 @@ import styles from './TopBar.module.css';
 export default function TopBar({ onToggleSidebar }) {
     const location = useLocation();
     const path = location.pathname.split('/').pop();
-    const { currentUser } = useAuth();
+    const { currentUser, isMaster, isAdmin } = useAuth();
     const { unreadCount } = useNotificationContext();
+    const canSwitch = isMaster || isAdmin;
 
     const [time, setTime] = useState(new Date());
     const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -40,6 +41,13 @@ export default function TopBar({ onToggleSidebar }) {
                 </div>
 
                 <div className={styles.rightSection}>
+                    {canSwitch && (
+                        <Link to="/pos" className={styles.switchBtn} title="Switch to POS">
+                            <Monitor size={18} />
+                            <span className={styles.switchText}>Go to POS</span>
+                        </Link>
+                    )}
+
                     <div className={styles.clock}>{formatTime(time)}</div>
 
                     <div className={styles.divider} />

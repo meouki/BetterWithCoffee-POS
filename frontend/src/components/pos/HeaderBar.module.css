@@ -116,7 +116,30 @@
 
 .logoutBtn:hover {
     background-color: rgba(239, 68, 68, 0.1);
-    /* Error color with opacity */
+}
+
+.switchBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    border-radius: var(--radius-md);
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+    text-decoration: none;
+}
+
+.switchBtn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.switchText {
+    display: inline;
 }
 
 @media (max-width: 600px) {
@@ -129,8 +152,13 @@
     }
 
     /* Hide the text label — the avatar bubble stays visible */
-    .cashierName {
+    .cashierName,
+    .switchText {
         display: none;
+    }
+
+    .switchBtn {
+        padding: 8px;
     }
 
     .clock {
