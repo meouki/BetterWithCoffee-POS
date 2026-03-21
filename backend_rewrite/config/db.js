@@ -1,21 +1,14 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-const sequelize = new Sequelize(
-    process.env.DB_NAME || 'pos_db',
-    process.env.DB_USER || 'root',
-    process.env.DB_PASS || 'root',
-    {
-        host: process.env.DB_HOST || 'localhost',
-        dialect: process.env.DB_DIALECT || 'mysql',
-        logging: false, // Set to console.log for debugging SQL queries
-        pool: {
-            max: 5,
-            min: 0,
-            acquire: 30000,
-            idle: 10000
-        }
-    }
-);
+const path = require('path');
+
+const sequelize = new Sequelize({
+    dialect: 'sqlite',
+    // Resolve absolute path starting from this file's folder (backend_rewrite/config) 
+    // going up two levels to the main PulsePoint folder
+    storage: path.join(__dirname, '../../pos_data.sqlite'), 
+    logging: false // Set to console.log for debugging SQL queries
+});
 
 module.exports = sequelize;

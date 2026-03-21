@@ -31,28 +31,7 @@ async function setup() {
     console.log('');
 
     // ── Step 1: Create the database ─────────────────────────────────────────
-    console.log(`[1/3] Creating database "${DB_NAME}"...`);
-
-    const bootstrap = new Sequelize('', DB_USER, DB_PASS, {
-        host: DB_HOST,
-        dialect: 'mysql',
-        logging: false,
-    });
-
-    try {
-        await bootstrap.authenticate();
-        await bootstrap.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`;`);
-        console.log(`      ✅ Database "${DB_NAME}" is ready.\n`);
-    } catch (err) {
-        console.error(`      ❌ Could not connect to MySQL: ${err.message}`);
-        console.error('');
-        console.error('      Make sure MySQL is running and that the credentials');
-        console.error(`      in backend_rewrite/.env are correct.`);
-        console.error(`      Current config: ${DB_USER}@${DB_HOST}`);
-        process.exit(1);
-    } finally {
-        await bootstrap.close();
-    }
+    console.log(`[1/3] Using SQLite... File will be created automatically upon sync.`);
 
     // ── Step 2: Sync all Sequelize models (create tables) ───────────────────
     console.log('[2/3] Creating tables from models...');

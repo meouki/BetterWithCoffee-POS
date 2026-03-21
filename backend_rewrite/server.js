@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const os = require('os');
 const { sequelize } = require('./models');
 
 const app = express();
@@ -71,12 +72,25 @@ async function seedDatabase() {
     }
 }
 
-sequelize.sync({ alter: true })
+sequelize.sync()
     .then(async () => {
         console.log('✅ Database synced successfully.');
         await seedDatabase();
         app.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 Server running on port ${PORT} (Network accessible)`);
+            console.log(`\n🚀 Server is running!`);
+            console.log(`\n================================`);
+            console.log(`  ACCESS THE POS FROM A TABLET  `);
+            console.log(`================================`);
+            const nets = os.networkInterfaces();
+            for (const name of Object.keys(nets)) {
+                for (const net of nets[name]) {
+                    // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
+                    if (net.family === 'IPv4' && !net.internal) {
+                        console.log(`  👉 http://${net.address}:${PORT}`);
+                    }
+                }
+            }
+            console.log(`================================\n`);
         });
     })
     .catch((err) => {

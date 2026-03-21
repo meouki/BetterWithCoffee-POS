@@ -12,10 +12,14 @@ router.get('/', async (req, res) => {
         if (from || to) {
             whereClause.timestamp = {};
             if (from) {
-                whereClause.timestamp[Op.gte] = new Date(`${from}T00:00:00`);
+                // If it already looks like a full ISO string (contains 'T'), use it directly
+                // Otherwise, append the start of day
+                const startDate = from.includes('T') ? new Date(from) : new Date(`${from}T00:00:00`);
+                whereClause.timestamp[Op.gte] = startDate;
             }
             if (to) {
-                whereClause.timestamp[Op.lte] = new Date(`${to}T23:59:59`);
+                const endDate = to.includes('T') ? new Date(to) : new Date(`${to}T23:59:59`);
+                whereClause.timestamp[Op.lte] = endDate;
             }
         }
 

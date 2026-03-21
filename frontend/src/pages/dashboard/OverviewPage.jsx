@@ -179,7 +179,7 @@ export default function OverviewPage() {
                     </div>
                 </div>
 
-                <div className={styles.kpiCard}>
+                {/* <div className={styles.kpiCard}>
                     <div className={styles.kpiHeader}>
                         <span className={styles.kpiLabel}>Low Stock Alerts</span>
                         <AlertTriangle size={20} className={styles.negative} />
@@ -188,7 +188,7 @@ export default function OverviewPage() {
                     <div className={`${styles.kpiChange} ${styles.negative}`}>
                         Requires immediate attention
                     </div>
-                </div>
+                </div> */}
             </div>
 
             <div className={styles.mainGrid}>

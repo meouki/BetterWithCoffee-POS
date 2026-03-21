@@ -18,6 +18,9 @@ if exist "..\backend_rewrite\server.js" cd ..
 start "" timeout /t 2 /nobreak > nul
 start "" "http://localhost:5000"
 
+:: Clean up any leftover background server processes first to prevent EADDRINUSE errors
+taskkill /F /IM node.exe >nul 2>&1
+
 :: Start the backend (this window stays open — closing it shuts down the app)
 node backend_rewrite\server.js
 
