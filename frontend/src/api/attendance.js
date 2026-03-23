@@ -1,48 +1,34 @@
-const API_URL = import.meta.env.VITE_API_URL || '';
+import { apiClient } from './apiClient';
 
 export const attendanceApi = {
-    getRecords: async (userId) => {
-        const response = await fetch(`${API_URL}/api/attendance/${userId}`);
-        if (!response.ok) throw new Error('Failed to fetch attendance records');
-        return response.json();
-    },
-
-    getStats: async (username) => {
-        const response = await fetch(`${API_URL}/api/attendance/stats/${username}`);
-        if (!response.ok) throw new Error('Failed to fetch user stats');
-        return response.json();
-    },
-
     clockIn: async (userId) => {
-        const response = await fetch(`${API_URL}/api/attendance/clock-in`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId })
-        });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'Failed to clock in');
-        return data;
+        const response = await apiClient.post('/api/attendance/clock-in', { user_id: userId });
+        if (!response.ok) throw new Error('Failed to clock in');
+        return response.json();
     },
 
     clockOut: async (userId) => {
-        const response = await fetch(`${API_URL}/api/attendance/clock-out`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId })
-        });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'Failed to clock out');
-        return data;
+        const response = await apiClient.post('/api/attendance/clock-out', { user_id: userId });
+        if (!response.ok) throw new Error('Failed to clock out');
+        return response.json();
     },
 
-    setDayOff: async (userId, date) => {
-        const response = await fetch(`${API_URL}/api/attendance/day-off`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId, date })
-        });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'Failed to set day off');
-        return data;
+    getToday: async () => {
+        const response = await apiClient.get('/api/attendance/today');
+        if (!response.ok) throw new Error('Failed to fetch attendance');
+        return response.json();
+    },
+
+    getLogs: async (startDate = null, endDate = null) => {
+        const params = new URLSearchParams();
+        if (startDate) params.append('from', startDate);
+        if (endDate) params.append('to', endDate);
+        
+        let url = '/api/attendance/logs';
+        if (params.toString()) url += `?${params.toString()}`;
+
+        const response = await apiClient.get(url);
+        if (!response.ok) throw new Error('Failed to fetch attendance logs');
+        return response.json();
     }
 };

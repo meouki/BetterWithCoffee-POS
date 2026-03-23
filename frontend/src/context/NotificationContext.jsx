@@ -19,8 +19,10 @@ export function NotificationProvider({ children }) {
 
     // Load logs on mount
     useEffect(() => {
-        fetchLogs();
-    }, [fetchLogs]);
+        if (currentUser) {
+            fetchLogs();
+        }
+    }, [fetchLogs, currentUser]);
 
     // Optional: Auto-poll if we want the dashboard to update silently (e.g. every 30s)
     useEffect(() => {

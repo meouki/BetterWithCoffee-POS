@@ -3,17 +3,19 @@ const router = express.Router();
 const { Order, OrderItem, sequelize } = require('../models');
 const { Op } = require('sequelize');
 
-// GET /api/orders - Fetch orders with optional date filtering
+// GET /api/orders - Fetch orders with optional date filtering and pagination
 router.get('/', async (req, res) => {
     try {
         const { from, to } = req.query;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 50;
+        const offset = (page - 1) * limit;
+
         let whereClause = {};
 
         if (from || to) {
             whereClause.timestamp = {};
             if (from) {
-                // If it already looks like a full ISO string (contains 'T'), use it directly
-                // Otherwise, append the start of day
                 const startDate = from.includes('T') ? new Date(from) : new Date(`${from}T00:00:00`);
                 whereClause.timestamp[Op.gte] = startDate;
             }
@@ -23,16 +25,26 @@ router.get('/', async (req, res) => {
             }
         }
 
-        const orders = await Order.findAll({
+        const { count, rows } = await Order.findAndCountAll({
             where: whereClause,
             include: [{
                 model: OrderItem,
                 as: 'items'
             }],
-            order: [['timestamp', 'DESC']]
+            order: [['timestamp', 'DESC']],
+            limit: limit,
+            offset: offset
         });
 
-        res.json(orders);
+        res.json({
+            orders: rows,
+            meta: {
+                totalItems: count,
+                totalPages: Math.ceil(count / limit),
+                currentPage: page,
+                hasMore: offset + rows.length < count
+            }
+        });
     } catch (error) {
         console.error('Error fetching orders:', error);
         res.status(500).json({ error: 'Failed to fetch orders' });
@@ -65,7 +77,7 @@ router.post('/', async (req, res) => {
             change: data.change ? parseFloat(data.change) : null
         }, { transaction: t });
 
-        // Create order items — frontend sends { id, name, quantity, price }
+        // Create order items
         const orderItems = data.items.map(item => ({
             order_id: newOrder.id,
             product_id: item.id,
@@ -73,7 +85,7 @@ router.post('/', async (req, res) => {
             quantity: item.quantity,
             price: parseFloat(item.price),
             original_price: item.original_price ? parseFloat(item.original_price) : null,
-            modifiers: item.modifiers // JSON handled by model setter
+            modifiers: item.modifiers
         }));
 
         await OrderItem.bulkCreate(orderItems, { transaction: t });

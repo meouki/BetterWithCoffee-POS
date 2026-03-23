@@ -27,7 +27,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
     const allNavItems = [
         { name: 'Overview', path: '/dashboard/overview', icon: LayoutDashboard, roles: ['Master', 'Admin'] },
-        { name: 'Orders', path: '/dashboard/orders', icon: ShoppingBag, roles: ['Master'] },
+        { name: 'Orders', path: '/dashboard/orders', icon: ShoppingBag, roles: ['Master', 'Admin'] },
         { name: 'Menu', path: '/dashboard/menu', icon: UtensilsCrossed, roles: ['Master'] },
         { name: 'Reports', path: '/dashboard/reports', icon: BarChart2, roles: ['Master', 'Admin'] },
         { name: 'Users', path: '/dashboard/users', icon: Users, roles: ['Master'] },

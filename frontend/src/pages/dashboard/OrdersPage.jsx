@@ -1,63 +1,99 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useOrderContext } from '../../context/OrderContext';
-import { Eye, Clock, User, Hash, Calendar, Loader as LoaderIcon } from 'lucide-react';
+import { Eye, Clock, User, Hash, Calendar } from 'lucide-react';
 import Loader from '../../components/shared/Loader';
 import styles from './OrdersPage.module.css';
 
+const ROW_HEIGHT = 64; // Approximate height of a row including borders
+
 export default function OrdersPage() {
-    const { fetchOrders, orders: globalOrders } = useOrderContext();
+    const { fetchOrders } = useOrderContext();
     const [orders, setOrders] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const [meta, setMeta] = useState({ currentPage: 1, hasMore: true, totalItems: 0 });
     const [selectedOrder, setSelectedOrder] = useState(null);
 
     // Date Filtering State
-    const [dateFilter, setDateFilter] = useState('Today'); // 'Today', '7Days', '30Days', 'Custom'
+    const [dateFilter, setDateFilter] = useState('Today'); 
     const [customStart, setCustomStart] = useState('');
     const [customEnd, setCustomEnd] = useState('');
 
+    // Virtualization State
+    const [scrollTop, setScrollTop] = useState(0);
+    const containerRef = useRef(null);
+
+    // Initial load and filter change
+    const loadInitialOrders = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const { start, end } = getDateRange();
+            const response = await fetchOrders(start, end, 1, 50);
+            setOrders(response.orders || []);
+            setMeta(response.meta);
+            if (containerRef.current) containerRef.current.scrollTop = 0;
+            setScrollTop(0);
+        } catch (error) {
+            console.error("Failed to fetch initial orders", error);
+            setOrders([]);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [dateFilter, customStart, customEnd, fetchOrders]);
+
     useEffect(() => {
-        const loadFilteredOrders = async () => {
-            setIsLoading(true);
-            try {
-                let start = null;
-                let end = null;
-                const now = new Date();
+        loadInitialOrders();
+    }, [loadInitialOrders]);
 
-                if (dateFilter === 'Today') {
-                    start = new Date(now.setHours(0, 0, 0, 0)).toISOString();
-                    end = new Date(now.setHours(23, 59, 59, 999)).toISOString();
-                } else if (dateFilter === '7Days') {
-                    const last7 = new Date();
-                    last7.setDate(now.getDate() - 7);
-                    start = last7.toISOString();
-                } else if (dateFilter === '30Days') {
-                    const last30 = new Date();
-                    last30.setDate(now.getDate() - 30);
-                    start = last30.toISOString();
-                } else if (dateFilter === 'Custom' && customStart && customEnd) {
-                    start = new Date(customStart).toISOString();
-                    end = new Date(customEnd).setHours(23, 59, 59, 999);
-                    end = new Date(end).toISOString();
-                }
+    const getDateRange = () => {
+        const now = new Date();
+        let start = null;
+        let end = null;
 
-                // If 'Custom' is selected but both dates aren't filled, default to fetching all (or handle gracefully)
-                if (dateFilter !== 'Custom' || (customStart && customEnd)) {
-                    // Assuming fetchOrders passes arguments down to api.getAll
-                    const data = await fetchOrders(start, end);
-                    // Temporarily using internal state to handle the filtered view since context.orders might be global
-                    setOrders(data || []);
-                }
-            } catch (error) {
-                console.error("Failed to fetch filtered orders", error);
-                setOrders([]);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+        if (dateFilter === 'Today') {
+            start = new Date(now.setHours(0, 0, 0, 0)).toISOString();
+            end = new Date(now.setHours(23, 59, 59, 999)).toISOString();
+        } else if (dateFilter === '7Days') {
+            const last7 = new Date();
+            last7.setDate(now.getDate() - 7);
+            start = last7.toISOString();
+        } else if (dateFilter === '30Days') {
+            const last30 = new Date();
+            last30.setDate(now.getDate() - 30);
+            start = last30.toISOString();
+        } else if (dateFilter === 'Custom' && customStart && customEnd) {
+            start = new Date(customStart).toISOString();
+            end = new Date(customEnd).setHours(23, 59, 59, 999);
+            end = new Date(end).toISOString();
+        }
+        return { start, end };
+    };
 
-        loadFilteredOrders();
-    }, [dateFilter, customStart, customEnd, fetchOrders, globalOrders.length]);
+    const loadMore = async () => {
+        if (isLoadingMore || !meta.hasMore) return;
+        setIsLoadingMore(true);
+        try {
+            const { start, end } = getDateRange();
+            const nextPage = meta.currentPage + 1;
+            const response = await fetchOrders(start, end, nextPage, 50);
+            setOrders(prev => [...prev, ...response.orders]);
+            setMeta(response.meta);
+        } catch (error) {
+            console.error("Failed to fetch more orders", error);
+        } finally {
+            setIsLoadingMore(false);
+        }
+    };
 
+    const handleScroll = (e) => {
+        const { scrollTop, scrollHeight, clientHeight } = e.target;
+        setScrollTop(scrollTop);
+
+        // Infinite Scroll trigger
+        if (scrollHeight - scrollTop - clientHeight < 200) {
+            loadMore();
+        }
+    };
 
     const formatDate = (dateStr) => {
         return new Date(dateStr).toLocaleString('en-US', {
@@ -77,19 +113,30 @@ export default function OrdersPage() {
         return firstItem;
     };
 
+    // Virtualization Calculations
+    const visibleCount = 15; // Number of items to render
+    const startIndex = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - 5);
+    const endIndex = Math.min(orders.length, startIndex + visibleCount + 10);
+    const visibleOrders = orders.slice(startIndex, endIndex);
+    const totalContentHeight = Math.max(orders.length * ROW_HEIGHT, 400);
+
     return (
         <div className={styles.pageContainer}>
             <div className={styles.header}>
                 <h2 className={styles.title}>Order History</h2>
             </div>
 
-            {/* Date Filters */}
             <div className={styles.filterSection}>
                 <div className={styles.pillGroup}>
-                    <button className={`${styles.filterBtn} ${dateFilter === 'Today' ? styles.activeFilter : ''}`} onClick={() => setDateFilter('Today')}>Today</button>
-                    <button className={`${styles.filterBtn} ${dateFilter === '7Days' ? styles.activeFilter : ''}`} onClick={() => setDateFilter('7Days')}>Last 7 Days</button>
-                    <button className={`${styles.filterBtn} ${dateFilter === '30Days' ? styles.activeFilter : ''}`} onClick={() => setDateFilter('30Days')}>This Month</button>
-                    <button className={`${styles.filterBtn} ${dateFilter === 'Custom' ? styles.activeFilter : ''}`} onClick={() => setDateFilter('Custom')}>Custom</button>
+                    {['Today', '7Days', '30Days', 'Custom'].map(f => (
+                        <button 
+                            key={f}
+                            className={`${styles.filterBtn} ${dateFilter === f ? styles.activeFilter : ''}`} 
+                            onClick={() => setDateFilter(f)}
+                        >
+                            {f === '7Days' ? 'Last 7 Days' : f === '30Days' ? 'This Month' : f}
+                        </button>
+                    ))}
                 </div>
 
                 {dateFilter === 'Custom' && (
@@ -101,7 +148,6 @@ export default function OrdersPage() {
                                 className={styles.dateInput}
                                 value={customStart}
                                 onChange={(e) => setCustomStart(e.target.value)}
-                                max={customEnd || undefined}
                             />
                         </div>
                         <span className={styles.dateSeparator}>to</span>
@@ -112,159 +158,117 @@ export default function OrdersPage() {
                                 className={styles.dateInput}
                                 value={customEnd}
                                 onChange={(e) => setCustomEnd(e.target.value)}
-                                min={customStart || undefined}
                             />
                         </div>
                     </div>
                 )}
             </div>
 
-            <div className={styles.tablePanel}>
-                <div className={styles.tableWrapper}>
-                    <table className={styles.table}>
-                        <thead>
-                            <tr>
-                                <th className={styles.th}>Action</th>
-                                <th className={styles.th}>Order Summary</th>
-                                <th className={styles.th}>Order #</th>
-                                <th className={styles.th}>Date & Time</th>
-                                <th className={styles.th}>Cashier</th>
-                                <th className={styles.th}>Type</th>
-                                <th className={styles.th}>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {isLoading ? (
-                                <tr>
-                                    <td colSpan="7">
-                                        <Loader size="medium" text="Loading history..." />
-                                    </td>
-                                </tr>
-                            ) : orders.length === 0 ? (
-                                <tr>
-                                    <td colSpan="7" className={styles.emptyState}>No orders found for this period.</td>
-                                </tr>
-                            ) : (
-                                orders.map((order) => (
-                                    <tr key={order.id}>
-                                        <td className={styles.td}>
-                                            <button
-                                                className={styles.viewBtn}
-                                                onClick={() => setSelectedOrder(order)}
-                                            >
-                                                <Eye size={16} /> View
-                                            </button>
-                                        </td>
-                                        <td className={styles.td}>
-                                            <span className={styles.orderSummaryText}>{generateOrderSummary(order.items)}</span>
-                                        </td>
-                                        <td className={styles.td}>
-                                            <span className={styles.orderId}>{order.id}</span>
-                                        </td>
-                                        <td className={styles.td}>{formatDate(order.timestamp)}</td>
-                                        <td className={styles.td}>{order.cashier}</td>
-                                        <td className={styles.td}>
-                                            <span className={`${styles.typeBadge} ${order.order_type === 'Dine-In' ? styles.dineIn : styles.takeOut}`}>
-                                                {order.order_type}
-                                            </span>
-                                        </td>
-                                        <td className={`${styles.td} font-bold`}>
-                                            ₱{order.total.toFixed(2)}
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+            <div 
+                className={styles.listContainer}
+                onScroll={handleScroll}
+                ref={containerRef}
+            >
+                {/* Virtualized Header - matching grid cols of rows */}
+                <div className={styles.listHeader}>
+                    <div className={styles.colAction}>Action</div>
+                    <div className={styles.colSummary}>Summary</div>
+                    <div className={styles.colId}>Order #</div>
+                    <div className={styles.colDate}>Date & Time</div>
+                    <div className={styles.colCashier}>Cashier</div>
+                    <div className={styles.colType}>Type</div>
+                    <div className={styles.colTotal}>Total</div>
+                </div>
+
+                <div className={styles.listDataContent}>
+                    {isLoading ? (
+                        <div className={styles.centeredLoader}>
+                            <Loader size="medium" text="Loading history..." />
+                        </div>
+                    ) : orders.length === 0 ? (
+                        <div className={styles.emptyState}>No orders found for this period.</div>
+                    ) : (
+                        <div style={{ height: totalContentHeight, position: 'relative' }}>
+                            {visibleOrders.map((order, index) => (
+                                <div 
+                                    className={styles.virtualRow} 
+                                    key={order.id}
+                                    style={{ 
+                                        position: 'absolute', 
+                                        top: (startIndex + index) * ROW_HEIGHT,
+                                        height: ROW_HEIGHT,
+                                        width: '100%'
+                                    }}
+                                >
+                                    <div className={styles.colAction}>
+                                        <button className={styles.viewBtn} onClick={() => setSelectedOrder(order)}>
+                                            <Eye size={14} /> View
+                                        </button>
+                                    </div>
+                                    <div className={styles.colSummary}>
+                                        <span className={styles.summaryText}>{generateOrderSummary(order.items)}</span>
+                                    </div>
+                                    <div className={styles.colId}>{order.id}</div>
+                                    <div className={styles.colDate}>{formatDate(order.timestamp)}</div>
+                                    <div className={styles.colCashier}>{order.cashier}</div>
+                                    <div className={styles.colType}>
+                                        <span className={`${styles.typeBadge} ${order.order_type === 'Dine-In' ? styles.dineIn : styles.takeOut}`}>
+                                            {order.order_type}
+                                        </span>
+                                    </div>
+                                    <div className={styles.colTotal}>₱{order.total.toFixed(2)}</div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {isLoadingMore && (
+                        <div className={styles.bottomLoader}>
+                             <div className={styles.dotPulse}></div>
+                             <span>Loading more orders...</span>
+                        </div>
+                    )}
                 </div>
             </div>
 
-            {/* Simple Detail Overlay (Optimized for Dashboard) */}
+            {/* Detail Modal */}
             {selectedOrder && (
-                <div className={styles.overlay}>
-                    <div className={styles.modal}>
+                <div className={styles.overlay} onClick={() => setSelectedOrder(null)}>
+                    <div className={styles.modal} onClick={e => e.stopPropagation()}>
                         <div className={styles.modalHeader}>
-                            <h3 className={styles.modalTitle}>Order History Detail</h3>
+                            <h3 className={styles.modalTitle}>Order Detail</h3>
                             <button onClick={() => setSelectedOrder(null)} className={styles.closeBtn}>✕</button>
                         </div>
 
                         <div className={styles.receiptSummary}>
                             <h3 className={styles.brandTitle}>Better with Coffee</h3>
                             <p className={styles.receiptType}>ACKNOWLEDGMENT RECEIPT</p>
-                            <div className={styles.businessInfo}>
-                                <p>TIN: 000-000-000-000</p>
-                                <p>123 Coffee Lane, Metro Manila</p>
-                            </div>
                         </div>
 
                         <div className={styles.metaGrid}>
-                            <div className={styles.metaItem}>
-                                <Hash size={16} className={styles.metaIcon} />
-                                <span className="font-semibold">{selectedOrder.id}</span>
-                            </div>
-                            <div className={styles.metaItem}>
-                                <Clock size={16} className={styles.metaIcon} />
-                                <span>{formatDate(selectedOrder.timestamp)}</span>
-                            </div>
-                            <div className={styles.metaItem}>
-                                <User size={16} className={styles.metaIcon} />
-                                <span>{selectedOrder.cashier}</span>
-                            </div>
+                            <div className={styles.metaItem}><Hash size={14} /> <strong>{selectedOrder.id}</strong></div>
+                            <div className={styles.metaItem}><Clock size={14} /> {formatDate(selectedOrder.timestamp)}</div>
+                            <div className={styles.metaItem}><User size={14} /> {selectedOrder.cashier}</div>
                         </div>
 
                         <div className={styles.itemsList}>
                             {selectedOrder.items.map((item, idx) => (
                                 <div key={idx} className={styles.itemWrapperDetail}>
                                     <div className={styles.itemRowDetail}>
-                                        <div className={styles.itemDesc}>
-                                            <span className={styles.itemQty}>{item.quantity}x</span>
-                                            <span className="font-medium">{item.name}</span>
-                                        </div>
-                                        <span className={styles.itemPriceDetail}>₱{(item.original_price ? item.original_price * item.quantity : item.price * item.quantity).toFixed(2)}</span>
+                                        <span>{item.quantity}x {item.name}</span>
+                                        <span>₱{(item.original_price || item.price * item.quantity).toFixed(2)}</span>
                                     </div>
-                                    
-                                    {item.modifiers && item.modifiers.length > 0 && (
-                                        <div className={styles.itemModifiersDetail}>
-                                            {item.modifiers.map((mod, midx) => (
-                                                <div key={midx} className={styles.modifierRowDetail}>
-                                                    <span className={styles.modifierNameDetail}>{mod.name}</span>
-                                                    {parseFloat(mod.price) > 0 && (
-                                                        <span>+₱{(parseFloat(mod.price) * item.quantity).toFixed(2)}</span>
-                                                    )}
-                                                </div>
-                                            ))}
+                                    {item.modifiers?.map((mod, midx) => (
+                                        <div key={midx} className={styles.modifierRowDetail}>
+                                            <span>• {mod.name}</span>
+                                            <span>+₱{(mod.price * item.quantity).toFixed(2)}</span>
                                         </div>
-                                    )}
+                                    ))}
                                 </div>
                             ))}
                         </div>
 
                         <div className={styles.totalsArea}>
-                            <div className={styles.totalRowDetail}>
-                                <span>Subtotal</span>
-                                <span>₱{selectedOrder.subtotal.toFixed(2)}</span>
-                            </div>
-                            <div className={styles.totalRowDetail}>
-                                <span>VAT (12%)</span>
-                                <span>₱{selectedOrder.vat.toFixed(2)}</span>
-                            </div>
-                            <div className={styles.grandTotalDetail}>
-                                <span>Total</span>
-                                <span className={styles.accentText}>₱{selectedOrder.total.toFixed(2)}</span>
-                            </div>
-                            <div className={styles.totalRowDetail} style={{ marginTop: '8px' }}>
-                                <span>Cash Tendered</span>
-                                <span>{selectedOrder.payment_method === 'Cash' ? `₱${selectedOrder.amount_tendered?.toFixed(2)}` : '---'}</span>
-                            </div>
-                            <div className={styles.totalRowDetail}>
-                                <span>Change</span>
-                                <span>₱{selectedOrder.change?.toFixed(2) ?? '0.00'}</span>
-                            </div>
-                        </div>
-
-                        <div className={styles.footerInfo}>
-                            <p className={styles.legalDisclaimer}>THIS IS NOT AN OFFICIAL RECEIPT</p>
-                            <p className={styles.personalityQuote}>"Fueling your passion, one cup at a time."</p>
+                            <div className={styles.totalRowDetail}><span>Total</span> <span className={styles.accentText}>₱{selectedOrder.total.toFixed(2)}</span></div>
                         </div>
                     </div>
                 </div>

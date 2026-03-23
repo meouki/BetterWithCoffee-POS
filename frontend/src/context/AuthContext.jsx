@@ -1,5 +1,6 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { usersApi } from '../api/users';
+import toast from 'react-hot-toast';
 
 /**
  * Role Hierarchy:
@@ -18,6 +19,20 @@ export function AuthProvider({ children }) {
         const saved = localStorage.getItem('bwc_user');
         return saved ? JSON.parse(saved) : null;
     });
+
+    useEffect(() => {
+        const handleAuthError = (event) => {
+            const message = event.detail?.message || 'Session invalidated.';
+            toast.error(`⚠️ ${message} Your account was logged in on another device.`, {
+                duration: 6000,
+                id: 'auth-kickout' // Prevent duplicate toasts
+            });
+            logout();
+        };
+
+        window.addEventListener('pulsepoint-auth-error', handleAuthError);
+        return () => window.removeEventListener('pulsepoint-auth-error', handleAuthError);
+    }, []);
 
     const login = async (username, password) => {
         try {
@@ -45,6 +60,7 @@ export function AuthProvider({ children }) {
         manageProducts: isMaster,
         viewReports: isMaster || isAdmin,
         viewOverview: isMaster || isAdmin,
+        viewOrders: isMaster || isAdmin,
         usePOS: isMaster || isAdmin || isCashier,
     };
 

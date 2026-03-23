@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useOrderContext } from '../../context/OrderContext';
 import {
     TrendingUp,
@@ -20,9 +20,42 @@ import {
 import styles from './OverviewPage.module.css';
 
 export default function OverviewPage() {
-    const { orders } = useOrderContext();
+    const { orders, fetchAnalytics } = useOrderContext();
     const [chartRange, setChartRange] = useState('Weekly');
+    const [historicalData, setHistoricalData] = useState([]);
+    const [isChartLoading, setIsChartLoading] = useState(false);
 
+    // Fetch historical data for charts when range changes
+    useEffect(() => {
+        const loadChartData = async () => {
+            setIsChartLoading(true);
+            try {
+                const now = new Date();
+                let start = new Date();
+                
+                if (chartRange === 'Daily') {
+                    start.setHours(now.getHours() - 24);
+                } else if (chartRange === 'Weekly') {
+                    start.setDate(now.getDate() - 7);
+                } else {
+                    // Monthly
+                    start.setMonth(now.getMonth() - 1);
+                }
+                
+                const data = await fetchAnalytics(start.toISOString(), now.toISOString());
+                setHistoricalData(data || []);
+            } catch (error) {
+                console.error("Chart data fetch failed", error);
+            } finally {
+                setIsChartLoading(false);
+            }
+        };
+
+        loadChartData();
+    }, [chartRange, fetchAnalytics]);
+
+    // Use 'orders' (today's live state) for landing stats, 
+    // but use 'historicalData' for the actual charts and all-time sellers
     const todayOrders = useMemo(() => {
         const today = new Date().toDateString();
         return orders.filter(o => new Date(o.timestamp).toDateString() === today);
@@ -45,13 +78,15 @@ export default function OverviewPage() {
     }, [todayOrders]);
 
     const recentOrders = useMemo(() => {
+        // Just show the first 10 of today's live orders
         return orders.slice(0, 10);
     }, [orders]);
 
-    // Aggregating data for Best Sellers Widget (All time)
+    // Aggregating data for Best Sellers Widget (from the fetched chart period)
     const bestSellers = useMemo(() => {
         const counts = {};
-        orders.forEach(order => {
+        const source = historicalData.length > 0 ? historicalData : todayOrders;
+        source.forEach(order => {
             order.items.forEach(item => {
                 counts[item.name] = (counts[item.name] || 0) + item.quantity;
             });
@@ -65,14 +100,14 @@ export default function OverviewPage() {
             sales,
             percent: (sales / max) * 100
         }));
-    }, [orders]);
+    }, [historicalData, todayOrders]);
 
     // Revenue chart data based on selected range
     const revenueData = useMemo(() => {
         const now = new Date();
+        const dataSource = historicalData.length > 0 ? historicalData : orders;
 
         if (chartRange === 'Daily') {
-            // Last 24 hours broken into 2-hour blocks
             const hours = [];
             for (let i = 12; i >= 0; i--) {
                 const blockStart = new Date(now);
@@ -80,7 +115,7 @@ export default function OverviewPage() {
                 const blockEnd = new Date(blockStart);
                 blockEnd.setHours(blockStart.getHours() + 2);
 
-                const revenue = orders
+                const revenue = dataSource
                     .filter(o => {
                         const d = new Date(o.timestamp);
                         return d >= blockStart && d < blockEnd;
@@ -94,7 +129,6 @@ export default function OverviewPage() {
             }
             return hours;
         } else if (chartRange === 'Weekly') {
-            // Last 7 days
             const days = [];
             const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             for (let i = 6; i >= 0; i--) {
@@ -104,7 +138,7 @@ export default function OverviewPage() {
                 const end = new Date(day);
                 end.setHours(23, 59, 59, 999);
 
-                const revenue = orders
+                const revenue = dataSource
                     .filter(o => {
                         const d = new Date(o.timestamp);
                         return d >= day && d <= end;
@@ -115,7 +149,6 @@ export default function OverviewPage() {
             }
             return days;
         } else {
-            // Monthly — last 4 weeks
             const weeks = [];
             for (let i = 3; i >= 0; i--) {
                 const weekStart = new Date(now);
@@ -123,7 +156,7 @@ export default function OverviewPage() {
                 const weekEnd = new Date(weekStart);
                 weekEnd.setDate(weekStart.getDate() + 7);
 
-                const revenue = orders
+                const revenue = dataSource
                     .filter(o => {
                         const d = new Date(o.timestamp);
                         return d >= weekStart && d < weekEnd;
@@ -135,7 +168,7 @@ export default function OverviewPage() {
             }
             return weeks;
         }
-    }, [orders, chartRange]);
+    }, [historicalData, orders, chartRange]);
 
     // Utility to get main CSS variable for charts
     const getAccentColor = () => {

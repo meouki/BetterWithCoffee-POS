@@ -1,38 +1,21 @@
-const API_URL = import.meta.env.VITE_API_URL || '';
+import { apiClient } from './apiClient';
 
 export const categoriesApi = {
     getAll: async () => {
-        const res = await fetch(`${API_URL}/api/categories`);
-        if (!res.ok) throw new Error('Failed to fetch categories');
-        return res.json();
+        const response = await apiClient.get('/api/categories');
+        if (!response.ok) throw new Error('Failed to fetch categories');
+        return response.json();
     },
-    create: async (data) => {
-        const res = await fetch(`${API_URL}/api/categories`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.error || 'Failed to create category');
-        }
-        return res.json();
+
+    create: async (name) => {
+        const response = await apiClient.post('/api/categories', { name });
+        if (!response.ok) throw new Error('Failed to create category');
+        return response.json();
     },
-    update: async (id, data) => {
-        const res = await fetch(`${API_URL}/api/categories/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        if (!res.ok) throw new Error('Failed to update category');
-        return res.json();
-    },
+
     delete: async (id) => {
-        const res = await fetch(`${API_URL}/api/categories/${id}`, { method: 'DELETE' });
-        if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.error || 'Failed to delete category');
-        }
+        const response = await apiClient.delete(`/api/categories/${id}`);
+        if (!response.ok) throw new Error('Failed to delete category');
         return true;
     }
 };

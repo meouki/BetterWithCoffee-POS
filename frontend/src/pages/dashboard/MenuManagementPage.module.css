@@ -6,7 +6,7 @@
 }
 
 .title {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-family: var(--font-drama);
     font-weight: 700;
 }
@@ -81,9 +81,9 @@
 }
 
 .th {
-    padding: 16px 24px;
+    padding: 12px 20px;
     color: var(--color-muted);
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
     text-transform: uppercase;
     border-bottom: 1px solid var(--color-border);
@@ -92,8 +92,8 @@
 }
 
 .td {
-    padding: 16px 24px;
-    font-size: 0.875rem;
+    padding: 12px 20px;
+    font-size: 0.8125rem;
     border-bottom: 1px solid var(--color-border);
     vertical-align: middle;
     white-space: nowrap;
@@ -132,11 +132,12 @@
 .productName {
     font-weight: 600;
     font-family: var(--font-ui);
+    font-size: 0.8125rem;
 }
 
 .productCategory {
     color: var(--color-muted);
-    font-size: 0.75rem;
+    font-size: 0.7rem;
 }
 
 .price {
@@ -281,9 +282,9 @@
     background-color: var(--color-bg);
     border: 1px solid var(--color-border);
     color: var(--color-text);
-    padding: 6px 12px;
+    padding: 4px 10px;
     border-radius: 9999px;
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     font-weight: 600;
     display: flex;
     align-items: center;

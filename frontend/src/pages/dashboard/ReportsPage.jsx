@@ -15,53 +15,62 @@ import styles from './ReportsPage.module.css';
 
 // Mock Data
 export default function ReportsPage() {
-    const { orders } = useOrderContext();
+    const { fetchAnalytics } = useOrderContext();
     const [activeTab, setActiveTab] = useState('Sales');
     const [dateRange, setDateRange] = useState('7Days'); // 'Today', '7Days', '30Days', 'Custom'
     const [customStart, setCustomStart] = useState('');
     const [customEnd, setCustomEnd] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [historicalData, setHistoricalData] = useState([]);
 
-    // Simulate loading on range change for a "premium" feel
+    // Fetch analytical data on range change
     useEffect(() => {
-        setIsLoading(true);
-        const timer = setTimeout(() => setIsLoading(false), 400);
-        return () => clearTimeout(timer);
-    }, [dateRange, customStart, customEnd]);
+        const loadReportData = async () => {
+            setIsLoading(true);
+            try {
+                const now = new Date();
+                let start = new Date();
+                let end = new Date();
 
-    const filteredOrders = useMemo(() => {
-        const now = new Date();
-        let start = new Date();
-        let end = new Date();
+                if (dateRange === 'Today') {
+                    start.setHours(0, 0, 0, 0);
+                    end.setHours(23, 59, 59, 999);
+                } else if (dateRange === '7Days') {
+                    start.setDate(now.getDate() - 7);
+                    start.setHours(0, 0, 0, 0);
+                } else if (dateRange === '30Days') {
+                    start.setDate(now.getDate() - 30);
+                    start.setHours(0, 0, 0, 0);
+                } else if (dateRange === 'Custom' && customStart && customEnd) {
+                    start = new Date(customStart);
+                    start.setHours(0, 0, 0, 0);
+                    end = new Date(customEnd);
+                    end.setHours(23, 59, 59, 999);
+                } else {
+                    // Default fallback for mount
+                    start.setDate(now.getDate() - 7);
+                }
 
-        if (dateRange === 'Today') {
-            start.setHours(0, 0, 0, 0);
-            end.setHours(23, 59, 59, 999);
-        } else if (dateRange === '7Days') {
-            start.setDate(now.getDate() - 7);
-        } else if (dateRange === '30Days') {
-            start.setDate(now.getDate() - 30);
-        } else if (dateRange === 'Custom' && customStart && customEnd) {
-            start = new Date(customStart);
-            start.setHours(0, 0, 0, 0);
-            end = new Date(customEnd);
-            end.setHours(23, 59, 59, 999);
-        } else {
-            return orders; // Default/Fallback
-        }
+                const data = await fetchAnalytics(start.toISOString(), end.toISOString());
+                setHistoricalData(data || []);
+            } catch (error) {
+                console.error("Failed to fetch report data", error);
+                setHistoricalData([]);
+            } finally {
+                setIsLoading(false);
+            }
+        };
 
-        return orders.filter(o => {
-            const d = new Date(o.timestamp);
-            return d >= start && d <= end;
-        });
-    }, [orders, dateRange, customStart, customEnd]);
+        loadReportData();
+    }, [dateRange, customStart, customEnd, fetchAnalytics]);
 
+    // Derived Data from Historical Fetch
     const revenueData = useMemo(() => {
         // Simple day-based aggregation for the chart
         const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         const data = days.map(day => ({ name: day, revenue: 0 }));
 
-        filteredOrders.forEach(o => {
+        historicalData.forEach(o => {
             const dayIdx = new Date(o.timestamp).getDay();
             data[dayIdx].revenue += o.total;
         });
@@ -74,42 +83,43 @@ export default function ReportsPage() {
             reordered.push(data[idx]);
         }
         return reordered;
-    }, [filteredOrders]);
+    }, [historicalData]);
 
     const metrics = useMemo(() => {
-        const totalRevenue = filteredOrders.reduce((sum, o) => sum + o.total, 0);
-        const totalOrders = filteredOrders.length;
+        const totalRevenue = historicalData.reduce((sum, o) => sum + o.total, 0);
+        const totalOrders = historicalData.length;
         const aov = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
-        const payments = filteredOrders.reduce((acc, o) => {
+        const payments = historicalData.reduce((acc, o) => {
             acc[o.payment_method] = (acc[o.payment_method] || 0) + 1;
             return acc;
         }, {});
         const topPayment = Object.entries(payments).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
 
         return { totalRevenue, totalOrders, aov, topPayment };
-    }, [filteredOrders]);
+    }, [historicalData]);
 
     const bestSellers = useMemo(() => {
         const items = {};
-        filteredOrders.forEach(o => {
+        historicalData.forEach(o => {
             o.items.forEach(item => {
-                if (!items[item.name]) {
-                    items[item.name] = { name: item.name, units: 0, revenue: 0, category: 'Product' };
+                const identifier = item.name;
+                if (!items[identifier]) {
+                    items[identifier] = { name: item.name, units: 0, revenue: 0, category: 'Product' };
                 }
-                items[item.name].units += item.quantity;
-                items[item.name].revenue += item.quantity * item.price;
+                items[identifier].units += item.quantity;
+                items[identifier].revenue += item.quantity * item.price;
             });
         });
         return Object.values(items).sort((a, b) => b.units - a.units).map((item, idx) => ({
             ...item,
             rank: idx + 1
         })).slice(0, 10);
-    }, [filteredOrders]);
+    }, [historicalData]);
 
     const cashierPerformance = useMemo(() => {
         const cashiers = {};
-        filteredOrders.forEach(o => {
+        historicalData.forEach(o => {
             if (!cashiers[o.cashier]) {
                 cashiers[o.cashier] = { name: o.cashier, orders: 0, revenue: 0, items: {} };
             }
@@ -127,11 +137,11 @@ export default function ReportsPage() {
             aov: c.revenue / c.orders,
             top: Object.entries(c.items).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A'
         }));
-    }, [filteredOrders]);
+    }, [historicalData]);
 
     const handleExportCSV = () => {
         const headers = ['Order ID', 'Timestamp', 'Items Count', 'Subtotal', 'VAT', 'Total', 'Payment', 'Type', 'Cashier'];
-        const rows = filteredOrders.map(o => [
+        const rows = historicalData.map(o => [
             o.id,
             o.timestamp,
             o.items.reduce((s, i) => s + i.quantity, 0),

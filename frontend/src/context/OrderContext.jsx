@@ -1,46 +1,72 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { ordersApi } from '../api/orders';
 import { useNotificationContext } from './NotificationContext';
+import { useAuth } from './AuthContext';
 
 const OrderContext = createContext();
 
 export function OrderProvider({ children }) {
     const [orders, setOrders] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const { currentUser } = useAuth();
 
-    // Initial load
+    // Initial load - Fetch TODAY's orders by default for live tracking
     const loadOrders = useCallback(async (silent = false) => {
+        if (!currentUser) return; // Don't fetch if not logged in
         if (!silent) setIsLoading(true);
         try {
-            const data = await ordersApi.getAll();
-            setOrders(data);
+            const today = new Date();
+            const start = new Date(today.setHours(0, 0, 0, 0)).toISOString();
+            const end = new Date(today.setHours(23, 59, 59, 999)).toISOString();
+            
+            // Limit today's fetch to 500 (safe enough for one active day)
+            const response = await ordersApi.getAll(start, end, 1, 500);
+            setOrders(response.orders || []);
         } catch (err) {
             console.error('Failed to load orders', err);
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [currentUser]);
 
     useEffect(() => {
-        loadOrders();
-        
-        // Polling for "Live Tracking" across devices
-        const interval = setInterval(() => {
-            loadOrders(true); // Silent update
-        }, 10000); // Every 10 seconds
+        if (currentUser) {
+            loadOrders();
+            
+            // Polling for "Live Tracking" across devices - only daily orders
+            const interval = setInterval(() => {
+                loadOrders(true); // Silent update
+            }, 15000); // 15 seconds
 
-        return () => clearInterval(interval);
-    }, [loadOrders]);
+            return () => clearInterval(interval);
+        }
+    }, [loadOrders, currentUser]);
 
     const { addNotification } = useNotificationContext();
 
-    const fetchOrders = useCallback(async (startDate, endDate) => {
+    /**
+     * Fetch raw orders for analytics (e.g., charts) without pagination
+     */
+    const fetchAnalytics = useCallback(async (startDate, endDate) => {
         try {
-            const data = await ordersApi.getAll(startDate, endDate);
+            const data = await ordersApi.getRaw(startDate, endDate);
             return data;
         } catch (err) {
-            console.error('Failed to fetch filtered orders', err);
+            console.error('Failed to fetch analytics orders', err);
             return [];
+        }
+    }, []);
+
+    /**
+     * Fetch orders with date range and pagination
+     */
+    const fetchOrders = useCallback(async (startDate, endDate, page = 1, limit = 50) => {
+        try {
+            const response = await ordersApi.getAll(startDate, endDate, page, limit);
+            return response; // Returns { orders, meta }
+        } catch (err) {
+            console.error('Failed to fetch filtered orders', err);
+            return { orders: [], meta: { hasMore: false } };
         }
     }, []);
 
@@ -84,6 +110,7 @@ export function OrderProvider({ children }) {
                 isLoading,
                 createOrder,
                 fetchOrders,
+                fetchAnalytics,
                 refreshOrders: loadOrders,
                 getTodayRevenue,
                 getTodayOrderCount

@@ -30,6 +30,7 @@ Source: "node-v24.14.0-x64.msi"; DestDir: "{tmp}"; Flags: ignoreversion
 
 ; 2. Bundle Installer Scripts
 Source: "setup-db.js"; DestDir: "{app}"; Flags: ignoreversion
+Source: "setup-cloud.ps1"; DestDir: "{app}"; Flags: ignoreversion
 Source: "start.bat"; DestDir: "{app}"; Flags: ignoreversion
 
 ; 3. Bundle Backend (excluding node_modules to run npm install on client PC, but you CAN bundle node_modules if you prefer a fully offline install)
@@ -45,7 +46,9 @@ Name: "{app}"; Permissions: users-modify
 ; Desktop Shortcut
 Name: "{autodesktop}\Start PulsePoint"; Filename: "{app}\start.bat"; WorkingDir: "{app}"; Comment: "Launch PulsePoint POS"
 ; Start Menu Shortcut
+Name: "{group}\Admin Dashboard"; Filename: "{app}\start.bat"; Parameters: "/dashboard"; WorkingDir: "{app}"
 Name: "{group}\Start PulsePoint"; Filename: "{app}\start.bat"; WorkingDir: "{app}"
+Name: "{group}\Setup Cloud Access"; Filename: "powershell.exe"; Parameters: "-ExecutionPolicy Bypass -File ""{app}\setup-cloud.ps1"""; WorkingDir: "{app}"; IconFilename: "{app}\start.bat"
 Name: "{group}\Uninstall PulsePoint"; Filename: "{uninstallexe}"
 
 [Run]

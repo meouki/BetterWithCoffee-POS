@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { productsApi } from '../api/products';
 import { categoriesApi } from '../api/categories';
 import { useNotificationContext } from './NotificationContext';
+import { useAuth } from './AuthContext';
 
 const ProductContext = createContext();
 
@@ -10,11 +11,18 @@ export function ProductProvider({ children }) {
     const [categories, setCategories] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const { currentUser } = useAuth();
 
     // Initial load
     useEffect(() => {
+        if (!currentUser) {
+            setIsLoading(false);
+            return;
+        };
+
         let mounted = true;
         const loadData = async () => {
+            setIsLoading(true); // Ensure it shows loading when user changes/logs in
             try {
                 const [pData, cData] = await Promise.all([
                     productsApi.getAll(),
@@ -39,7 +47,7 @@ export function ProductProvider({ children }) {
         return () => {
             mounted = false;
         };
-    }, []);
+    }, [currentUser]);
 
     const { addNotification } = useNotificationContext();
 

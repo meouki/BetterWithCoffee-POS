@@ -38,6 +38,10 @@ const User = sequelize.define('user', {
         type: DataTypes.STRING(50),
         allowNull: true,
         defaultValue: 'User'
+    },
+    session_id: {
+        type: DataTypes.STRING(255),
+        allowNull: true
     }
 }, {
     tableName: 'users',

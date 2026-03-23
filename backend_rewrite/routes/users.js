@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { User } = require('../models');
+const sessionAuth = require('../middleware/auth');
 
 // GET /api/users - Fetch all users
-router.get('/', async (req, res) => {
+router.get('/', sessionAuth, async (req, res) => {
     try {
         const users = await User.findAll({
             attributes: { exclude: ['password'] },
@@ -32,7 +33,7 @@ router.post('/login', async (req, res) => {
             }
         }
 
-        // 2. Normal Login Flow
+        // Normal Login Flow
         const user = await User.findOne({ where: { username } });
 
         if (!user || !(await user.validatePassword(password))) {
@@ -43,8 +44,11 @@ router.post('/login', async (req, res) => {
             return res.status(403).json({ error: 'Your account is disabled' });
         }
 
-        // Update last login
+        // Update last login and generate New Session ID (UUID)
+        // This will effectively "kick out" any other active sessions
+        const crypto = require('crypto');
         user.last_login = new Date();
+        user.session_id = crypto.randomUUID();
         await user.save();
 
         const { password: _, ...safeUser } = user.toJSON();
@@ -56,7 +60,7 @@ router.post('/login', async (req, res) => {
 });
 
 // POST /api/users - Create new user
-router.post('/', async (req, res) => {
+router.post('/', sessionAuth, async (req, res) => {
     try {
         const { name, username, password, role } = req.body;
         const newUser = await User.create({ name, username, password, role });
@@ -73,7 +77,7 @@ router.post('/', async (req, res) => {
 });
 
 // PATCH /api/users/:id - Update user
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', sessionAuth, async (req, res) => {
     try {
         const { id } = req.params;
         const updates = req.body;
@@ -96,7 +100,7 @@ router.patch('/:id', async (req, res) => {
 });
 
 // DELETE /api/users/:id - Delete user
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', sessionAuth, async (req, res) => {
     try {
         const { id } = req.params;
         if (parseInt(id) === 1) {

@@ -1,6 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const { Notification } = require('../models');
+const tunnelManager = require('../utils/tunnelManager');
+
+// GET /api/notifications/cloud-status - Get current cloud tunnel info
+router.get('/cloud-status', (req, res) => {
+    res.json(tunnelManager.getStatus());
+});
 
 // GET /api/notifications - Fetch all notifications
 router.get('/', async (req, res) => {

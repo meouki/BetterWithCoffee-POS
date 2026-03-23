@@ -1,18 +1,14 @@
-const API_URL = import.meta.env.VITE_API_URL || '';
+import { apiClient } from './apiClient';
 
 export const usersApi = {
     getAll: async () => {
-        const response = await fetch(`${API_URL}/api/users`);
+        const response = await apiClient.get('/api/users');
         if (!response.ok) throw new Error('Failed to fetch users');
         return response.json();
     },
 
     login: async (username, password) => {
-        const response = await fetch(`${API_URL}/api/users/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
-        });
+        const response = await apiClient.post('/api/users/login', { username, password });
         
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Login failed');
@@ -20,11 +16,7 @@ export const usersApi = {
     },
 
     create: async (userData) => {
-        const response = await fetch(`${API_URL}/api/users`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(userData)
-        });
+        const response = await apiClient.post('/api/users', userData);
         
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Failed to create user');
@@ -32,11 +24,7 @@ export const usersApi = {
     },
 
     update: async (id, updates) => {
-        const response = await fetch(`${API_URL}/api/users/${id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(updates)
-        });
+        const response = await apiClient.patch(`/api/users/${id}`, updates);
         
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Failed to update user');
@@ -44,9 +32,7 @@ export const usersApi = {
     },
 
     delete: async (id) => {
-        const response = await fetch(`${API_URL}/api/users/${id}`, {
-            method: 'DELETE'
-        });
+        const response = await apiClient.delete(`/api/users/${id}`);
         
         if (!response.ok) {
             const data = await response.json();

@@ -1,9 +1,10 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const os = require('os');
 const { sequelize } = require('./models');
+const tunnelManager = require('./utils/tunnelManager');
 
 const app = express();
 
@@ -28,21 +29,41 @@ const notificationRoutes = require('./routes/notifications');
 const userRoutes = require('./routes/users');
 const attendanceRoutes = require('./routes/attendance');
 const categoryRoutes = require('./routes/categories');
+const sessionAuth = require('./middleware/auth');
 
-app.use('/api/products', productRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/inventory', inventoryRoutes);
-app.use('/api/notifications', notificationRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/attendance', attendanceRoutes);
-app.use('/api/categories', categoryRoutes);
+app.use('/api/products', sessionAuth, productRoutes);
+app.use('/api/orders', sessionAuth, orderRoutes);
+app.use('/api/inventory', sessionAuth, inventoryRoutes);
+app.use('/api/notifications', notificationRoutes); // Allow public health/cloud checks
+app.use('/api/users', userRoutes); // Auth applied INSIDE users.js for specific routes
+app.use('/api/attendance', sessionAuth, attendanceRoutes);
+app.use('/api/categories', sessionAuth, categoryRoutes);
 
-// Serve built React frontend (production)
-app.use(express.static(path.join(__dirname, '../frontend/dist')));
+// --- Robust Frontend Static Serving ---
+const distPath = path.resolve(__dirname, '..', 'frontend', 'dist');
+const indexPath = path.join(distPath, 'index.html');
+
+console.log(`📂 Booting: Resolving frontend path at ${distPath}`);
+
+app.use(express.static(distPath));
 
 // Catch-all: let React Router handle client-side routes
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+    if (require('fs').existsSync(indexPath)) {
+        res.sendFile(indexPath);
+    } else {
+        res.status(404).send(`
+            <div style="font-family: sans-serif; padding: 40px; text-align: center; background: #0f172a; color: white; height: 100vh;">
+                <h1 style="color: #ef4444;">PulsePoint Frontend Error</h1>
+                <p>Could not find <code>index.html</code> at your installation path.</p>
+                <div style="background: #1e293b; padding: 20px; border-radius: 8px; display: inline-block; text-align: left; margin: 20px 0;">
+                    <strong>Expected location:</strong><br/>
+                    <code>${indexPath}</code>
+                </div>
+                <p>Please ensure you have run <code>npm run build</code> and that your installer includes the <code>dist</code> folder.</p>
+            </div>
+        `);
+    }
 });
 
 // Start Server
@@ -76,6 +97,13 @@ sequelize.sync()
     .then(async () => {
         console.log('✅ Database synced successfully.');
         await seedDatabase();
+
+        // Start Cloudflare Tunnel if enabled in .env
+        const enableCloud = (process.env.ENABLE_CLOUD || '').trim().toLowerCase() === 'true';
+        if (enableCloud) {
+            tunnelManager.start(PORT);
+        }
+
         app.listen(PORT, '0.0.0.0', () => {
             console.log(`\n🚀 Server is running!`);
             console.log(`\n================================`);
@@ -84,7 +112,6 @@ sequelize.sync()
             const nets = os.networkInterfaces();
             for (const name of Object.keys(nets)) {
                 for (const net of nets[name]) {
-                    // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
                     if (net.family === 'IPv4' && !net.internal) {
                         console.log(`  👉 http://${net.address}:${PORT}`);
                     }

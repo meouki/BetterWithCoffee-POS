@@ -113,103 +113,135 @@
     font-style: italic;
 }
 
-.tablePanel {
+/* Virtualized List Structure */
+.listContainer {
+    display: flex;
+    flex-direction: column;
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    overflow: hidden;
+    height: 700px; /* Reduced to fit typical screens while virtualizing */
+    overflow: auto; /* Unified horizontal and vertical scroll */
+    position: relative;
 }
 
-.tableWrapper {
-    overflow-x: auto;
+.listHeader {
+    display: grid;
+    grid-template-columns: 100px 1.5fr 100px 180px 120px 120px 120px;
+    background-color: var(--color-surface);
+    border-bottom: 2px solid var(--color-border);
+    z-index: 20;
+    padding: 0 16px;
+    position: sticky;
+    top: 0;
+    min-width: 1100px; /* Ensure content doesn't squash, triggers horizontal scroll */
 }
 
-.table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-}
-
-.th {
-    padding: 16px 24px;
+.listHeader > div {
+    padding: 16px 8px;
     font-size: 0.75rem;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--color-muted);
+}
+
+.listDataContent {
+    flex: 1;
+    position: relative;
+    padding: 0 16px;
+    min-width: 1100px; /* Must match header for alignment */
+}
+
+.virtualRow {
+    display: grid;
+    grid-template-columns: 100px 1.5fr 100px 180px 120px 120px 120px;
+    align-items: center;
     border-bottom: 1px solid var(--color-border);
-    white-space: nowrap;
+    transition: background-color 0.2s;
+    background-color: var(--color-surface); /* Opaque backgrounds for performance */
 }
 
-.td {
-    padding: 16px 24px;
-    border-bottom: 1px solid var(--color-border);
+.virtualRow:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.virtualRow > div {
+    padding: 0 8px;
     font-size: 0.875rem;
-    white-space: nowrap;
 }
 
-.orderId {
-    font-weight: 600;
-    font-family: var(--font-data);
-}
-
-.orderSummaryText {
-    color: var(--color-text);
-    font-size: 0.875rem;
-    max-width: 250px;
+.summaryText {
+    max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    display: inline-block;
-}
-
-.typeBadge {
-    padding: 4px 10px;
-    border-radius: 99px;
-    font-size: 0.75rem;
-    font-weight: 600;
-}
-
-.dineIn {
-    background-color: rgba(59, 130, 246, 0.1);
-    color: #3B82F6;
-}
-
-.takeOut {
-    background-color: rgba(139, 92, 246, 0.1);
-    color: #8B5CF6;
-}
-
-.paymentBadge {
-    font-size: 0.75rem;
-    color: var(--color-muted);
-    background: var(--color-bg);
-    padding: 2px 8px;
-    border-radius: 4px;
-    border: 1px solid var(--color-border);
+    display: block;
 }
 
 .viewBtn {
-    background: transparent;
-    border: 1px solid var(--color-border);
-    color: var(--color-text);
-    padding: 6px 12px;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    font-size: 0.75rem;
-    transition: all 0.2s;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
+    padding: 6px 12px;
+    background-color: rgba(74, 127, 165, 0.12); /* Light theme blueish tint */
+    color: var(--color-accent);
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    outline: none;
 }
 
 .viewBtn:hover {
-    background: var(--color-bg);
-    border-color: var(--color-accent);
+    background-color: var(--color-accent);
+    color: white;
+    box-shadow: 0 2px 8px var(--color-accent-muted);
+}
+
+.orderId {
+    font-family: var(--font-data);
+    font-weight: 600;
+}
+
+.centeredLoader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.bottomLoader {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: var(--color-muted);
+    font-size: 0.8rem;
+}
+
+.dotPulse {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--color-accent);
+    box-shadow: 9999px 0 0 -5px var(--color-accent);
+    animation: dotPulse 1.5s infinite linear;
+    position: relative;
+    left: -9999px;
+}
+
+@keyframes dotPulse {
+    0% { box-shadow: 9999px 0 0 -5px var(--color-accent); }
+    30% { box-shadow: 9999px 0 0 2px var(--color-accent); }
+    60%, 100% { box-shadow: 9999px 0 0 -5px var(--color-accent); }
 }
 
 .emptyState {
-    padding: 64px;
+    padding: 100px;
     text-align: center;
     color: var(--color-muted);
 }

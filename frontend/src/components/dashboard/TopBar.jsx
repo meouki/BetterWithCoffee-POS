@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { Bell, Menu, Monitor } from 'lucide-react';
+import { Bell, Menu, Monitor, Cloud } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotificationContext } from '../../context/NotificationContext';
 import ProfilePanel from '../shared/ProfilePanel';
+import CloudStatusPanel from './CloudStatusPanel';
 import styles from './TopBar.module.css';
 
 export default function TopBar({ onToggleSidebar }) {
@@ -15,6 +16,7 @@ export default function TopBar({ onToggleSidebar }) {
 
     const [time, setTime] = useState(new Date());
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isCloudOpen, setIsCloudOpen] = useState(false);
 
     useEffect(() => {
         const timer = setInterval(() => setTime(new Date()), 1000);
@@ -58,6 +60,15 @@ export default function TopBar({ onToggleSidebar }) {
                             {unreadCount > 0 && <span className={styles.badge}>{unreadCount > 99 ? '99+' : unreadCount}</span>}
                         </Link>
 
+                        <button 
+                            className={`${styles.iconBtn} ${isCloudOpen ? styles.active : ''}`}
+                            onClick={() => setIsCloudOpen(!isCloudOpen)}
+                            title="Cloud Access Status"
+                        >
+                            <Cloud size={20} />
+                        </button>
+
+                        <div className={styles.divider} />
                         {/* Clickable user pill → opens profile panel */}
                         <button
                             className={styles.userPill}
@@ -73,6 +84,14 @@ export default function TopBar({ onToggleSidebar }) {
             </header>
 
             <ProfilePanel isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
+
+            {isCloudOpen && (
+                <div className={styles.cloudOverlay} onClick={() => setIsCloudOpen(false)}>
+                    <div className={styles.cloudDropdown} onClick={e => e.stopPropagation()}>
+                        <CloudStatusPanel />
+                    </div>
+                </div>
+            )}
         </>
     );
 }
