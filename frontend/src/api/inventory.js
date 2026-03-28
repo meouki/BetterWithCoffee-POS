@@ -1,21 +1,81 @@
 import { apiClient } from './apiClient';
 
 export const inventoryApi = {
-    getAllLogs: async () => {
+    // Ingredients CRUD
+    getAll: async () => {
         const response = await apiClient.get('/api/inventory');
-        if (!response.ok) throw new Error('Failed to fetch inventory logs');
+        if (!response.ok) throw new Error('Failed to fetch ingredients');
         return response.json();
     },
 
-    logAction: async (actionData) => {
-        const response = await apiClient.post('/api/inventory', actionData);
-        if (!response.ok) throw new Error('Failed to log inventory action');
+    create: async (data) => {
+        const response = await apiClient.post('/api/inventory', data);
+        if (!response.ok) throw new Error('Failed to create ingredient');
         return response.json();
     },
 
-    getSummary: async () => {
-        const response = await apiClient.get('/api/inventory/summary');
-        if (!response.ok) throw new Error('Failed to fetch inventory summary');
+    update: async (id, data) => {
+        const response = await apiClient.patch(`/api/inventory/${id}`, data);
+        if (!response.ok) throw new Error('Failed to update ingredient');
         return response.json();
-    }
+    },
+
+    delete: async (id) => {
+        const response = await apiClient.delete(`/api/inventory/${id}`);
+        if (!response.ok) throw new Error('Failed to delete ingredient');
+        return response.json();
+    },
+
+    // Stock Logs
+    getLogs: async () => {
+        const response = await apiClient.get('/api/inventory/logs');
+        if (!response.ok) throw new Error('Failed to fetch stock logs');
+        return response.json();
+    },
+};
+
+export const recipesApi = {
+    getByProduct: async (productId) => {
+        const response = await apiClient.get(`/api/recipes?product_id=${productId}`);
+        if (!response.ok) throw new Error('Failed to fetch recipes');
+        return response.json();
+    },
+
+    create: async (data) => {
+        const response = await apiClient.post('/api/recipes', data);
+        if (!response.ok) throw new Error('Failed to create recipe');
+        return response.json();
+    },
+
+    delete: async (id) => {
+        const response = await apiClient.delete(`/api/recipes/${id}`);
+        if (!response.ok) throw new Error('Failed to delete recipe');
+        return response.json();
+    },
+};
+
+export const productSizesApi = {
+    getByProduct: async (productId) => {
+        const response = await apiClient.get(`/api/product-sizes?product_id=${productId}`);
+        if (!response.ok) throw new Error('Failed to fetch product sizes');
+        return response.json();
+    },
+
+    create: async (data) => {
+        const response = await apiClient.post('/api/product-sizes', data);
+        if (!response.ok) throw new Error('Failed to create product size');
+        return response.json();
+    },
+
+    update: async (id, data) => {
+        const response = await apiClient.patch(`/api/product-sizes/${id}`, data);
+        if (!response.ok) throw new Error('Failed to update product size');
+        return response.json();
+    },
+
+    delete: async (id) => {
+        const response = await apiClient.delete(`/api/product-sizes/${id}`);
+        if (!response.ok) throw new Error('Failed to delete product size');
+        return response.json();
+    },
 };

@@ -23,6 +23,10 @@ const Product = sequelize.define('product', {
         type: DataTypes.BOOLEAN,
         defaultValue: true
     },
+    has_sizes: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
     modifiers: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
@@ -53,6 +57,10 @@ const Product = sequelize.define('product', {
             const finalValue = typeof value === 'string' ? value : JSON.stringify(value || []);
             this.setDataValue('addons', finalValue);
         }
+    },
+    is_archived: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
     },
     image_url: {
         type: DataTypes.STRING(500),

@@ -82,8 +82,13 @@ router.patch('/:id', sessionAuth, async (req, res) => {
         const { id } = req.params;
         const updates = req.body;
         
-        if (parseInt(id) === 1 && updates.is_active === false) {
-            return res.status(403).json({ error: 'Cannot disable the root Master account' });
+        if (parseInt(id) === 1) {
+            if (updates.is_active === false) {
+                return res.status(403).json({ error: 'Cannot disable the root Master account' });
+            }
+            if (updates.role && updates.role !== 'Master') {
+                return res.status(403).json({ error: 'Cannot change the role of the root Master account' });
+            }
         }
 
         const user = await User.findByPk(id);

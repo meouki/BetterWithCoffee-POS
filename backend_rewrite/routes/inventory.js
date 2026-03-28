@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Inventory } = require('../models');
+const { Inventory, StockLog } = require('../models');
 
 // GET /api/inventory - Get all inventory items
 router.get('/', async (req, res) => {
@@ -10,6 +10,21 @@ router.get('/', async (req, res) => {
     } catch (error) {
         console.error('Error fetching inventory:', error);
         res.status(500).json({ error: 'Failed to fetch inventory' });
+    }
+});
+
+// GET /api/inventory/logs - Get all stock logs
+router.get('/logs', async (req, res) => {
+    try {
+        const logs = await StockLog.findAll({
+            include: [{ model: Inventory, as: 'inventory' }], // Note: Make sure alias is correct
+            order: [['timestamp', 'DESC']],
+            limit: 200
+        });
+        res.json(logs);
+    } catch (error) {
+        console.error('Error fetching stock logs:', error);
+        res.status(500).json({ error: 'Failed to fetch stock logs' });
     }
 });
 
@@ -25,6 +40,16 @@ router.post('/', async (req, res) => {
             threshold: parseFloat(data.threshold || 0),
             last_updated: new Date()
         });
+        
+        await StockLog.create({
+            inventory_id: newItem.id,
+            change_qty: newItem.stock,
+            reason: 'manual',
+            reference_id: 'Initial setup',
+            stock_after: newItem.stock,
+            timestamp: new Date()
+        });
+
         res.status(201).json(newItem);
     } catch (error) {
         console.error('Error creating inventory item:', error);
@@ -39,6 +64,7 @@ router.patch('/:id', async (req, res) => {
         if (!item) return res.status(404).json({ error: 'Inventory item not found' });
 
         const updates = req.body;
+        let oldStock = item.stock;
 
         if (updates.stock !== undefined) item.stock = parseFloat(updates.stock);
         if (updates.threshold !== undefined) item.threshold = parseFloat(updates.threshold);
@@ -48,6 +74,19 @@ router.patch('/:id', async (req, res) => {
 
         item.last_updated = new Date();
         await item.save();
+        
+        // Log manual stock update if stock changed
+        if (updates.stock !== undefined && updates.stock !== oldStock) {
+             await StockLog.create({
+                inventory_id: item.id,
+                change_qty: item.stock - oldStock,
+                reason: updates.reason || 'manual',
+                reference_id: updates.reference_id || 'Manual Update',
+                stock_after: item.stock,
+                timestamp: new Date()
+            });
+        }
+
         res.json(item);
     } catch (error) {
         console.error('Error updating inventory:', error);

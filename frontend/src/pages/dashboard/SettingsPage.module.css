@@ -258,3 +258,326 @@
 .rangeInput::-webkit-slider-thumb:hover {
     transform: scale(1.2);
 }
+
+.dangerSection {
+    border: 1px solid var(--color-warning);
+    background-color: rgba(239, 68, 68, 0.05); /* Light red tint */
+}
+
+.dangerText {
+    color: var(--color-warning);
+}
+
+.dangerBtn {
+    padding: 8px 16px;
+    background-color: transparent;
+    border: 1px solid var(--color-warning);
+    color: var(--color-warning);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.dangerBtn:hover {
+    background-color: var(--color-warning);
+    color: white;
+}
+
+.wipeConfirmStep {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-warning);
+    padding: 16px;
+    border-radius: var(--radius-md);
+    animation: fadeIn var(--transition-fast) ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.warningText {
+    font-size: 0.875rem;
+    color: var(--color-text);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.warningText strong {
+    color: var(--color-warning);
+}
+
+.wipeActions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
+.cancelBtn {
+    padding: 8px 16px;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.cancelBtn:hover {
+    background-color: var(--color-bg);
+}
+
+.dangerBtnSolid {
+    padding: 8px 16px;
+    background-color: var(--color-warning);
+    border: none;
+    color: white;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.dangerBtnSolid:hover {
+    background-color: #DC2626; /* Darker red */
+}
+
+.dangerBtnSolid:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.dangerInput {
+    padding: 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-size: 1rem;
+    width: 100%;
+    margin-top: 8px;
+}
+
+/* ── Data Management ── */
+.importGuide {
+    background: color-mix(in srgb, var(--color-accent-muted) 60%, transparent);
+    border: 1px solid var(--color-accent-muted);
+    border-radius: var(--radius-sm);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    font-family: var(--font-ui);
+    font-size: 0.875rem;
+}
+
+.guideTitle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--color-accent);
+}
+
+.guideList {
+    margin: 0;
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    color: var(--color-text);
+    line-height: 1.5;
+}
+
+.guideList code {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-size: 0.8rem;
+}
+
+.dataRow {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 0;
+}
+
+@media (min-width: 640px) {
+    .dataRow {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+.exportBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background-color: var(--color-accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color var(--transition-base);
+    flex-shrink: 0;
+}
+
+.exportBtn:hover:not(:disabled) {
+    background-color: var(--color-accent-hover);
+}
+
+.exportBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.importBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--transition-base);
+    flex-shrink: 0;
+}
+
+.importBtn:hover:not(:disabled) {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.importBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.importConfirmBox {
+    margin-top: 20px;
+    padding: 20px;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.importFileInfo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-accent);
+}
+
+.importMeta {
+    font-weight: 400;
+    color: var(--color-muted);
+    font-size: 0.8rem;
+    margin-left: auto;
+}
+
+.importModeRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.importModeLabel {
+    font-size: 0.875rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.importModeGroup {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.modeBtn {
+    padding: 7px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-muted);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    font-weight: 500;
+}
+
+.modeBtnActive {
+    border-color: var(--color-accent);
+    background: var(--color-accent-muted);
+    color: var(--color-accent);
+    font-weight: 600;
+}
+
+.modeBtnWipeActive {
+    border-color: #EF4444;
+    background: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+    font-weight: 600;
+}
+
+.wipeWarningSmall {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: #EF4444;
+    line-height: 1.4;
+    padding: 10px 12px;
+    background: rgba(239, 68, 68, 0.08);
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.importPasswordRow {
+    display: flex;
+    flex-direction: column;
+}
+
+.saveBtn {
+    padding: 10px 20px;
+    background-color: var(--color-accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.saveBtn:hover:not(:disabled) {
+    background-color: var(--color-accent-hover);
+}
+
+.saveBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

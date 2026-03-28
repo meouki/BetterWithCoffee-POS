@@ -18,8 +18,8 @@ OutputBaseFilename=PulsePoint-Setup
 Compression=lzma
 SolidCompression=yes
 ArchitecturesInstallIn64BitMode=x64
-SetupIconFile=compiler:SetupClassicIcon.ico
-UninstallDisplayIcon={app}\Start PulsePoint.bat
+SetupIconFile=icon.ico
+UninstallDisplayIcon={app}\icon.ico
 DisableWelcomePage=no
 AllowNoIcons=yes
 PrivilegesRequired=admin
@@ -32,6 +32,8 @@ Source: "node-v24.14.0-x64.msi"; DestDir: "{tmp}"; Flags: ignoreversion
 Source: "setup-db.js"; DestDir: "{app}"; Flags: ignoreversion
 Source: "setup-cloud.ps1"; DestDir: "{app}"; Flags: ignoreversion
 Source: "start.bat"; DestDir: "{app}"; Flags: ignoreversion
+Source: "icon.png"; DestDir: "{app}"; Flags: ignoreversion
+Source: "icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 ; 3. Bundle Backend (excluding node_modules to run npm install on client PC, but you CAN bundle node_modules if you prefer a fully offline install)
 Source: "..\backend_rewrite\*"; DestDir: "{app}\backend_rewrite"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "node_modules\*, .git\*"
@@ -44,11 +46,12 @@ Name: "{app}"; Permissions: users-modify
 
 [Icons]
 ; Desktop Shortcut
-Name: "{autodesktop}\Start PulsePoint"; Filename: "{app}\start.bat"; WorkingDir: "{app}"; Comment: "Launch PulsePoint POS"
-; Start Menu Shortcut
-Name: "{group}\Admin Dashboard"; Filename: "{app}\start.bat"; Parameters: "/dashboard"; WorkingDir: "{app}"
-Name: "{group}\Start PulsePoint"; Filename: "{app}\start.bat"; WorkingDir: "{app}"
-Name: "{group}\Setup Cloud Access"; Filename: "powershell.exe"; Parameters: "-ExecutionPolicy Bypass -File ""{app}\setup-cloud.ps1"""; WorkingDir: "{app}"; IconFilename: "{app}\start.bat"
+Name: "{autodesktop}\PulsePoint POS"; Filename: "{app}\start.bat"; IconFilename: "{app}\icon.ico"; WorkingDir: "{app}"; Comment: "Launch PulsePoint POS"
+
+; Start Menu Shortcuts
+Name: "{group}\PulsePoint POS"; Filename: "{app}\start.bat"; IconFilename: "{app}\icon.ico"; WorkingDir: "{app}"
+Name: "{group}\Admin Dashboard"; Filename: "{app}\start.bat"; Parameters: "/dashboard"; IconFilename: "{app}\icon.ico"; WorkingDir: "{app}"
+Name: "{group}\Setup Cloud Access"; Filename: "powershell.exe"; Parameters: "-ExecutionPolicy Bypass -File ""{app}\setup-cloud.ps1"""; WorkingDir: "{app}"; IconFilename: "{app}\icon.ico"
 Name: "{group}\Uninstall PulsePoint"; Filename: "{uninstallexe}"
 
 [Run]

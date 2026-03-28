@@ -94,8 +94,9 @@ export default function UserDrawer({ isOpen, user, onClose, onSave }) {
         onSave(submissionData);
         onClose();
     };
-
     if (!isOpen) return null;
+
+    const isProtected = user?.id === 1;
 
     return (
         <>
@@ -155,14 +156,15 @@ export default function UserDrawer({ isOpen, user, onClose, onSave }) {
 
                     {/* Role Selection */}
                     <div className={styles.fieldGroup}>
-                        <label className={styles.label}>Role</label>
-                        <div className={styles.roleTiles}>
+                        <label className={styles.label}>Role {isProtected && <span style={{fontSize: '0.8rem', color: '#EF4444'}}>(Locked for Root Master)</span>}</label>
+                        <div className={styles.roleTiles} style={{ opacity: isProtected ? 0.6 : 1, pointerEvents: isProtected ? 'none' : 'auto' }}>
                             {ROLES.map(r => (
                                 <button
                                     key={r.name}
                                     type="button"
-                                    onClick={() => handleChange('role', r.name)}
+                                    onClick={() => !isProtected && handleChange('role', r.name)}
                                     className={`${styles.roleTile} ${form.role === r.name ? styles.roleTileActive : ''}`}
+                                    disabled={isProtected}
                                 >
                                     <div className={`${styles.roleTileName} ${form.role === r.name ? styles.accentText : ''}`}>
                                         {r.name}
@@ -175,15 +177,16 @@ export default function UserDrawer({ isOpen, user, onClose, onSave }) {
 
                     {/* Status */}
                     <div className={styles.fieldGroup}>
-                        <label className={styles.label}>Account Status</label>
-                        <div className={styles.availRow}>
+                        <label className={styles.label}>Account Status {isProtected && <span style={{fontSize: '0.8rem', color: '#EF4444'}}>(Locked for Root Master)</span>}</label>
+                        <div className={styles.availRow} style={{ opacity: isProtected ? 0.6 : 1, pointerEvents: isProtected ? 'none' : 'auto' }}>
                             <span className={styles.availLabel}>
                                 {form.is_active ? 'Active — can log in' : 'Inactive — login disabled'}
                             </span>
                             <button
                                 className={`${styles.toggle} ${form.is_active ? styles.toggleOn : styles.toggleOff}`}
-                                onClick={() => handleChange('is_active', !form.is_active)}
+                                onClick={() => !isProtected && handleChange('is_active', !form.is_active)}
                                 type="button"
+                                disabled={isProtected}
                             >
                                 <div className={`${styles.toggleNub} ${form.is_active ? styles.nubOn : styles.nubOff}`} />
                             </button>

@@ -33,6 +33,10 @@
     /* Prevents overflow within grid cells */
 }
 
+.alertCard {
+    border-left-color: var(--color-warning) !important;
+}
+
 .kpiHeader {
     display: flex;
     align-items: center;

@@ -6,8 +6,11 @@ import {
     DollarSign,
     ShoppingBag,
     Award,
-    AlertTriangle
+    AlertTriangle,
+    Package
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { inventoryApi } from '../../api/inventory';
 import {
     LineChart,
     Line,
@@ -24,6 +27,22 @@ export default function OverviewPage() {
     const [chartRange, setChartRange] = useState('Weekly');
     const [historicalData, setHistoricalData] = useState([]);
     const [isChartLoading, setIsChartLoading] = useState(false);
+    const [lowStockCount, setLowStockCount] = useState(0);
+    const navigate = useNavigate();
+
+    // Fetch low stock items for KPI
+    useEffect(() => {
+        const fetchStockAlerts = async () => {
+            try {
+                const data = await inventoryApi.getAll();
+                const lowItems = data.filter(item => item.threshold > 0 && item.stock <= item.threshold);
+                setLowStockCount(lowItems.length);
+            } catch (error) {
+                console.error("Failed to fetch inventory for overview", error);
+            }
+        };
+        fetchStockAlerts();
+    }, []);
 
     // Fetch historical data for charts when range changes
     useEffect(() => {
@@ -179,7 +198,11 @@ export default function OverviewPage() {
         <div>
             {/* KPIs */}
             <div className={styles.kpiGrid}>
-                <div className={styles.kpiCard}>
+                <div 
+                    className={styles.kpiCard} 
+                    onClick={() => navigate('/dashboard/reports')}
+                    style={{ cursor: 'pointer' }}
+                >
                     <div className={styles.kpiHeader}>
                         <span className={styles.kpiLabel}>Today's Revenue</span>
                         <DollarSign size={20} className="text-[var(--color-accent)]" />
@@ -190,7 +213,11 @@ export default function OverviewPage() {
                     </div>
                 </div>
 
-                <div className={styles.kpiCard}>
+                <div 
+                    className={styles.kpiCard}
+                    onClick={() => navigate('/dashboard/orders')}
+                    style={{ cursor: 'pointer' }}
+                >
                     <div className={styles.kpiHeader}>
                         <span className={styles.kpiLabel}>Total Orders</span>
                         <ShoppingBag size={20} className="text-[var(--color-accent)]" />
@@ -201,7 +228,11 @@ export default function OverviewPage() {
                     </div>
                 </div>
 
-                <div className={styles.kpiCard}>
+                <div 
+                    className={styles.kpiCard}
+                    onClick={() => navigate('/dashboard/reports')}
+                    style={{ cursor: 'pointer' }}
+                >
                     <div className={styles.kpiHeader}>
                         <span className={styles.kpiLabel}>Top Item Today</span>
                         <Award size={20} className="text-[var(--color-accent)]" />
@@ -212,16 +243,24 @@ export default function OverviewPage() {
                     </div>
                 </div>
 
-                {/* <div className={styles.kpiCard}>
+                <div 
+                    className={`${styles.kpiCard} ${lowStockCount > 0 ? styles.alertCard : ''}`} 
+                    onClick={() => navigate('/dashboard/inventory')}
+                    style={{ cursor: 'pointer' }}
+                >
                     <div className={styles.kpiHeader}>
-                        <span className={styles.kpiLabel}>Low Stock Alerts</span>
-                        <AlertTriangle size={20} className={styles.negative} />
+                        <span className={styles.kpiLabel}>Stock Alerts</span>
+                        {lowStockCount > 0 ? (
+                            <AlertTriangle size={20} className={styles.negative} />
+                        ) : (
+                            <Package size={20} className={styles.positive} />
+                        )}
                     </div>
-                    <div className={styles.kpiValue}>3</div>
-                    <div className={`${styles.kpiChange} ${styles.negative}`}>
-                        Requires immediate attention
+                    <div className={styles.kpiValue}>{lowStockCount}</div>
+                    <div className={`${styles.kpiChange} ${lowStockCount > 0 ? styles.negative : styles.positive}`}>
+                        {lowStockCount > 0 ? 'Requires attention' : 'All stock healthy'}
                     </div>
-                </div> */}
+                </div>
             </div>
 
             <div className={styles.mainGrid}>

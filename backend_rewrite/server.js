@@ -1,3 +1,22 @@
+const cluster = require('cluster');
+
+if (cluster.isPrimary) {
+    console.log(`\n[Process Manager] Primary Manager started (PID: ${process.pid})`);
+    console.log(`[Process Manager] The system will automatically restart on crash or database import.`);
+    
+    cluster.fork();
+
+    cluster.on('exit', (worker, code, signal) => {
+        console.log(`\n[Process Manager] Worker (PID: ${worker.process.pid}) has shut down.`);
+        console.log(`[Process Manager] Rebooting a fresh instance in 1 second...\n`);
+        
+        // Wait 1 second before booting back up to avoid spamming crashes
+        setTimeout(() => {
+            cluster.fork();
+        }, 1000);
+    });
+
+} else {
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
@@ -29,6 +48,9 @@ const notificationRoutes = require('./routes/notifications');
 const userRoutes = require('./routes/users');
 const attendanceRoutes = require('./routes/attendance');
 const categoryRoutes = require('./routes/categories');
+const recipeRoutes = require('./routes/recipes');
+const productSizeRoutes = require('./routes/product-sizes');
+const systemRoutes = require('./routes/system');
 const sessionAuth = require('./middleware/auth');
 
 app.use('/api/products', sessionAuth, productRoutes);
@@ -38,6 +60,9 @@ app.use('/api/notifications', notificationRoutes); // Allow public health/cloud 
 app.use('/api/users', userRoutes); // Auth applied INSIDE users.js for specific routes
 app.use('/api/attendance', sessionAuth, attendanceRoutes);
 app.use('/api/categories', sessionAuth, categoryRoutes);
+app.use('/api/recipes', sessionAuth, recipeRoutes);
+app.use('/api/product-sizes', sessionAuth, productSizeRoutes);
+app.use('/api/system', sessionAuth, systemRoutes);
 
 // --- Robust Frontend Static Serving ---
 const distPath = path.resolve(__dirname, '..', 'frontend', 'dist');
@@ -123,3 +148,4 @@ sequelize.sync()
     .catch((err) => {
         console.error('❌ Failed to sync database:', err.message);
     });
+}

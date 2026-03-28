@@ -53,6 +53,7 @@ export default function POSInterface() {
         }
 
         const hasCustomizations = 
+            product.has_sizes ||
             product.has_sugar_selector || 
             product.has_milk_selector || 
             addonCount > 0;
@@ -60,7 +61,7 @@ export default function POSInterface() {
         if (hasCustomizations) {
             setActiveProduct(product);
         } else {
-            addToCart({ ...product, price: product.base_price, quantity: 1 });
+            addToCart({ ...product, price: product.base_price, quantity: 1, modifiers: [] });
         }
     };
 

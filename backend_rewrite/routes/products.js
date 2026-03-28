@@ -19,7 +19,10 @@ if (!fs.existsSync(uploadsDir)) {
 // GET /api/products - Fetch all products
 router.get('/', async (req, res) => {
     try {
-        const products = await Product.findAll({ order: [['id', 'ASC']] });
+        const products = await Product.findAll({ 
+            where: { is_archived: false },
+            order: [['id', 'ASC']] 
+        });
         res.json(products);
     } catch (error) {
         console.error('Error fetching products:', error);
@@ -66,6 +69,7 @@ router.post('/', upload.single('image'), async (req, res) => {
             modifiers: data.modifiers === 'true' || data.modifiers === true,
             has_sugar_selector: data.has_sugar_selector === 'true' || data.has_sugar_selector === true,
             has_milk_selector: data.has_milk_selector === 'true' || data.has_milk_selector === true,
+            has_sizes: data.has_sizes === 'true' || data.has_sizes === true,
             addons: data.addons, // Handled by model setter
             image_url: imageUrl
         });
@@ -115,6 +119,9 @@ router.patch('/:id', upload.single('image'), async (req, res) => {
         if (updates.has_milk_selector !== undefined) {
             product.has_milk_selector = updates.has_milk_selector === 'true' || updates.has_milk_selector === true;
         }
+        if (updates.has_sizes !== undefined) {
+            product.has_sizes = updates.has_sizes === 'true' || updates.has_sizes === true;
+        }
         if (updates.addons !== undefined) {
             product.addons = updates.addons;
         }
@@ -134,11 +141,23 @@ router.delete('/:id', async (req, res) => {
         const product = await Product.findByPk(req.params.id);
         if (!product) return res.status(404).json({ error: 'Product not found' });
 
-        await product.destroy();
-        res.json({ message: 'Product deleted', id: parseInt(req.params.id) });
+        // Check if the product has ever been sold
+        const { OrderItem } = require('../models');
+        const salesCount = await OrderItem.count({ where: { product_id: product.id } });
+
+        if (salesCount > 0) {
+            // Smart Delete: Product exists in history, archive it instead
+            product.is_archived = true;
+            await product.save();
+            res.json({ message: 'Product archived successfully due to existing sales history', id: parseInt(req.params.id), action: 'archived' });
+        } else {
+            // Standard Delete: Never sold, safe to completely remove
+            await product.destroy();
+            res.json({ message: 'Product permanently deleted', id: parseInt(req.params.id), action: 'deleted' });
+        }
     } catch (error) {
-        console.error('Error deleting product:', error);
-        res.status(500).json({ error: 'Failed to delete product' });
+        console.error('Error archiving/deleting product:', error);
+        res.status(500).json({ error: 'Failed to delete product', detail: error.message });
     }
 });
 

@@ -407,6 +407,45 @@
     border-radius: var(--radius-sm);
 }
 
+/* Size Variant Blocks */
+.sizeBlock {
+    background-color: var(--color-surface);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.sizeBlockHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sizeName {
+    flex: 1;
+    font-weight: 700;
+    font-family: var(--font-ui);
+    font-size: 0.9375rem;
+}
+
+.sizeAdj {
+    font-family: var(--font-data);
+    font-size: 0.875rem;
+    color: var(--color-accent);
+    font-weight: 600;
+}
+
+.addSizeRow {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 4px;
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;

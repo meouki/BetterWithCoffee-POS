@@ -1,0 +1,151 @@
+.recipeSection {
+    background-color: var(--color-bg);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.recipeHeader {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px;
+}
+
+.recipeIcon {
+    color: var(--color-accent);
+}
+
+.recipeTitle {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-accent);
+    font-family: var(--font-ui);
+}
+
+.emptyRecipe {
+    font-size: 0.8rem;
+    color: var(--color-muted);
+    font-style: italic;
+}
+
+.recipeRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+}
+
+.recipeIngName {
+    flex: 1;
+    font-size: 0.875rem;
+    font-family: var(--font-ui);
+    font-weight: 500;
+}
+
+.recipeQty {
+    font-size: 0.8rem;
+    font-family: var(--font-data);
+    color: var(--color-muted);
+    min-width: 64px;
+    text-align: right;
+}
+
+.removeBtn {
+    background: transparent;
+    border: none;
+    color: var(--color-muted);
+    cursor: pointer;
+    padding: 2px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    transition: all var(--transition-fast);
+}
+
+.removeBtn:hover {
+    color: var(--color-error);
+    background-color: color-mix(in srgb, var(--color-error) 12%, transparent);
+}
+
+.addRow {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.ingSelect {
+    flex: 1;
+    background-color: var(--color-surface);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-family: var(--font-ui);
+    font-size: 0.8125rem;
+    padding: 6px 10px;
+    outline: none;
+    transition: border-color var(--transition-base);
+    appearance: none;
+}
+
+.ingSelect:focus {
+    border-color: var(--color-accent);
+}
+
+.qtyInput {
+    width: 72px;
+    background-color: var(--color-surface);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-family: var(--font-data);
+    font-size: 0.8125rem;
+    padding: 6px 8px;
+    outline: none;
+    transition: border-color var(--transition-base);
+}
+
+.qtyInput:focus {
+    border-color: var(--color-accent);
+}
+
+.addIngBtn {
+    background-color: var(--color-accent-muted);
+    color: var(--color-accent);
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-sm);
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.addIngBtn:hover:not(:disabled) {
+    background-color: var(--color-accent);
+    color: white;
+}
+
+.addIngBtn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.loadingText {
+    font-size: 0.8rem;
+    color: var(--color-muted);
+    padding: 8px;
+    font-style: italic;
+}

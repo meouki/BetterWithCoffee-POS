@@ -53,25 +53,56 @@ export function ProductProvider({ children }) {
 
     const addProduct = useCallback(async (productData) => {
         try {
-            let dataToSend = productData;
+            const { pendingSizes, pendingBaseRecipes, pendingSizeRecipes, ...coreData } = productData;
+            let dataToSend = coreData;
+
             if (productData.imageFile) {
                 const formData = new FormData();
-                formData.append('name', productData.name);
-                formData.append('category_name', productData.category_name);
-                formData.append('base_price', productData.base_price);
-                formData.append('is_available', productData.is_available);
-                formData.append('modifiers', productData.modifiers);
-                formData.append('has_sugar_selector', productData.has_sugar_selector);
-                formData.append('has_milk_selector', productData.has_milk_selector);
-                formData.append('addons', JSON.stringify(productData.addons || []));
+                formData.append('name', coreData.name);
+                formData.append('category_name', coreData.category_name);
+                formData.append('base_price', coreData.base_price);
+                formData.append('is_available', coreData.is_available);
+                formData.append('modifiers', coreData.modifiers);
+                formData.append('has_sugar_selector', coreData.has_sugar_selector);
+                formData.append('has_milk_selector', coreData.has_milk_selector);
+                formData.append('has_sizes', coreData.has_sizes);
+                formData.append('addons', JSON.stringify(coreData.addons || []));
                 formData.append('image', productData.imageFile);
                 dataToSend = formData;
             }
 
+            // 1. Create Product
             const newProduct = await productsApi.create(dataToSend);
-            setProducts(prev => [...prev, newProduct]);
+            
+            // 2. Handle Base Recipe
+            if (pendingBaseRecipes && pendingBaseRecipes.length > 0) {
+                const { recipesApi } = await import('../api/inventory');
+                await Promise.all(pendingBaseRecipes.map(recipe => 
+                    recipesApi.create({ ...recipe, product_id: newProduct.id, size_id: null })
+                ));
+            }
 
-            addNotification('MENU_EDIT', `Product Added: ${newProduct.name}`, `Added to ${newProduct.category_name} at ₱${newProduct.base_price}`);
+            // 3. Handle Sizes and their recipes
+            if (pendingSizes && pendingSizes.length > 0) {
+                const { productSizesApi, recipesApi } = await import('../api/inventory');
+                for (const tempSize of pendingSizes) {
+                    const createdSize = await productSizesApi.create({
+                        product_id: newProduct.id,
+                        name: tempSize.name,
+                        price_adjustment: tempSize.price_adjustment
+                    });
+
+                    const sizeRecipes = pendingSizeRecipes[tempSize.id] || [];
+                    if (sizeRecipes.length > 0) {
+                        await Promise.all(sizeRecipes.map(recipe => 
+                            recipesApi.create({ ...recipe, product_id: newProduct.id, size_id: createdSize.id })
+                        ));
+                    }
+                }
+            }
+
+            setProducts(prev => [...prev, newProduct]);
+            addNotification('MENU_EDIT', `Product Added: ${newProduct.name}`, `Added with ${pendingSizes?.length || 0} variants`);
 
             return newProduct;
         } catch (err) {
@@ -82,25 +113,38 @@ export function ProductProvider({ children }) {
 
     const updateProduct = useCallback(async (id, updateData) => {
         try {
-            let dataToSend = updateData;
+            const { pendingSizes, pendingBaseRecipes, pendingSizeRecipes, ...coreData } = updateData;
+            let dataToSend = coreData;
+
             if (updateData.imageFile) {
                 const formData = new FormData();
-                formData.append('name', updateData.name);
-                formData.append('category_name', updateData.category_name);
-                formData.append('base_price', updateData.base_price);
-                formData.append('is_available', updateData.is_available);
-                formData.append('modifiers', updateData.modifiers);
-                formData.append('has_sugar_selector', updateData.has_sugar_selector);
-                formData.append('has_milk_selector', updateData.has_milk_selector);
-                formData.append('addons', JSON.stringify(updateData.addons || []));
+                formData.append('name', coreData.name);
+                formData.append('category_name', coreData.category_name);
+                formData.append('base_price', coreData.base_price);
+                formData.append('is_available', coreData.is_available);
+                formData.append('modifiers', coreData.modifiers);
+                formData.append('has_sugar_selector', coreData.has_sugar_selector);
+                formData.append('has_milk_selector', coreData.has_milk_selector);
+                formData.append('has_sizes', coreData.has_sizes);
+                formData.append('addons', JSON.stringify(coreData.addons || []));
                 formData.append('image', updateData.imageFile);
-                if (updateData.image_url === '') formData.append('image_url', ''); // Handle image removal
+                if (updateData.image_url === '') formData.append('image_url', '');
                 dataToSend = formData;
             }
 
             const updatedProduct = await productsApi.update(id, dataToSend);
-            setProducts(prev => prev.map(p => p.id === id ? updatedProduct : p));
 
+            // Handle Base Recipe updates for non-size products
+            if (!updatedProduct.has_sizes && pendingBaseRecipes) {
+                const { recipesApi } = await import('../api/inventory');
+                // For simplicity in update, we just ensure these are sent. 
+                // A better way would be to sync, but the bridge here handles immediate creation
+                await Promise.all(pendingBaseRecipes.map(recipe => 
+                    recipesApi.create({ ...recipe, product_id: id, size_id: null })
+                ));
+            }
+
+            setProducts(prev => prev.map(p => p.id === id ? updatedProduct : p));
             addNotification('MENU_EDIT', `Product Edited: ${updatedProduct.name}`, `Details updated by Admin`);
 
             return updatedProduct;

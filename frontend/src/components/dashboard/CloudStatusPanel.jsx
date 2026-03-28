@@ -28,9 +28,36 @@ export default function CloudStatusPanel() {
         return () => clearInterval(interval);
     }, []);
 
-    const copyToClipboard = (text) => {
-        navigator.clipboard.writeText(text);
-        toast.success('URL Copied to clipboard');
+    const copyToClipboard = async (text) => {
+        if (!text) return;
+        
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(text);
+                toast.success('URL copied to clipboard');
+            } else {
+                // Fallback for non-secure contexts
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-999999px";
+                textArea.style.top = "-999999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                if (successful) {
+                    toast.success('URL copied to clipboard');
+                } else {
+                    throw new Error('Fallback copy failed');
+                }
+            }
+        } catch (err) {
+            console.error('Copy failed:', err);
+            toast.error('Failed to copy URL. Please copy it manually.');
+        }
     };
 
     return (

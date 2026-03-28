@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Order, OrderItem, sequelize } = require('../models');
+const { Order, OrderItem, sequelize, Recipe, ProductSize, Inventory, StockLog } = require('../models');
 const { Op } = require('sequelize');
 
 // GET /api/orders - Fetch orders with optional date filtering and pagination
@@ -89,6 +89,73 @@ router.post('/', async (req, res) => {
         }));
 
         await OrderItem.bulkCreate(orderItems, { transaction: t });
+
+        // Auto-Deduct Stock based on Recipes
+        try {
+            for (const item of data.items) {
+                let sizeName = null;
+                let modifications = null;
+                try {
+                    modifications = typeof item.modifiers === 'string' ? JSON.parse(item.modifiers) : item.modifiers;
+                } catch (e) {}
+
+                if (Array.isArray(modifications)) {
+                    for (const mod of modifications) {
+                        if (mod.name && mod.name.startsWith('Size: ')) {
+                            sizeName = mod.name.replace('Size: ', '').trim();
+                            break;
+                        }
+                    }
+                }
+                
+                let sizeId = null;
+                if (sizeName) {
+                    const productSize = await ProductSize.findOne({
+                        where: { product_id: item.id, name: sizeName },
+                        transaction: t
+                    });
+                    if (productSize) {
+                        sizeId = productSize.id;
+                    }
+                }
+
+                const baseRecipes = await Recipe.findAll({
+                    where: { product_id: item.id, size_id: null },
+                    transaction: t
+                });
+
+                const recipesToProcess = [...baseRecipes];
+
+                if (sizeId) {
+                    const sizeRecipes = await Recipe.findAll({
+                        where: { product_id: item.id, size_id: sizeId },
+                        transaction: t
+                    });
+                    recipesToProcess.push(...sizeRecipes);
+                }
+
+                for (const recipe of recipesToProcess) {
+                    const ingredient = await Inventory.findByPk(recipe.inventory_id, { transaction: t });
+                    if (ingredient) {
+                        const deduction = recipe.quantity * item.quantity;
+                        ingredient.stock -= deduction;
+                        await ingredient.save({ transaction: t });
+
+                        await StockLog.create({
+                            inventory_id: ingredient.id,
+                            change_qty: -deduction,
+                            reason: 'order',
+                            reference_id: newOrder.id,
+                            stock_after: ingredient.stock,
+                            timestamp: new Date()
+                        }, { transaction: t });
+                    }
+                }
+            }
+        } catch (autoDeductError) {
+            // We just log deduction error, but the order still succeeds. Avoid rollback here
+            console.error('Non-fatal error: auto-deduction failed:', autoDeductError);
+        }
 
         await t.commit();
 

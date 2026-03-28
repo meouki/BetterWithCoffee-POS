@@ -1,5 +1,8 @@
-import { useState, useEffect } from 'react';
-import { Moon, Sun, Monitor, Check } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Moon, Sun, Monitor, Check, AlertTriangle, ShieldAlert, Download, Upload, FileJson, Info } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { useAuth } from '../../context/AuthContext';
+import { apiClient } from '../../api/apiClient';
 import styles from './SettingsPage.module.css';
 
 const ACCENT_PRESETS = [
@@ -11,6 +14,7 @@ const ACCENT_PRESETS = [
 ];
 
 export default function SettingsPage() {
+    const { isMaster } = useAuth();
     const [theme, setTheme] = useState(() => {
         return localStorage.getItem('bwc_theme') || 'system';
     });
@@ -20,6 +24,21 @@ export default function SettingsPage() {
     });
 
     const [activeTheme, setActiveTheme] = useState('light');
+    
+    // Wipe Database Config
+    const [wipeStep, setWipeStep] = useState(0);
+    const [masterPassword, setMasterPassword] = useState('');
+    const [isWiping, setIsWiping] = useState(false);
+
+    // Import / Export state
+    const fileInputRef = useRef(null);
+    const [importBundle, setImportBundle] = useState(null);
+    const [importFileName, setImportFileName] = useState('');
+    const [importMode, setImportMode] = useState('merge'); // 'merge' | 'wipe'
+    const [importPassword, setImportPassword] = useState('');
+    const [importStep, setImportStep] = useState(0); // 0=idle, 1=password, 2=final_confirm
+    const [isImporting, setIsImporting] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
 
     const [animationDuration, setAnimationDuration] = useState(() => {
         return localStorage.getItem('bwc_page_animation_duration') || '0.5';
@@ -66,6 +85,116 @@ export default function SettingsPage() {
     useEffect(() => {
         localStorage.setItem('bwc_page_animation_type', animationType);
     }, [animationType]);
+
+    const handleWipeDatabase = async () => {
+        if (!masterPassword) {
+            toast.error("Master password is required.");
+            return;
+        }
+
+        setIsWiping(true);
+        try {
+            const res = await apiClient.post('/api/system/wipe', { password: masterPassword });
+            
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error || 'Failed to wipe database');
+            }
+
+            toast.success("System completely wiped. Restarting...");
+            
+            // Wait 2s then reload to login page
+            setTimeout(() => {
+                localStorage.clear();
+                window.location.href = '/login';
+            }, 2000);
+            
+        } catch (err) {
+            console.error(err);
+            toast.error(err.message);
+            setIsWiping(false);
+        }
+    };
+
+    const handleExport = async () => {
+        setIsExporting(true);
+        try {
+            // Append timestamp to bust aggressive browser cache of the old HTML fallback response
+            const res = await apiClient.get(`/api/system/export?t=${Date.now()}`);
+            if (!res.ok) {
+                const d = await res.json().catch(() => ({}));
+                throw new Error(d.error || 'Export failed');
+            }
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `pulsepoint-database-${new Date().toISOString().slice(0,10)}.sqlite`;
+            a.click();
+            URL.revokeObjectURL(url);
+            toast.success('Backup downloaded successfully!');
+        } catch (err) {
+            toast.error(err.message);
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
+    const handleFileSelect = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        if (!file.name.endsWith('.sqlite')) {
+            toast.error('Invalid backup file. Please select a .sqlite file.');
+            e.target.value = '';
+            return;
+        }
+
+        setImportFileName(file.name);
+        setImportBundle(file); // Store the actual File object
+        setImportStep(1);
+        e.target.value = '';
+    };
+
+    const handleImport = async () => {
+        if (!importBundle || !importPassword) return;
+        setIsImporting(true);
+        try {
+            const formData = new FormData();
+            formData.append('db', importBundle);
+            formData.append('password', importPassword);
+
+            // Cannot use apiClient.post here because apiClient sets Content-Type to application/json specifically for non-FormData objects, 
+            // but let's double check apiClient... actually apiClient handles FormData correctly by not setting Content-Type!
+            const res = await apiClient.post('/api/system/import', formData);
+            const data = await res.json().catch(() => ({}));
+            
+            if (!res.ok) throw new Error(data.error || 'Import failed');
+            
+            toast.success(data.message || 'Import successful! Rebooting backend automatically...', { duration: 5000 });
+            setImportStep(0);
+            setImportBundle(null);
+            setImportFileName('');
+            setImportPassword('');
+            
+            // Wait 4 seconds for the master process to fork a new worker and boot it up
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 4000);
+            
+        } catch (err) {
+            toast.error(err.message);
+        } finally {
+            setIsImporting(false);
+        }
+    };
+
+    const cancelImport = () => {
+        setImportStep(0);
+        setImportBundle(null);
+        setImportFileName('');
+        setImportPassword('');
+    };
 
     return (
         <div className={styles.pageContainer}>
@@ -165,6 +294,183 @@ export default function SettingsPage() {
                     </div>
                 </div>
             </div>
+
+            {/* ── DATA MANAGEMENT ── */}
+            <div className={styles.section}>
+                <h3 className={styles.sectionHeader}>
+                    <FileJson size={20} /> Data Management
+                </h3>
+
+                {/* Guide box */}
+                <div className={styles.importGuide}>
+                    <div className={styles.guideTitle}><Info size={14} /> How Import &amp; Export Works</div>
+                    <ul className={styles.guideList}>
+                        <li><strong>Export</strong> downloads your <code>pos_data.sqlite</code> database file which contains your latest data.</li>
+                        <li><strong>Import</strong> uploads a previously saved <code>.sqlite</code> file and <em>replaces your current database</em>.</li>
+                        <li><strong>Warning</strong>: Importing will permanently wipe your current data and overwrite it with the backup. Use carefully!</li>
+                        <li>Both export and import operations require your <strong>Master password</strong> to execute correctly.</li>
+                    </ul>
+                </div>
+
+                {/* Export */}
+                <div className={styles.dataRow}>
+                    <div className={styles.settingInfo}>
+                        <div className={styles.settingTitle}>Export Backup</div>
+                        <div className={styles.settingDesc}>Download a copy of the SQLite database right now.</div>
+                    </div>
+                    <button
+                        className={styles.exportBtn}
+                        onClick={handleExport}
+                        disabled={isExporting}
+                    >
+                        <Download size={16} />
+                        {isExporting ? 'Exporting…' : 'Download Backup'}
+                    </button>
+                </div>
+
+                <div className={styles.divider} />
+
+                {/* Import */}
+                <div className={styles.dataRow}>
+                    <div className={styles.settingInfo}>
+                        <div className={styles.settingTitle}>Import from Backup</div>
+                        <div className={styles.settingDesc}>Restore data from a previously exported PulsePoint <code>.sqlite</code> file.</div>
+                    </div>
+                    <button
+                        className={styles.importBtn}
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isImporting || importStep === 1}
+                    >
+                        <Upload size={16} />
+                        Select File
+                    </button>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".sqlite"
+                        style={{ display: 'none' }}
+                        onChange={handleFileSelect}
+                    />
+                </div>
+
+                {importStep > 0 && importBundle && (
+                    <div className={styles.importConfirmBox}>
+                        <div className={styles.importFileInfo}>
+                            <FileJson size={16} />
+                            <span>{importFileName}</span>
+                        </div>
+
+                        {importStep === 1 && (
+                            <>
+                                <p className={styles.wipeWarningSmall}>
+                                    <ShieldAlert size={14} /> This action requires your <strong>Master Password</strong> to proceed.
+                                </p>
+                                <div className={styles.importPasswordRow}>
+                                    <input
+                                        type="password"
+                                        placeholder="Type Master Password"
+                                        className={styles.dangerInput}
+                                        value={importPassword}
+                                        onChange={e => setImportPassword(e.target.value)}
+                                        autoFocus
+                                    />
+                                </div>
+                                <div className={styles.wipeActions}>
+                                    <button className={styles.cancelBtn} onClick={cancelImport}>Cancel</button>
+                                    <button 
+                                        className={styles.saveBtn} 
+                                        disabled={!importPassword}
+                                        onClick={() => setImportStep(2)}
+                                    >
+                                        Next Component
+                                    </button>
+                                </div>
+                            </>
+                        )}
+
+                        {importStep === 2 && (
+                            <>
+                                <p className={styles.wipeWarningSmall} style={{ color: '#EF4444', background: 'rgba(239, 68, 68, 0.1)' }}>
+                                    <AlertTriangle size={16} /> 
+                                    <strong>FINAL CONFIRMATION:</strong> Every record currently in the system will be <strong>erased</strong> and replaced by this file. This cannot be undone!
+                                </p>
+                                <div className={styles.wipeActions}>
+                                    <button className={styles.cancelBtn} onClick={() => setImportStep(1)} disabled={isImporting}>Back</button>
+                                    <button
+                                        className={styles.dangerBtnSolid}
+                                        onClick={handleImport}
+                                        disabled={isImporting}
+                                    >
+                                        {isImporting ? 'Restoring...' : 'YES, WIPE & RESTORE DB'}
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                )}
+            </div>
+
+            {isMaster && (
+                <div className={`${styles.section} ${styles.dangerSection}`}>
+                    <h3 className={`${styles.sectionHeader} ${styles.dangerText}`}>
+                    <ShieldAlert size={20} /> Danger Zone
+                </h3>
+
+                <div className={styles.settingRow}>
+                    <div className={styles.settingInfo}>
+                        <div className={styles.settingTitle}>Total Factory Reset</div>
+                        <div className={styles.settingDesc}>
+                            Permanently wipe all products, categories, orders, logic, and configurations.
+                        </div>
+                    </div>
+
+                    {wipeStep === 0 && (
+                        <button 
+                            className={styles.dangerBtn}
+                            onClick={() => setWipeStep(1)}
+                        >
+                            Factory Reset System
+                        </button>
+                    )}
+
+                    {wipeStep === 1 && (
+                        <div className={styles.wipeConfirmStep}>
+                            <p className={styles.warningText}>
+                                <AlertTriangle size={16} /> 
+                                <strong>WARNING:</strong> This will permanently delete all records, recipes, orders, and configurations. Are you absolutely sure?
+                            </p>
+                            <div className={styles.wipeActions}>
+                                <button className={styles.cancelBtn} onClick={() => setWipeStep(0)}>Cancel</button>
+                                <button className={styles.dangerBtn} onClick={() => setWipeStep(2)}>Yes, proceed</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {wipeStep === 2 && (
+                        <div className={styles.wipeConfirmStep}>
+                            <p className={styles.warningText}>
+                                <strong>FINAL WARNING:</strong> Please backup your <code>pos_data.sqlite</code> file located in the backend folder first. <br/><br/>
+                                Enter Master Password to execute wipe:
+                            </p>
+                            <input 
+                                type="password" 
+                                className={styles.dangerInput}
+                                placeholder="Master Password"
+                                value={masterPassword}
+                                onChange={e => setMasterPassword(e.target.value)}
+                                disabled={isWiping}
+                            />
+                            <div className={styles.wipeActions}>
+                                <button className={styles.cancelBtn} onClick={() => { setWipeStep(0); setMasterPassword(''); }} disabled={isWiping}>Abort</button>
+                                <button className={styles.dangerBtnSolid} onClick={handleWipeDatabase} disabled={isWiping || !masterPassword}>
+                                    {isWiping ? 'Wiping System...' : 'CONFIRM WIPE'}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                    </div>
+                </div>
+            )}
 
             <div className={styles.section}>
                 <h3 className={styles.sectionHeader}>System Information</h3>

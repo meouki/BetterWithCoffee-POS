@@ -45,7 +45,7 @@ export default function CartDrawer({
                                 <div className={styles.itemInfo}>
                                     <div className={styles.itemName}>{item.name}</div>
                                         <div className={styles.modList}>
-                                            {item.modifiers.map((mod, midx) => (
+                                            {(Array.isArray(item.modifiers) ? item.modifiers : []).map((mod, midx) => (
                                                 <div key={midx} className={styles.modItem}>
                                                     <span>{mod.name}</span>
                                                     {parseFloat(mod.price) > 0 && <span>+₱{parseFloat(mod.price).toFixed(2)}</span>}

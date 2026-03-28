@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react';
 import { X, Camera, Trash2, Plus } from 'lucide-react';
 import { useProductContext } from '../../context/ProductContext';
+import { inventoryApi, productSizesApi, recipesApi } from '../../api/inventory';
+import RecipeBuilder from './RecipeBuilder';
 import styles from './ProductDrawer.module.css';
 
 const emptyForm = {
     name: '',
-    category_name: '', // Will be set to first category in useEffect
+    category_name: '',
     base_price: '',
     is_available: true,
     modifiers: false,
     has_sugar_selector: false,
     has_milk_selector: false,
+    has_sizes: false,
     addons: [],
     image_url: '',
 };
@@ -21,6 +24,22 @@ export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
     const [form, setForm] = useState(emptyForm);
     const [originalPrice, setOriginalPrice] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null);
+
+    // Inventory/recipe state
+    const [ingredients, setIngredients] = useState([]);
+    const [sizes, setSizes] = useState([]); // ProductSize records for this product
+    const [newSizeName, setNewSizeName] = useState('');
+    const [newSizeAdj, setNewSizeAdj] = useState('0');
+    // Pending recipes for NEW products (before they are saved to DB)
+    const [pendingBaseRecipes, setPendingBaseRecipes] = useState([]);
+    const [pendingSizeRecipes, setPendingSizeRecipes] = useState({}); // { tempSizeKey: [recipes] }
+
+    useEffect(() => {
+        if (isOpen) {
+            // Load all ingredients for recipe picker
+            inventoryApi.getAll().then(setIngredients).catch(() => {});
+        }
+    }, [isOpen]);
 
     // Sync form with product being edited
     useEffect(() => {
@@ -34,16 +53,21 @@ export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
                     modifiers: product.modifiers || false,
                     has_sugar_selector: product.has_sugar_selector || false,
                     has_milk_selector: product.has_milk_selector || false,
+                    has_sizes: product.has_sizes || false,
                     addons: product.addons || [],
                     image_url: product.image_url || '',
                 });
                 setOriginalPrice(product.base_price);
+                // Load sizes for this product if editing
+                if (product.id) {
+                    productSizesApi.getByProduct(product.id).then(setSizes).catch(() => setSizes([]));
+                }
             } else {
-                setForm({
-                    ...emptyForm,
-                    category_name: categories.length > 0 ? categories[0].name : ''
-                });
+                setForm({ ...emptyForm, category_name: categories.length > 0 ? categories[0].name : '' });
                 setOriginalPrice(null);
+                setSizes([]);
+                setPendingBaseRecipes([]);
+                setPendingSizeRecipes({});
             }
             setSelectedFile(null);
         }
@@ -52,9 +76,6 @@ export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
-        // In a real app, you'd upload to server here.
-        // For now, we'll create a local preview URL.
         const previewUrl = URL.createObjectURL(file);
         setSelectedFile(file);
         handleChange('image_url', previewUrl);
@@ -70,32 +91,75 @@ export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
         setForm(prev => ({ ...prev, [field]: value }));
     };
 
+    // --- Size Management (for SAVED products only) ---
+    const handleAddSize = async () => {
+        if (!newSizeName.trim()) return;
+        if (!product?.id) {
+            // Offline: just add a temp entry for visual display, recipes will wire on save
+            const tempSize = { id: `temp-${Date.now()}`, name: newSizeName.trim(), price_adjustment: parseFloat(newSizeAdj || 0), product_id: null };
+            setSizes(prev => [...prev, tempSize]);
+            setPendingSizeRecipes(prev => ({ ...prev, [tempSize.id]: [] }));
+            setNewSizeName('');
+            setNewSizeAdj('0');
+            return;
+        }
+        try {
+            const created = await productSizesApi.create({
+                product_id: product.id,
+                name: newSizeName.trim(),
+                price_adjustment: parseFloat(newSizeAdj || 0),
+                sort_order: sizes.length
+            });
+            setSizes(prev => [...prev, created]);
+            setNewSizeName('');
+            setNewSizeAdj('0');
+        } catch (err) {
+            console.error('Failed to add size:', err);
+        }
+    };
+
+    const handleRemoveSize = async (size) => {
+        if (!product?.id || String(size.id).startsWith('temp')) {
+            setSizes(prev => prev.filter(s => s.id !== size.id));
+            return;
+        }
+        if (!window.confirm(`Delete size "${size.name}"? This also removes its recipe.`)) return;
+        try {
+            await productSizesApi.delete(size.id);
+            setSizes(prev => prev.filter(s => s.id !== size.id));
+        } catch (err) {
+            console.error('Failed to delete size:', err);
+        }
+    };
+
     const handleSave = () => {
         const parsedPrice = parseFloat(form.base_price);
         if (!form.name.trim() || isNaN(parsedPrice) || parsedPrice <= 0) return;
 
         onSave({
             ...(product || {}),
-            id: product?.id ?? Date.now(), // Temp ID for new products
+            id: product?.id ?? null, // Let server decide or use null for new
             name: form.name.trim(),
             category_name: form.category_name,
             base_price: parsedPrice,
             is_available: form.is_available,
+            has_sizes: form.has_sizes,
             modifiers: form.modifiers || form.addons.length > 0 || form.has_sugar_selector || form.has_milk_selector,
             has_sugar_selector: form.has_sugar_selector,
             has_milk_selector: form.has_milk_selector,
             addons: form.addons,
             image_url: form.image_url,
-            imageFile: selectedFile // Pass the actual file
+            imageFile: selectedFile,
+            // Pass along new sizes and recipes for handling by ProductContext
+            pendingSizes: sizes.filter(s => String(s.id).startsWith('temp')),
+            pendingBaseRecipes: pendingBaseRecipes,
+            pendingSizeRecipes: pendingSizeRecipes
         });
         onClose();
     };
 
     const handleAddAddon = () => {
-        setForm(prev => ({
-            ...prev,
-            addons: [...prev.addons, { name: '', price: '0' }]
-        }));
+        setForm(prev => ({ ...prev, addons: [...prev.addons, { name: '', price: '0' }] }));
     };
 
     const handleUpdateAddon = (index, field, value) => {
@@ -107,10 +171,7 @@ export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
     };
 
     const handleRemoveAddon = (index) => {
-        setForm(prev => ({
-            ...prev,
-            addons: prev.addons.filter((_, i) => i !== index)
-        }));
+        setForm(prev => ({ ...prev, addons: prev.addons.filter((_, i) => i !== index) }));
     };
 
     if (!isOpen) return null;
@@ -220,6 +281,94 @@ export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
                         </div>
                     </div>
 
+                    {/* Inventory Section */}
+                    <div className={styles.sectionDivider}>Inventory & Recipe</div>
+
+                    {/* has_sizes toggle */}
+                    <div className={styles.fieldGroup}>
+                        <div className={styles.availRow}>
+                            <div>
+                                <div className={styles.availLabel}>Size Variants</div>
+                                <div className={styles.availDesc}>Enable Regular / Large / Custom sizes with their own recipes</div>
+                            </div>
+                            <button
+                                className={`${styles.toggle} ${form.has_sizes ? styles.toggleOn : styles.toggleOff}`}
+                                onClick={() => handleChange('has_sizes', !form.has_sizes)}
+                            >
+                                <div className={`${styles.toggleNub} ${form.has_sizes ? styles.nubOn : styles.nubOff}`} />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* RECIPE: no sizes */}
+                    {!form.has_sizes && (
+                        <div className={styles.fieldGroup}>
+                            <label className={styles.label}>Base Recipe</label>
+                            <RecipeBuilder
+                                productId={product?.id ?? null}
+                                sizeId={null}
+                                ingredients={ingredients}
+                                pendingRecipes={pendingBaseRecipes}
+                                onPendingChange={(_, updated) => setPendingBaseRecipes(updated)}
+                            />
+                        </div>
+                    )}
+
+                    {/* SIZE VARIANTS */}
+                    {form.has_sizes && (
+                        <div className={styles.fieldGroup}>
+                            <div className={styles.addonHeader}>
+                                <label className={styles.label}>Size Variants</label>
+                            </div>
+
+                            {/* Existing sizes */}
+                            {sizes.map(size => (
+                                <div key={size.id} className={styles.sizeBlock}>
+                                    <div className={styles.sizeBlockHeader}>
+                                        <div className={styles.sizeName}>{size.name}</div>
+                                        <div className={styles.sizeAdj}>
+                                            {size.price_adjustment >= 0 ? '+' : ''}₱{size.price_adjustment}
+                                        </div>
+                                        <button className={styles.removeAddonBtn} onClick={() => handleRemoveSize(size)}>
+                                            <X size={15} />
+                                        </button>
+                                    </div>
+                                    <RecipeBuilder
+                                        productId={product?.id ?? null}
+                                        sizeId={String(size.id).startsWith('temp') ? null : size.id}
+                                        ingredients={ingredients}
+                                        pendingRecipes={pendingSizeRecipes[size.id] || []}
+                                        onPendingChange={(_, updated) => setPendingSizeRecipes(prev => ({ ...prev, [size.id]: updated }))}
+                                    />
+                                </div>
+                            ))}
+
+                            {/* Add new size */}
+                            <div className={styles.addSizeRow}>
+                                <input
+                                    className={styles.addonNameInput}
+                                    placeholder="Size name (e.g. Regular, Large)"
+                                    value={newSizeName}
+                                    onChange={e => setNewSizeName(e.target.value)}
+                                />
+                                <div className={styles.addonPriceWrapper}>
+                                    <span>₱</span>
+                                    <input
+                                        type="number"
+                                        className={styles.addonPriceInput}
+                                        placeholder="Adj."
+                                        value={newSizeAdj}
+                                        onChange={e => setNewSizeAdj(e.target.value)}
+                                        title="Price adjustment (e.g. +20 for Large)"
+                                    />
+                                </div>
+                                <button className={styles.addAddonBtn} onClick={handleAddSize}>
+                                    <Plus size={14} /> Add Size
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Customizations Section */}
                     <div className={styles.sectionDivider}>Customizations</div>
 
@@ -260,19 +409,19 @@ export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
                                 <Plus size={14} /> Add Row
                             </button>
                         </div>
-                        
+
                         <div className={styles.addonList}>
                             {form.addons.map((addon, index) => (
                                 <div key={index} className={styles.addonRow}>
-                                    <input 
-                                        className={styles.addonNameInput} 
+                                    <input
+                                        className={styles.addonNameInput}
                                         placeholder="Add-on Name (e.g. Hot Sauce)"
                                         value={addon.name}
                                         onChange={(e) => handleUpdateAddon(index, 'name', e.target.value)}
                                     />
                                     <div className={styles.addonPriceWrapper}>
                                         <span>₱</span>
-                                        <input 
+                                        <input
                                             type="number"
                                             className={styles.addonPriceInput}
                                             value={addon.price}
