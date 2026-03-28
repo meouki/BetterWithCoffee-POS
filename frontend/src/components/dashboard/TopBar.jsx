@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { Bell, Menu, Monitor, Cloud } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotificationContext } from '../../context/NotificationContext';
 import ProfilePanel from '../shared/ProfilePanel';
 import CloudStatusPanel from './CloudStatusPanel';
+import { attendanceApi } from '../../api/attendance';
 import styles from './TopBar.module.css';
 
 export default function TopBar({ onToggleSidebar }) {
@@ -17,11 +19,42 @@ export default function TopBar({ onToggleSidebar }) {
     const [time, setTime] = useState(new Date());
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isCloudOpen, setIsCloudOpen] = useState(false);
+    const [attendanceStatus, setAttendanceStatus] = useState('none'); // 'none', 'in', 'out'
 
     useEffect(() => {
         const timer = setInterval(() => setTime(new Date()), 1000);
         return () => clearInterval(timer);
     }, []);
+
+    const fetchAttendance = useCallback(async () => {
+        if (!currentUser) return;
+        try {
+            const records = await attendanceApi.getRecords(currentUser.id);
+            const todayStr = new Date().toISOString().split('T')[0];
+            const todayRecord = records.find(r => r.date === todayStr);
+
+            if (!todayRecord || !todayRecord.clock_in) {
+                setAttendanceStatus('none');
+            } else if (todayRecord.clock_in && !todayRecord.clock_out) {
+                setAttendanceStatus('in');
+            } else if (todayRecord.clock_in && todayRecord.clock_out) {
+                setAttendanceStatus('out');
+            }
+        } catch (error) {
+            console.error('Failed to fetch attendance for topbar:', error);
+        }
+    }, [currentUser]);
+
+    useEffect(() => {
+        fetchAttendance();
+    }, [fetchAttendance]);
+
+    // Re-fetch when profile panel closes (user might have changed status)
+    useEffect(() => {
+        if (!isProfileOpen) {
+            fetchAttendance();
+        }
+    }, [isProfileOpen, fetchAttendance]);
 
     const formatTime = (date) => {
         return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }) +
@@ -60,7 +93,7 @@ export default function TopBar({ onToggleSidebar }) {
                             {unreadCount > 0 && <span className={styles.badge}>{unreadCount > 99 ? '99+' : unreadCount}</span>}
                         </Link>
 
-                        <button 
+                        <button
                             className={`${styles.iconBtn} ${isCloudOpen ? styles.active : ''}`}
                             onClick={() => setIsCloudOpen(!isCloudOpen)}
                             title="Cloud Access Status"
@@ -76,7 +109,13 @@ export default function TopBar({ onToggleSidebar }) {
                             title="View profile"
                             aria-label="Open profile"
                         >
-                            <div className={styles.userAvatar}>{initial}</div>
+                            <div className={styles.userAvatarWrapper}>
+                                <div className={`${styles.statusRing} ${attendanceStatus === 'in' ? styles.statusClockedIn :
+                                        attendanceStatus === 'out' ? styles.statusClockedOut :
+                                            styles.statusNotClocked
+                                    }`} />
+                                <div className={styles.userAvatar}>{initial}</div>
+                            </div>
                             <span className={styles.userName}>{displayName}</span>
                         </button>
                     </div>

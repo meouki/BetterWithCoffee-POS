@@ -8,6 +8,11 @@ const sessionAuth = async (req, res, next) => {
     const userId = req.headers['x-user-id'];
     const sessionId = req.headers['x-session-id'];
 
+    // Always allow OPTIONS preflight requests to pass through without authentication
+    if (req.method === 'OPTIONS') {
+        return next();
+    }
+
     // For public endpoints or login, skip (already handled by route structure usually)
     // But we'll apply this selectively in server.js
     if (!userId || !sessionId) {
@@ -24,9 +29,9 @@ const sessionAuth = async (req, res, next) => {
 
         if (user.session_id !== sessionId) {
             console.warn(`[sessionAuth] 401: Session mismatch for ${user.username}. Received ${sessionId}, DB has ${user.session_id}`);
-            return res.status(401).json({ 
-                error: 'Session invalidated.', 
-                message: 'You have been logged in on another device. Please log in again.' 
+            return res.status(401).json({
+                error: 'Session invalidated.',
+                message: 'You have been logged in on another device. Please log in again.'
             });
         }
 

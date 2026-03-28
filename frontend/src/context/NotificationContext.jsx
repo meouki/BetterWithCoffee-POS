@@ -11,9 +11,11 @@ export function NotificationProvider({ children }) {
 
     // Initial fetch function
     const fetchLogs = useCallback(async () => {
-        const fetchedLogs = await notificationsApi.getAll();
-        if (fetchedLogs.length > 0) {
-            setLogs(fetchedLogs);
+        try {
+            const fetchedLogs = await notificationsApi.getAll();
+            setLogs(fetchedLogs || []);
+        } catch (error) {
+            console.error('Failed to fetch notifications:', error);
         }
     }, []);
 
@@ -43,8 +45,19 @@ export function NotificationProvider({ children }) {
     const addNotification = useCallback(async (type, message, details = "") => {
         const actorName = currentUser?.name || 'Unknown Staff';
 
-        // Send to backend text file
-        await notificationsApi.add({ type, message, details, cashier: actorName });
+        try {
+            // Send to backend
+            await notificationsApi.add({ 
+                type, 
+                message, 
+                details, 
+                cashier: actorName,
+                timestamp: new Date().toISOString()
+            });
+        } catch (error) {
+            console.error('Failed to save notification persistency:', error);
+            // We still want to show it in UI even if DB pipe is broken
+        }
 
         // Optimistically add to UI list and bump unread count
         const newLog = {
@@ -58,7 +71,7 @@ export function NotificationProvider({ children }) {
 
         setLogs(prev => [newLog, ...prev]);
         setUnreadCount(prev => prev + 1);
-    }, []);
+    }, [currentUser]);
 
     const markAllRead = useCallback(() => {
         setUnreadCount(0);

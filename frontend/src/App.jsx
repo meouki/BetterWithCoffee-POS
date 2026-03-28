@@ -119,12 +119,15 @@ function App() {
                     <Route index element={<Navigate to="overview" replace />} />
                     <Route path="overview" element={<OverviewPage />} />
                     <Route path="orders" element={<OrdersPage />} />
-                    <Route path="menu" element={<MenuManagementPage />} />
                     <Route path="inventory" element={<InventoryPage />} />
                     <Route path="reports" element={<ReportsPage />} />
-                    <Route path="users" element={<UserManagementPage />} />
                     <Route path="settings" element={<SettingsPage />} />
                     <Route path="notifications" element={<NotificationsPage />} />
+
+                    <Route element={<ProtectedRoute allowedRoles={['Master']} />}>
+                      <Route path="users" element={<UserManagementPage />} />
+                      <Route path="menu" element={<MenuManagementPage />} />
+                    </Route>
                   </Route>
                 </Route>
               </Routes>

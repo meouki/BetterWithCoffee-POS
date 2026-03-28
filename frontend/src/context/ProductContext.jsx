@@ -152,15 +152,15 @@ export function ProductProvider({ children }) {
                 deleteProduct,
                 toggleAvailability,
                 categories,
-                addCategory: async (name) => {
+                addCategory: useCallback(async (name) => {
                     const newCat = await categoriesApi.create({ name });
                     setCategories(prev => [...prev, newCat]);
                     addNotification('MENU_EDIT', 'New Category', `Created "${name}" group.`);
-                },
-                deleteCategory: async (id) => {
+                }, [addNotification]),
+                deleteCategory: useCallback(async (id) => {
                     await categoriesApi.delete(id);
                     setCategories(prev => prev.filter(c => c.id !== id));
-                }
+                }, [])
             }}
         >
             {children}

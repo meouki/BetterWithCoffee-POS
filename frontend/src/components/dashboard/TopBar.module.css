@@ -228,3 +228,61 @@
         width: calc(100vw - 24px);
     }
 }
+
+.userAvatarWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.statusRing {
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+.statusNotClocked {
+    border-color: var(--color-error);
+    box-shadow: 0 0 8px var(--color-error);
+    animation: glowRed 2s infinite alternate;
+}
+
+.statusClockedIn {
+    border-color: #3B82F6; /* Bright Blue */
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+    border-style: dashed;
+    animation: spin-ring 4s linear infinite, glowBlue 2s infinite alternate;
+}
+
+.statusClockedOut {
+    border-color: var(--color-success);
+    box-shadow: 0 0 8px var(--color-success);
+    animation: glowGreen 2s infinite alternate;
+}
+
+@keyframes spin-ring {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes glowRed {
+    from { box-shadow: 0 0 4px var(--color-error); opacity: 0.6; }
+    to { box-shadow: 0 0 12px var(--color-error); opacity: 1; }
+}
+
+@keyframes glowBlue {
+    from { box-shadow: 0 0 4px #3B82F6; opacity: 0.6; }
+    to { box-shadow: 0 0 15px #3B82F6; opacity: 1; }
+}
+
+@keyframes glowGreen {
+    from { box-shadow: 0 0 4px var(--color-success); opacity: 0.6; }
+    to { box-shadow: 0 0 12px var(--color-success); opacity: 1; }
+}

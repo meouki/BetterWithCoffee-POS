@@ -89,6 +89,7 @@ export default function MenuManagementPage() {
             toast.success('Category added');
         } catch (err) {
             console.error(err);
+            toast.error(err.message || 'Failed to add category');
         }
     };
 

@@ -24,6 +24,9 @@ router.post('/', async (req, res) => {
         const category = await Category.create({ name });
         res.status(201).json(category);
     } catch (error) {
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            return res.status(400).json({ error: 'A category with this name already exists.' });
+        }
         res.status(400).json({ error: error.message });
     }
 });

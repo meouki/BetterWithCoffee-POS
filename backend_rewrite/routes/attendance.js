@@ -21,14 +21,18 @@ router.get('/:userId', async (req, res) => {
 // POST /api/attendance/clock-in - Record clock in for today
 router.post('/clock-in', async (req, res) => {
     try {
-        const { userId } = req.body;
+        const user_id = req.body.user_id || req.body.userId;
         const today = new Date().toISOString().split('T')[0];
+
+        if (!user_id) {
+            return res.status(400).json({ error: 'User ID is required' });
+        }
 
         // Find or create record for today
         const [record, created] = await Attendance.findOrCreate({
-            where: { user_id: userId, date: today },
+            where: { user_id, date: today },
             defaults: { 
-                user_id: userId, 
+                user_id, 
                 date: today,
                 clock_in: new Date(),
                 type: 'Work'
@@ -55,11 +59,15 @@ router.post('/clock-in', async (req, res) => {
 // POST /api/attendance/clock-out - Record clock out for today
 router.post('/clock-out', async (req, res) => {
     try {
-        const { userId } = req.body;
+        const user_id = req.body.user_id || req.body.userId;
         const today = new Date().toISOString().split('T')[0];
 
+        if (!user_id) {
+            return res.status(400).json({ error: 'User ID is required' });
+        }
+
         const record = await Attendance.findOne({
-            where: { user_id: userId, date: today }
+            where: { user_id, date: today }
         });
 
         if (!record || !record.clock_in) {
@@ -79,13 +87,18 @@ router.post('/clock-out', async (req, res) => {
 // POST /api/attendance/day-off - Mark today or a specific date as Day Off
 router.post('/day-off', async (req, res) => {
     try {
-        const { userId, date } = req.body;
+        const user_id = req.body.user_id || req.body.userId;
+        const date = req.body.date;
         const targetDate = date || new Date().toISOString().split('T')[0];
 
+        if (!user_id) {
+            return res.status(400).json({ error: 'User ID is required' });
+        }
+
         const [record, created] = await Attendance.findOrCreate({
-            where: { user_id: userId, date: targetDate },
+            where: { user_id, date: targetDate },
             defaults: { 
-                user_id: userId, 
+                user_id, 
                 date: targetDate,
                 type: 'DayOff'
             }

@@ -79,16 +79,19 @@ export default function UserDrawer({ isOpen, user, onClose, onSave }) {
     const handleSave = () => {
         if (!validate()) return;
 
-        onSave({
-            ...(user || {}),
-            id: user?.id ?? undefined, // Let backend assign ID if new
-            name: form.username, // Name defaults to username
+        const submissionData = {
+            name: form.username,
             username: form.username.toLowerCase().trim(),
-            password: form.password, // IMPORTANT: Send the password
             role: form.role,
             is_active: form.is_active,
-            // created/last_login are handled by database
-        });
+        };
+
+        // Only include password if it's filled (new account OR password change)
+        if (form.password) {
+            submissionData.password = form.password;
+        }
+
+        onSave(submissionData);
         onClose();
     };
 

@@ -19,6 +19,18 @@ export const attendanceApi = {
         return response.json();
     },
 
+    getRecords: async (userId) => {
+        const response = await apiClient.get(`/api/attendance/${userId}`);
+        if (!response.ok) throw new Error('Failed to fetch user attendance');
+        return response.json();
+    },
+
+    getStats: async (username) => {
+        const response = await apiClient.get(`/api/attendance/stats/${username}`);
+        if (!response.ok) throw new Error('Failed to fetch user stats');
+        return response.json();
+    },
+
     getLogs: async (startDate = null, endDate = null) => {
         const params = new URLSearchParams();
         if (startDate) params.append('from', startDate);

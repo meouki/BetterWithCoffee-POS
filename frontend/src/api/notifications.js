@@ -7,6 +7,18 @@ export const notificationsApi = {
         return response.json();
     },
 
+    add: async (notification) => {
+        const response = await apiClient.post('/api/notifications', notification);
+        if (!response.ok) throw new Error('Failed to create notification');
+        return response.json();
+    },
+
+    clearAll: async () => {
+        const response = await apiClient.delete('/api/notifications');
+        if (!response.ok) throw new Error('Failed to clear notifications');
+        return true;
+    },
+
     getUnreadCount: async () => {
         const response = await apiClient.get('/api/notifications/unread-count');
         if (!response.ok) throw new Error('Failed to fetch unread count');

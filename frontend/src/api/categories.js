@@ -7,9 +7,12 @@ export const categoriesApi = {
         return response.json();
     },
 
-    create: async (name) => {
-        const response = await apiClient.post('/api/categories', { name });
-        if (!response.ok) throw new Error('Failed to create category');
+    create: async (categoryData) => {
+        const response = await apiClient.post('/api/categories', categoryData);
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to create category');
+        }
         return response.json();
     },
 

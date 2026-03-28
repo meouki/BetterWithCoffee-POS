@@ -87,7 +87,7 @@ async function seedDatabase() {
     const categoryCount = await Category.count();
     if (categoryCount === 0) {
         console.log('🌱 Seeding default categories...');
-        const defaults = ['Cold Drinks', 'Hot Drinks', 'Blended Drinks', 'Frappe Drinks', 'Pastries'];
+        const defaults = ['Cold Drinks', 'Hot Drinks', 'Blended Drinks', 'Snacks'];
         await Category.bulkCreate(defaults.map(name => ({ name })));
         console.log('✅ Default categories seeded.');
     }
@@ -107,7 +107,7 @@ sequelize.sync()
         app.listen(PORT, '0.0.0.0', () => {
             console.log(`\n🚀 Server is running!`);
             console.log(`\n================================`);
-            console.log(`  ACCESS THE POS FROM A TABLET  `);
+            console.log(`  ACCESS THE POS FROM ANY DEVICE  `);
             console.log(`================================`);
             const nets = os.networkInterfaces();
             for (const name of Object.keys(nets)) {
