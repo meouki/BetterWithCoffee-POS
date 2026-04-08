@@ -7,7 +7,7 @@ The backend is an Express.js REST API using Sequelize ORM with SQLite. It serves
 ## Core Files
 
 ### `server.js`
-**The main entry point.** Sets up Express with CORS, JSON parsing, and static file serving for uploaded images (`/uploads`). Mounts all API route handlers under `/api/*`. Serves the pre-built React frontend from `../frontend/dist/` with a catch-all for client-side routing. On startup: syncs database tables, seeds a default Master user (`master`/`master123`) and default categories if none exist, optionally starts a Cloudflare tunnel if `ENABLE_CLOUD=true` in `.env`. Listens on port 5000 (configurable via `PORT` env var) on all interfaces (`0.0.0.0`) and prints LAN IP addresses for multi-device access.
+**The main entry point — uses Node.js `cluster` for process management.** The primary process immediately forks one worker and watches for its exit; on any crash or `process.exit(0)` (e.g., after a DB import), it automatically reforks after 1 second, enabling zero-intervention recovery. The worker process sets up Express with CORS, JSON parsing, static file serving for uploaded images (`/uploads`), and mounts all API route handlers under `/api/*`. Serves the pre-built React frontend from `../frontend/dist/` with a catch-all for client-side routing. On startup: syncs database tables, seeds a default Master user (`master`/`master123`) and default categories (`Cold Drinks`, `Hot Drinks`, `Blended Drinks`, `Snacks`) if none exist. Optionally starts a Cloudflare tunnel if `ENABLE_CLOUD=true` in `.env`. Listens on port 5000 on `0.0.0.0` and prints LAN IPs for multi-device access.
 
 ### `emergency-reset.js`
 **Standalone CLI script** to reset the Master account password back to `master123`. Run with `node emergency-reset.js` if locked out. Safe to re-run — finds or recreates the Master account.
@@ -37,8 +37,13 @@ Creates and exports a single Sequelize instance configured for SQLite dialect. T
 **Central model registry.** Imports all models, defines Sequelize associations, and exports everything. Key associations:
 - `Category` ↔ `Product` (via `category_name` string foreign key, not ID)
 - `Order` → `OrderItem` (cascade delete)
-- `OrderItem` → `Product`
+- `OrderItem` → `Product` (SET NULL on delete)
 - `User` → `Attendance`
+- `Product` → `ProductSize` (cascade delete, alias `sizes`)
+- `Product` → `Recipe` (cascade delete, alias `recipes`)
+- `ProductSize` → `Recipe` (SET NULL on delete, alias `sizeRecipes`)
+- `Inventory` → `Recipe` (alias `ingredient`)
+- `Inventory` → `StockLog` (cascade delete, alias `logs`)
 
 ### `User.js`
 Fields: `id`, `name`, `username` (unique), `password`, `role` (ENUM: Master/Admin/Cashier), `is_active`, `last_login`, `avatar_icon`, `session_id`. Has a `beforeSave` hook that auto-hashes the password with bcrypt when changed. Includes a `validatePassword()` instance method.
@@ -56,13 +61,22 @@ Fields: `id`, `order_id`, `product_id`, `name`, `quantity`, `price`, `original_p
 Fields: `id`, `name` (unique), `is_active`. Table: `categories`.
 
 ### `Inventory.js`
-Fields: `id`, `name`, `category`, `stock`, `unit`, `threshold`, `last_updated`. Table: `inventory`. Standalone — not linked to products via foreign key.
+Fields: `id`, `name`, `category`, `stock`, `unit`, `threshold`, `last_updated`. Table: `inventory`. Now linked to `Recipe` and `StockLog` via associations.
 
 ### `Notification.js`
 Fields: `id`, `timestamp`, `type` (string, e.g. SALE/MENU_EDIT/ALERT), `message`, `details`, `cashier`. Table: `notifications`.
 
 ### `Attendance.js`
 Fields: `id`, `user_id`, `date` (DATEONLY), `clock_in` (DATE), `clock_out` (DATE), `type` (ENUM: Work/DayOff). Has a unique composite index on `[user_id, date]`. Table: `attendance`.
+
+### `ProductSize.js` *(New)*
+Fields: `id`, `product_id`, `name` (e.g. "Regular", "Large"), `price_adjustment` (float, added to base_price), `sort_order` (integer for display order). Unique composite index on `[product_id, name]`. Table: `product_sizes`. Linked: `Product → ProductSize` (cascade delete).
+
+### `Recipe.js` *(New)*
+Fields: `id`, `product_id`, `size_id` (nullable — null means applies to base product regardless of size), `inventory_id`, `quantity` (float). Unique composite index on `[product_id, size_id, inventory_id]`. Table: `recipes`. Links a product (optionally per-size) to one inventory ingredient with a consumption quantity. Linked: `Product → Recipe` (cascade delete), `ProductSize → Recipe` (SET NULL on size delete), `Inventory → Recipe`.
+
+### `StockLog.js` *(New)*
+Fields: `id`, `inventory_id`, `change_qty` (float, positive = stock added, negative = consumed), `reason` (string: 'manual', 'sale', etc.), `reference_id` (nullable string, e.g. Order ID), `stock_after` (float, snapshot of stock after change), `timestamp`. Table: `stock_logs`. Linked: `Inventory → StockLog` (cascade delete). Provides a full immutable audit trail for every stock movement.
 
 ---
 
@@ -93,10 +107,28 @@ Fields: `id`, `user_id`, `date` (DATEONLY), `clock_in` (DATE), `clock_out` (DATE
 - `DELETE /:id` — Delete category only if it has no products.
 
 ### `inventory.js`
-- `GET /` — List all inventory items.
-- `POST /` — Create inventory item.
-- `PATCH /:id` — Update stock/threshold/name/category/unit.
-- `DELETE /:id` — Delete inventory item.
+- `GET /` — List all inventory items ordered by ID.
+- `GET /logs` — Fetch last 200 stock log entries in reverse chronological order (includes Inventory name). Returns `StockLog` records.
+- `POST /` — Create inventory item. Automatically creates an initial `StockLog` entry with reason `'manual'`.
+- `PATCH /:id` — Update stock/threshold/name/category/unit. If `stock` changed, auto-creates a `StockLog` entry with the delta. Accepts optional `reason` and `reference_id` fields in body.
+- `DELETE /:id` — Delete inventory item (cascade-deletes associated stock logs).
+
+### `product-sizes.js` *(New)*
+- `GET /` — List all product sizes, optionally filtered by `?product_id=`. Ordered by `sort_order` then `id`.
+- `POST /` — Create a product size (`product_id`, `name`, `price_adjustment`, `sort_order`).
+- `PATCH /:id` — Update size fields.
+- `DELETE /:id` — Delete a product size (cascades to any linked recipes via SET NULL).
+
+### `recipes.js` *(New)*
+- `GET /` — List all recipes, optionally filtered by `?product_id=`. Includes `Inventory` ingredient details.
+- `POST /` — Create a recipe entry (`product_id`, `size_id?`, `inventory_id`, `quantity`).
+- `DELETE /:id` — Delete a specific recipe entry.
+
+### `system.js` *(New)*
+All routes require `sessionAuth`. Provides database management endpoints:
+- `POST /wipe` — **Factory Reset.** Requires `{ password }` (Master password verified). Drops and recreates all tables via `sequelize.sync({ force: true })`, then reseeds master account and default categories.
+- `GET /export` — **Backup Download.** Streams the raw `pos_data.sqlite` file as a direct file download with cache-busting headers.
+- `POST /import` — **Database Restore.** Accepts `multipart/form-data` with `db` (`.sqlite` file) and `password` fields. Verifies Master password, closes Sequelize connection, writes the uploaded buffer directly over `pos_data.sqlite`, then calls `process.exit(0)` after a 2s delay — the cluster primary auto-reforks and the new server boots with the restored DB.
 
 ### `notifications.js`
 - `GET /cloud-status` — Returns Cloudflare tunnel status (no auth required).

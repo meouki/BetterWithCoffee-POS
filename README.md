@@ -53,18 +53,26 @@ If you have the installation package, simply run `PulsePoint-Setup.exe`. The ins
 
 ### Method B: Manual Development Setup
 1.  Clone the repository.
-2.  Install dependencies for both folders:
+2.  **Environment Configuration**:
+    Manage secret keys and local settings by setting up environment files:
+    
+    *   **Backend**: Copy `backend_rewrite/.env.example` to `backend_rewrite/.env`.
+    *   **Frontend**: Copy `frontend/.env.example` to `frontend/.env`.
+    
+    *Check these files to adjust your `PORT`, `FINANCIAL_BACK_KEY`, and `VITE_API_URL` values.*
+
+3.  Install dependencies for both folders:
     ```bash
     cd backend_rewrite && npm install
     cd ../frontend && npm install
     ```
-3.  Build the frontend:
+4.  Build the frontend:
     ```bash
     cd frontend && npm run build
     ```
-4.  Start the system:
+5.  Start the system:
     ```bash
-    cd backend_rewrite && npm start
+    cd backend_rewrite && node server.js
     ```
 
 ---

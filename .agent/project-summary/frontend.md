@@ -43,7 +43,10 @@ Methods: `getAll()`, `create(categoryData)`, `delete(id)`.
 **Includes offline fallback logic.** Uses a circuit breaker pattern — if the server is unreachable, falls back to localStorage cache for reads and queues orders locally. Methods: `getAll(startDate, endDate, page, limit)` (returns `{orders, meta}`), `getRaw(startDate, endDate)` (no pagination, for analytics), `create(orderData)`.
 
 ### `inventory.js`
-Methods: `getAllLogs()`, `logAction(actionData)`, `getSummary()`.
+**Three named exports** covering ingredients, recipes, and product sizes:
+- `inventoryApi`: `getAll()`, `create(data)`, `update(id, data)`, `delete(id)`, `getLogs()` (last 200 stock log entries).
+- `recipesApi`: `getByProduct(productId)`, `create(data)`, `delete(id)`.
+- `productSizesApi`: `getByProduct(productId)`, `create(data)`, `update(id, data)`, `delete(id)`.
 
 ### `notifications.js`
 Methods: `getAll()`, `add(notification)`, `clearAll()`, `getUnreadCount()`, `markAsRead(id)`, `markAllAsRead()`, `getCloudStatus()`.
@@ -107,10 +110,16 @@ Dashboard header bar. Shows: hamburger menu (mobile), page title, "Go to POS" li
 Dashboard navigation sidebar. Links: Overview, Orders, Menu Management (Master only), Inventory, Reports, User Management (Master only), Settings. Shows active state and collapses on mobile.
 
 ### `ProductDrawer.jsx` + `.module.css`
-Slide-in drawer for creating/editing products. Fields: name, category (dropdown), base price, image upload with preview, availability toggle, modifier toggles (sugar selector, milk selector), custom addons (dynamic list with name + price). Handles FormData for image uploads.
+Slide-in drawer for creating/editing products. Fields: name, category (dropdown), base price, image upload with preview, availability toggle, modifier toggles (sugar selector, milk selector), custom addons (dynamic list with name + price). Also manages **per-product size variations** via dynamic fields (add/remove custom size names + price adjustments) and contains a `RecipeBuilder` per size (and one for the base product). Handles FormData for image uploads. On save, syncs `ProductSize` records to the backend and bulk-saves new recipes for new products.
+
+### `RecipeBuilder.jsx` + `.module.css` *(New)*
+**Inline sub-component within ProductDrawer.** Manages ingredient-to-product recipe mapping for a specific `(productId, sizeId)` pair. Operates in two modes:
+- **Live mode** (existing product): immediately creates/deletes Recipe records via `recipesApi`.
+- **Offline/pending mode** (new product being created): stores pending recipe entries locally; parent (ProductDrawer) sends these to the backend after the product is saved.
+UI: ingredient dropdown (scoped to inventory items not yet added), quantity input, add button, list of current ingredients with remove button.
 
 ### `UserDrawer.jsx` + `.module.css`
-Slide-in drawer for creating/editing users. Fields: username, password (optional on edit — blank = keep current), role selector (tile-based: Master/Admin/Cashier with descriptions), account status toggle. Conditionally includes password in submission data.
+Slide-in drawer for creating/editing users. Fields: username, password, confirm password (new), role selector (tile-based: Master/Admin/Cashier with descriptions), account status toggle. Conditionally includes password in submission data (blank = keep current on edit). Root Master account (id=1) is detected via `isProtected` flag — role selector and status toggle are locked/greyed out, and a red "(Locked for Root Master)" label is shown. Validates: username required/no-spaces, password min 6 chars, passwords must match.
 
 ### `UserDTRModal.jsx` + `.module.css`
 Modal showing a specific user's attendance calendar (monthly view), clock-in/out times, day-off markers, absent detection for past dates, revenue/order stats, and CSV export.
@@ -175,7 +184,13 @@ Analytics hub with three tabs: **Sales Report** (bar chart by day-of-week + KPI 
 **Master only.** Staff management. User table with avatar, name, role badges, active/inactive toggle, created date, last login. Add/edit via UserDrawer. Delete with confirmation. Click user row to open DTR modal.
 
 ### `SettingsPage.jsx` + `.module.css`
-System preferences: dark/light mode toggle, accent color picker (5 presets: Caramel/Sage/Dusty Rose/Slate Blue/Amber), page transition animation style and duration slider. System info panel (version, environment, DB dialect, API URL, browser info, network status).
+System preferences, organized into four sections:
+1. **Appearance**: dark/light mode toggle, accent color picker (5 presets: Caramel/Sage/Dusty Rose/Slate Blue/Amber), page transition animation style and duration slider. All settings persist in `localStorage` and apply CSS custom properties on the fly.
+2. **Data Management**: Export and Import backup subsystem.
+   - **Export**: Downloads the raw `pos_data.sqlite` file via `GET /api/system/export` with a cache-busting `?t=` timestamp. Delivered as a browser-triggered file download.
+   - **Import**: Multi-step flow — (Step 1) file selection (`.sqlite` only), (Step 2) Master password confirmation, (Step 3) final destructive warning. Sends `multipart/form-data` to `POST /api/system/import`. On success, waits 4 seconds for auto-restart then redirects to `/login`.
+3. **Danger Zone** *(Master only)*: 3-step Factory Reset flow — initial button, warning confirmation, then Master password input before executing `POST /api/system/wipe`.
+4. **System Information**: Read-only grid showing App Version, Environment, DB Dialect, API URL, browser user-agent, and online/offline status.
 
 ### `NotificationsPage.jsx` + `.module.css`
 Activity log viewer. Shows all system notifications with timestamp, type badge (SALE/MENU_EDIT/ALERT), message, details, and actor name. "Clear All" button.
