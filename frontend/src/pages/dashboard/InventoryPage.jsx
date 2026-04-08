@@ -6,7 +6,7 @@ import styles from './InventoryPage.module.css';
 
 const emptyForm = { name: '', category: '', stock: '', unit: '', threshold: '' };
 
-function IngredientDrawer({ isOpen, ingredient, onClose, onSaved }) {
+function IngredientDrawer({ isOpen, ingredient, onClose, onSaved, existingCategories = [] }) {
     const isEditing = !!ingredient;
     const [form, setForm] = useState(emptyForm);
     const [isSaving, setIsSaving] = useState(false);
@@ -30,9 +30,9 @@ function IngredientDrawer({ isOpen, ingredient, onClose, onSaved }) {
                 const updated = await inventoryApi.update(ingredient.id, {
                     name: form.name.trim(),
                     category: form.category.trim(),
-                    stock: parseFloat(form.stock || 0),
+                    stock: Math.max(0, parseFloat(form.stock) || 0),
                     unit: form.unit.trim(),
-                    threshold: parseFloat(form.threshold || 0),
+                    threshold: Math.max(0, parseFloat(form.threshold) || 0),
                 });
                 onSaved(updated, 'edit');
                 toast.success('Ingredient updated');
@@ -40,9 +40,9 @@ function IngredientDrawer({ isOpen, ingredient, onClose, onSaved }) {
                 const created = await inventoryApi.create({
                     name: form.name.trim(),
                     category: form.category.trim() || 'General',
-                    stock: parseFloat(form.stock || 0),
+                    stock: Math.max(0, parseFloat(form.stock) || 0),
                     unit: form.unit.trim(),
-                    threshold: parseFloat(form.threshold || 0),
+                    threshold: Math.max(0, parseFloat(form.threshold) || 0),
                 });
                 onSaved(created, 'add');
                 toast.success('Ingredient added');
@@ -70,7 +70,12 @@ function IngredientDrawer({ isOpen, ingredient, onClose, onSaved }) {
                     </div>
                     <div className={styles.fieldGroup}>
                         <label className={styles.label}>Category</label>
-                        <input className={styles.input} maxLength={50} placeholder="e.g. Raw Materials, Dairy" value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} />
+                        <input list="category-options" className={styles.input} maxLength={50} placeholder="e.g. Raw Materials, Dairy" value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} />
+                        <datalist id="category-options">
+                            {existingCategories.map((cat, idx) => (
+                                <option key={idx} value={cat} />
+                            ))}
+                        </datalist>
                     </div>
                     <div className={styles.fieldRow}>
                         <div className={styles.fieldGroup}>
@@ -226,6 +231,8 @@ export default function InventoryPage() {
         return { label: 'OK', cls: styles.statusOk };
     };
 
+    const existingCategories = [...new Set(ingredients.map(i => i.category).filter(Boolean))];
+
     return (
         <div className={styles.pageContainer}>
             <div className={styles.header}>
@@ -325,6 +332,7 @@ export default function InventoryPage() {
                 ingredient={editingItem}
                 onClose={() => setDrawerOpen(false)}
                 onSaved={handleSaved}
+                existingCategories={existingCategories}
             />
         </div>
     );

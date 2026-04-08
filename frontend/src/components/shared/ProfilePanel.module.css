@@ -217,14 +217,13 @@
     border-radius: var(--radius-md);
     border: 1px solid var(--color-border);
     background: var(--color-surface);
+    color: var(--color-text);
     cursor: pointer;
     font-family: var(--font-ui);
     transition: all var(--transition-base);
 }
 
-.dtrBtn i {
-    color: var(--color-muted);
-}
+
 
 .dtrBtn:hover:not(:disabled) {
     border-color: var(--color-accent);
@@ -246,6 +245,12 @@
     background: color-mix(in srgb, var(--color-error) 15%, transparent);
     border-color: var(--color-error);
     color: var(--color-error);
+}
+
+.dayOffActive {
+    background: var(--color-surface);
+    border-color: var(--color-text);
+    color: var(--color-text);
 }
 
 /* ─── Calendar Section ───────────────────── */

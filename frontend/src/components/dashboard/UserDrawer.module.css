@@ -124,6 +124,7 @@
     border: 2px solid var(--color-border);
     border-radius: var(--radius-md);
     background-color: var(--color-surface);
+    color: var(--color-text);
     padding: 12px 8px;
     text-align: center;
     cursor: pointer;

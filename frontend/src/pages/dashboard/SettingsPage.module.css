@@ -581,3 +581,45 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+/* Ambient Background Toggle */
+.availRow {
+    display: flex;
+    align-items: center;
+}
+
+.toggle {
+    width: 44px;
+    height: 24px;
+    border-radius: 9999px;
+    position: relative;
+    cursor: pointer;
+    border: none;
+    transition: background-color var(--transition-base);
+}
+
+.toggleOn {
+    background-color: var(--color-success);
+}
+
+.toggleOff {
+    background-color: var(--color-muted);
+}
+
+.toggleNub {
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    transition: transform var(--transition-base);
+}
+
+.nubOn {
+    transform: translateX(22px);
+}
+
+.nubOff {
+    transform: translateX(2px);
+}

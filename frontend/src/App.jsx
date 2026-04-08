@@ -5,6 +5,7 @@ import { ProductProvider } from './context/ProductContext';
 import { OrderProvider } from './context/OrderContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { Toaster } from 'react-hot-toast';
+import AmbientBackground from './components/shared/AmbientBackground';
 import './App.css';
 
 // Layouts
@@ -65,6 +66,7 @@ function App() {
   return (
     <AuthProvider>
       <NotificationProvider>
+        <AmbientBackground />
         <Toaster
           position="bottom-left"
           toastOptions={{

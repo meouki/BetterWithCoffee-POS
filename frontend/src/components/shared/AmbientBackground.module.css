@@ -1,0 +1,114 @@
+.ambientContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.6;
+    animation-iteration-count: infinite;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    mix-blend-mode: normal;
+}
+
+[data-theme="dark"] .blob {
+    opacity: 0.15;
+    filter: blur(120px);
+}
+
+/* 
+ * We use translate and scale combinations because they only use the GPU 
+ * without causing paint/layout repaints. 
+ */
+
+.blob1 {
+    top: -5%;
+    left: -5%;
+    width: 35vw;
+    height: 35vw;
+    background-color: var(--color-accent);
+    animation-name: orbitA;
+    animation-duration: 25s;
+}
+
+.blob2 {
+    bottom: -10%;
+    right: -5%;
+    width: 40vw;
+    height: 40vw;
+    background-color: color-mix(in srgb, var(--color-accent) 60%, transparent);
+    animation-name: orbitB;
+    animation-duration: 30s;
+}
+
+.blob3 {
+    top: 30%;
+    left: 50%;
+    width: 30vw;
+    height: 30vw;
+    background-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+    animation-name: orbitC;
+    animation-duration: 20s;
+}
+
+@keyframes orbitA {
+    0% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(30vw, 15vh) scale(1.1);
+    }
+
+    66% {
+        transform: translate(-10vw, 40vh) scale(0.9);
+    }
+
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+}
+
+@keyframes orbitB {
+    0% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(-20vw, -30vh) scale(0.95);
+    }
+
+    66% {
+        transform: translate(10vw, -10vh) scale(1.05);
+    }
+
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+}
+
+@keyframes orbitC {
+    0% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(-15vw, -15vh) scale(1.15);
+    }
+
+    66% {
+        transform: translate(-35vw, 10vh) scale(0.85);
+    }
+
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+}

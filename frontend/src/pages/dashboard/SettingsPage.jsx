@@ -48,6 +48,10 @@ export default function SettingsPage() {
         return localStorage.getItem('bwc_page_animation_type') || 'slide-in-left';
     });
 
+    const [ambientBg, setAmbientBg] = useState(() => {
+        return localStorage.getItem('bwc_ambient_bg') !== 'false';
+    });
+
     useEffect(() => {
         const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
         setActiveTheme(isDark ? 'dark' : 'light');
@@ -85,6 +89,12 @@ export default function SettingsPage() {
     useEffect(() => {
         localStorage.setItem('bwc_page_animation_type', animationType);
     }, [animationType]);
+
+    // Handle Ambient Background Changes
+    useEffect(() => {
+        localStorage.setItem('bwc_ambient_bg', ambientBg);
+        window.dispatchEvent(new Event('ambient_bg_changed'));
+    }, [ambientBg]);
 
     const handleWipeDatabase = async () => {
         if (!masterPassword) {
@@ -224,6 +234,27 @@ export default function SettingsPage() {
                             </span>
                         </div>
                     </button>
+                </div>
+
+                <div className={styles.divider} />
+
+                <div className={styles.settingRow}>
+                    <div className={styles.settingInfo}>
+                        <div className={styles.settingTitle}>Ambient Background</div>
+                        <div className={styles.settingDesc}>
+                            Enable dynamic glowing orbs moving in the background.
+                        </div>
+                    </div>
+
+                    <div className={styles.availRow} style={{ border: 'none', background: 'transparent', padding: 0 }}>
+                        <button
+                            className={`${styles.toggle} ${ambientBg ? styles.toggleOn : styles.toggleOff}`}
+                            onClick={() => setAmbientBg(!ambientBg)}
+                            type="button"
+                        >
+                            <div className={`${styles.toggleNub} ${ambientBg ? styles.nubOn : styles.nubOff}`} />
+                        </button>
+                    </div>
                 </div>
 
                 <div className={styles.divider} />
