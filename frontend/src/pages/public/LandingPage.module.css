@@ -161,6 +161,23 @@
     border-color: rgba(255, 255, 255, 0.6);
 }
 
+.docsBtn {
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.6);
+    background-color: transparent;
+    padding: 12px 20px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    gap: 7px;
+    width: max-content;
+    transition: color var(--transition-base), border-color var(--transition-base);
+}
+
+.docsBtn:hover {
+    color: white;
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
 /* Value Props Section */
 .valueSection {
     padding: 128px 24px;
@@ -273,6 +290,22 @@
     font-family: var(--font-ui);
     font-size: 0.875rem;
     color: var(--color-muted);
+}
+
+.footerDocsLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-accent);
+    transition: opacity var(--transition-base);
+    text-decoration: none;
+}
+
+.footerDocsLink:hover {
+    opacity: 0.75;
 }
 
 @keyframes slideInFromLeft {

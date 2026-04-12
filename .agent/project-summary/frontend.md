@@ -99,6 +99,9 @@ Simple animated loading spinner with optional text label.
 ### `Skeleton.jsx` + `.module.css`
 Skeleton loading placeholder with shimmer animation.
 
+### `AmbientBackground.jsx` + `.module.css`
+Performance-optimized, CSS-based GPU-animated ambient background effect. Listens for `ambient_bg_changed` events to toggle on/off globally based on user preference.
+
 ---
 
 ## Dashboard Components (`components/dashboard/`)
@@ -158,9 +161,6 @@ Payment modal. Shows order summary, total amount, payment method selector (Cash/
 ### `FloatingCartButton.jsx` + `.module.css`
 Fixed-position floating action button showing cart item count badge. Bounces on update.
 
-### `ReceiptModal.jsx` + `.module.css`
-Post-checkout receipt display. Shows store info, order ID, timestamp, itemized list with modifiers, subtotal/VAT/total, payment method, tendered amount, change. Has a "Print Receipt" button (window.print) and "New Order" button.
-
 ---
 
 ## Dashboard Pages (`pages/dashboard/`)
@@ -185,7 +185,7 @@ Analytics hub with three tabs: **Sales Report** (bar chart by day-of-week + KPI 
 
 ### `SettingsPage.jsx` + `.module.css`
 System preferences, organized into four sections:
-1. **Appearance**: dark/light mode toggle, accent color picker (5 presets: Caramel/Sage/Dusty Rose/Slate Blue/Amber), page transition animation style and duration slider. All settings persist in `localStorage` and apply CSS custom properties on the fly.
+1. **Appearance**: dark/light mode toggle, accent color picker (5 presets: Caramel/Sage/Dusty Rose/Slate Blue/Amber), ambient background toggle, page transition animation style and duration slider. All settings persist in `localStorage` and apply CSS custom properties/animations on the fly.
 2. **Data Management**: Export and Import backup subsystem.
    - **Export**: Downloads the raw `pos_data.sqlite` file via `GET /api/system/export` with a cache-busting `?t=` timestamp. Delivered as a browser-triggered file download.
    - **Import**: Multi-step flow — (Step 1) file selection (`.sqlite` only), (Step 2) Master password confirmation, (Step 3) final destructive warning. Sends `multipart/form-data` to `POST /api/system/import`. On success, waits 4 seconds for auto-restart then redirects to `/login`.

@@ -1,4 +1,4 @@
-import { ChevronRight, Coffee, Zap, BarChart3 } from 'lucide-react';
+import { ChevronRight, Coffee, Zap, BarChart3, BookOpen } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import styles from './LandingPage.module.css';
 
@@ -31,6 +31,9 @@ export default function LandingPage() {
                         </Link>
                         <Link to="/dashboard" className={`pos-btn ${styles.secondaryBtn}`}>
                             Access Admin
+                        </Link>
+                        <Link to="/docs" className={`pos-btn ${styles.docsBtn}`}>
+                            <BookOpen size={16} /> Docs
                         </Link>
                     </div>
                 </div>
@@ -81,6 +84,9 @@ export default function LandingPage() {
                 <p className={styles.footerText}>
                     © 2026 PulsePoint POS System.
                 </p>
+                <Link to="/docs" className={styles.footerDocsLink}>
+                    <BookOpen size={13} /> Documentation
+                </Link>
             </footer>
         </div>
     );

@@ -37,4 +37,4 @@ POS-PulsePoint/
 - **Data backup:** `GET /api/system/export` downloads raw SQLite. `POST /api/system/import` replaces the DB file and triggers a `process.exit(0)` which the cluster primary catches to auto-reboot.
 - **Offline fallback:** The `orders.js` API client has a circuit breaker that falls back to `localStorage` reads and queues creates when the server is unreachable.
 - **Recipe/Inventory system:** `ProductSize` defines named size variations with price adjustments. `Recipe` links a `(product, size?)` pair to an inventory ingredient with a quantity, enabling stock deduction on sale.
-- **V2 Roadmap:** See `ideas.md` in the project root for next-phase feature concepts (Predictive Restocking, KDS, QR Receipts, Gamification, etc.).
+- **V2 Roadmap & Future Plans:** See `future-plans.md` in this directory and `ideas.md` in the project root for pending implementations like the Receipt System and next-phase feature concepts (Predictive Restocking, KDS, Gamification, etc.).

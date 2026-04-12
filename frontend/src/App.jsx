@@ -31,6 +31,7 @@ import NotificationsPage from './pages/dashboard/NotificationsPage';
 import LandingPage from './pages/public/LandingPage';
 import AccountCreationPage from './pages/public/AccountCreationPage';
 import LoginPage from './pages/public/LoginPage';
+import DocsPage from './pages/public/DocsPage';
 
 function App() {
   // Initialize Global Theme & Accent
@@ -100,6 +101,7 @@ function App() {
                   <Route index element={<LandingPage />} />
                 </Route>
                 <Route path="/login" element={<LoginPage />} />
+                <Route path="/docs" element={<DocsPage />} />
 
                 {/* Registration - Protected (Master only typically, allowing Admin for demo) */}
                 <Route element={<ProtectedRoute allowedRoles={['Master', 'Admin']} />}>
