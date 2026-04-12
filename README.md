@@ -1,3 +1,4 @@
+<!-- GSD:docs-update -->
 # PulsePoint — Better With Coffee ☕
 
 A production-grade, modular Point of Sale (POS) system designed specifically for specialty café operations. PulsePoint focuses on speed, tactile feedback, and premium aesthetics to streamline daily café flows.
@@ -10,14 +11,14 @@ A production-grade, modular Point of Sale (POS) system designed specifically for
 *   **Touch-First Design**: Optimized for tablet and mobile devices with high-tap targets and smooth animations.
 *   **Dynamic Menu**: Fluid category-based product grid with "Fly-to-Cart" visual feedback.
 *   **Advanced Modifier System**: Comprehensive customization options for sugar levels (0-100%), milk alternatives, and add-ons with real-time price calculation.
-*   **Checkout & Receipts**: Support for multiple payment methods (Cash, Card, GCash), cash tendering with change calculation, and printable receipt generation.
+*   **Checkout**: Support for multiple payment methods (Cash, Card, GCash) with cash tendering and change calculation.
 
 ### 2. The Manager's Cockpit (Admin Dashboard)
 *   **Live KPI Insights**: Real-time sales tracking including today's revenue, order counts, and top-selling items.
 *   **Advanced Analytics**: Dedicated reports for Sales trends, Best Sellers, and Cashier Performance with full CSV export capabilities.
-*   **Menu & Inventory Management**: 
+*   **Menu & Inventory Management**:
     *   **Menu**: Full CRUD for products and categories with image uploads and availability toggles.
-    *   **Inventory**: Stock level tracking with low-stock thresholds and categorized inventory logs.
+    *   **Inventory**: Stock level tracking with low-stock thresholds, recipe-based deduction on sales, and categorized inventory logs.
 *   **Staff Management**: Comprehensive user roles (Master, Admin, Cashier) with active/inactive status toggles and secure account management.
 
 ### 3. Integrated Attendance & Performance
@@ -29,7 +30,7 @@ A production-grade, modular Point of Sale (POS) system designed specifically for
 ### 4. System & Cloud Intelligence
 *   **Cloud Access**: Native integration with **Cloudflare Tunnels**, allowing you to access your POS from anywhere in the world with a secure link.
 *   **Smart Activity Logs**: A centralized notification system that logs every sale, menu change, and administrative action for full transparency.
-*   **Theming & Personalization**: Five premium accent presets (Caramel, Sage, Dusty Rose, Slate Blue, Amber) and a high-contrast Dark Mode.
+*   **Theming & Personalization**: Five premium accent presets (Caramel, Sage, Dusty Rose, Slate Blue, Amber), a high-contrast Dark Mode, and a toggleable ambient background effect.
 
 ---
 
@@ -55,11 +56,11 @@ If you have the installation package, simply run `PulsePoint-Setup.exe`. The ins
 1.  Clone the repository.
 2.  **Environment Configuration**:
     Manage secret keys and local settings by setting up environment files:
-    
+
     *   **Backend**: Copy `backend_rewrite/.env.example` to `backend_rewrite/.env`.
     *   **Frontend**: Copy `frontend/.env.example` to `frontend/.env`.
-    
-    *Check these files to adjust your `PORT`, `FINANCIAL_BACK_KEY`, and `VITE_API_URL` values.*
+
+    *Check these files to adjust your `PORT`, `FINANCIAL_BACKDOOR_KEY`, and `VITE_API_URL` values.*
 
 3.  Install dependencies for both folders:
     ```bash
@@ -78,7 +79,7 @@ If you have the installation package, simply run `PulsePoint-Setup.exe`. The ins
 ---
 
 ## 🛡 Security & Backup
-PulsePoint uses a local-first **SQLite** database for lightning-fast operations and zero-latency in-store. For backups, periodically copy the `pos_data.sqlite` file in the root directory to a secure location.
+PulsePoint uses a local-first **SQLite** database for lightning-fast operations and zero-latency in-store. The Settings page includes a full **Export/Import** backup system for the raw SQLite database file, and a **Factory Reset** option (Master password required). For extra safety, periodically copy the `pos_data.sqlite` file in the root directory to a secure location.
 
 ---
 
