@@ -1,10 +1,34 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X, Receipt, CheckCircle2 } from 'lucide-react';
 import styles from './CheckoutModal.module.css';
 
 export default function CheckoutModal({ isOpen, onClose, cartItems, onComplete }) {
     const [paymentMethod, setPaymentMethod] = useState('Cash');
     const [tendered, setTendered] = useState('');
+    const [animState, setAnimState] = useState(null);
+    const animTimeout = useRef(null);
+
+    const triggerAnim = (type) => {
+        setAnimState(type);
+        if (animTimeout.current) clearTimeout(animTimeout.current);
+        animTimeout.current = setTimeout(() => setAnimState(null), 150);
+    };
+
+    const handleQuickCash = (val) => {
+        setTendered(prev => (parseFloat(prev || 0) + val).toString());
+        triggerAnim('add');
+    };
+
+    const handleExactAmount = () => {
+        setTendered(total.toString());
+        triggerAnim('add');
+    };
+
+    const handleClearCash = () => {
+        setTendered('');
+        triggerAnim('clear');
+    };
+
 
     useEffect(() => {
         if (isOpen) {
@@ -100,11 +124,41 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, onComplete }
                                     type="number"
                                     value={tendered}
                                     onChange={(e) => setTendered(e.target.value)}
-                                    className={styles.amountInput}
+                                    className={`${styles.amountInput} ${animState === 'add' ? styles.animAdd : ''} ${animState === 'clear' ? styles.animClear : ''}`}
                                     placeholder="0.00"
-                                    autoFocus
                                 />
+                                {tendered && (
+                                    <button
+                                        type="button"
+                                        className={styles.clearInputBtn}
+                                        onClick={handleClearCash}
+                                        title="Clear Amount"
+                                    >
+                                        <X size={18} />
+                                    </button>
+                                )}
                             </div>
+
+                            <div className={styles.quickCashGrid}>
+                                {[1, 5, 10, 20, 50, 100, 200, 500, 1000].map(val => (
+                                    <button
+                                        key={val}
+                                        type="button"
+                                        className={styles.quickCashBtn}
+                                        onClick={() => handleQuickCash(val)}
+                                    >
+                                        +₱{val}
+                                    </button>
+                                ))}
+                            </div>
+                            
+                            <button
+                                type="button"
+                                className={styles.exactBtn}
+                                onClick={handleExactAmount}
+                            >
+                                Exact Amount (₱{total.toFixed(2)})
+                            </button>
 
                             <div className={`${styles.changeRow} ${tenderedAmount > 0 ? (change >= 0 ? styles.changeValid : styles.changeInvalid) : ''}`}>
                                 <span>Change</span>

@@ -33,16 +33,36 @@ async function setup() {
     // ── Step 1: Create the database ─────────────────────────────────────────
     console.log(`[1/3] Using SQLite... File will be created automatically upon sync.`);
 
-    // ── Step 2: Sync all Sequelize models (create tables) ───────────────────
-    console.log('[2/3] Creating tables from models...');
+    // ── Step 2: Run Database Migrations (create tables) ───────────────────
+    console.log('[2/3] Running database migrations...');
 
     let models;
     try {
-        models = require('./backend_rewrite/models');
-        await models.sequelize.sync({ force: false, alter: true });
-        console.log('      ✅ All tables created.\n');
+        models = require(path.join(backendDir, 'models'));
+        const { sequelize } = models;
+        const { Umzug, SequelizeStorage } = require(path.join(backendDir, 'node_modules', 'umzug'));
+
+        const umzug = new Umzug({
+            migrations: { 
+                glob: path.join(backendDir, 'migrations', '*.js'),
+                resolve: ({ name, path: mp, context }) => {
+                    const migration = require(mp);
+                    return { 
+                        name, 
+                        up: async () => migration.up(context, require(path.join(backendDir, 'node_modules', 'sequelize'))), 
+                        down: async () => migration.down(context, require(path.join(backendDir, 'node_modules', 'sequelize'))) 
+                    };
+                }
+            },
+            context: sequelize.getQueryInterface(),
+            storage: new SequelizeStorage({ sequelize }),
+            logger: console,
+        });
+
+        await umzug.up();
+        console.log('      ✅ All migrations applied.\n');
     } catch (err) {
-        console.error(`      ❌ Failed to sync tables: ${err.message}`);
+        console.error(`      ❌ Failed to run migrations: ${err.message}`);
         process.exit(1);
     }
 

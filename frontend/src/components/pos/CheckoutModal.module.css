@@ -171,11 +171,97 @@
     font-weight: 700;
     color: var(--color-text);
     outline: none;
-    transition: border-color var(--transition-base);
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.15s ease-out, box-shadow 0.15s ease-out, color 0.15s ease-out, background-color 0.15s ease-out;
 }
 
 .amountInput:focus {
     border-color: var(--color-accent);
+}
+
+.animAdd {
+    transform: scale(1.02) translateY(-2px);
+    border-color: var(--color-success);
+    box-shadow: 0 0 15px color-mix(in srgb, var(--color-success) 40%, transparent);
+    color: var(--color-success);
+}
+
+.animClear {
+    background-color: color-mix(in srgb, var(--color-error) 15%, var(--color-surface));
+    border-color: var(--color-error);
+}
+
+.clearInputBtn {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: color-mix(in srgb, var(--color-surface) 60%, var(--color-muted));
+    border: none;
+    color: var(--color-text);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.clearInputBtn:hover {
+    background: var(--color-error);
+    color: white;
+}
+
+.quickCashGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.quickCashBtn {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    height: 70px;
+    padding: 12px 8px;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 1.2rem;
+    font-family: var(--font-data);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+}
+
+.quickCashBtn:hover {
+    background-color: color-mix(in srgb, var(--color-bg) 80%, var(--color-accent));
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    transform: translateY(-2px);
+}
+
+.quickCashBtn:active {
+    transform: scale(0.95);
+}
+
+.exactBtn {
+    width: 100%;
+    padding: 12px;
+    background-color: transparent;
+    border: 1.5px dashed var(--color-accent);
+    color: var(--color-accent);
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-family: var(--font-ui);
+    margin-bottom: 24px;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.exactBtn:hover {
+    background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
 }
 
 .changeRow {

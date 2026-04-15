@@ -3,8 +3,8 @@
     flex-direction: column;
     height: 100vh;
     width: 100%;
-    padding-top: 52px;
-    /* Height of header */
+    padding-top: 64px;
+    /* Height of header (increased for mobile) */
     position: relative;
     background-color: var(--color-bg);
     overflow-x: hidden;

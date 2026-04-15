@@ -3,14 +3,15 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 52px;
+    height: 64px;
     background-color: var(--color-surface);
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 2px solid var(--color-border);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 16px;
+    padding: 0 20px;
     z-index: 40;
+    backdrop-filter: blur(10px);
 }
 
 .leftSection {
@@ -35,23 +36,44 @@
     color: var(--color-accent);
 }
 
-.orderBadge {
-    padding: 4px 12px;
+.typeToggleWrapper {
+    display: flex;
+    align-items: center;
+}
+
+.typeToggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px 6px 8px;
     font-size: 0.75rem;
     font-weight: 700;
     border-radius: 9999px;
-    transition: background-color var(--transition-base);
     border: none;
     cursor: pointer;
     color: white;
+    transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.orderBadge.dineIn {
+.typeToggle:active {
+    transform: scale(0.95);
+}
+
+.bgDine {
     background-color: var(--color-dine-in);
 }
 
-.orderBadge.takeOut {
+.bgTake {
     background-color: var(--color-takeout);
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    background-color: white;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
 .clock {
@@ -140,6 +162,32 @@
 
 .switchText {
     display: inline;
+}
+
+.historyBtn {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-muted);
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.historyBtn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.historyBtn.active {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: white;
 }
 
 @media (max-width: 600px) {

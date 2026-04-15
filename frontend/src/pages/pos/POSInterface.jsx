@@ -11,11 +11,12 @@ import CartDrawer from '../../components/pos/CartDrawer';
 import ModifierSheet from '../../components/pos/ModifierSheet';
 import CheckoutModal from '../../components/pos/CheckoutModal';
 import ReceiptModal from '../../components/pos/ReceiptModal';
+import HistoryDrawer from '../../components/pos/HistoryDrawer';
 import toast from 'react-hot-toast';
 import styles from './POSInterface.module.css';
 
 export default function POSInterface() {
-    const [orderType, setOrderType] = useState(null);
+    const [orderType, setOrderType] = useState('Take-Out');
     const [activeCategory, setActiveCategory] = useState('All');
     const [cartItems, setCartItems] = useState([]);
     const { products } = useProductContext();
@@ -23,8 +24,9 @@ export default function POSInterface() {
     const { currentUser } = useAuth();
 
     // Modals state
-    const [isOrderTypeModalOpen, setIsOrderTypeModalOpen] = useState(true);
+    const [isOrderTypeModalOpen, setIsOrderTypeModalOpen] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
     const [activeReceipt, setActiveReceipt] = useState(null);
 
@@ -37,9 +39,9 @@ export default function POSInterface() {
         toast.success(`Started ${type} Order`);
     };
 
-    const handleChangeOrderType = () => {
-        // Note: In real app, confirm before clearing cart
-        setIsOrderTypeModalOpen(true);
+    const handleChangeOrderType = (newType) => {
+        setOrderType(newType);
+        toast.success(`Switched to ${newType}`);
     };
 
     const handleProductClick = (product) => {
@@ -115,8 +117,8 @@ export default function POSInterface() {
     const handleNewOrder = () => {
         setCartItems([]);
         setActiveReceipt(null);
-        setOrderType(null);
-        setIsOrderTypeModalOpen(true);
+        setOrderType('Take-Out');
+        setIsOrderTypeModalOpen(false);
     };
 
     return (
@@ -124,6 +126,8 @@ export default function POSInterface() {
             <HeaderBar
                 orderType={orderType}
                 onOrderTypeClick={handleChangeOrderType}
+                onHistoryClick={() => setIsHistoryOpen(true)}
+                isHistoryOpen={isHistoryOpen}
             />
 
             {isOrderTypeModalOpen && (
@@ -148,6 +152,11 @@ export default function POSInterface() {
             <FloatingCartButton
                 itemCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
                 onClick={() => setIsCartOpen(true)}
+            />
+
+            <HistoryDrawer
+                isOpen={isHistoryOpen}
+                onClose={() => setIsHistoryOpen(false)}
             />
 
             <CartDrawer

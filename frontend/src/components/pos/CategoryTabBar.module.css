@@ -1,11 +1,9 @@
 .tabBarWrapper {
     position: sticky;
-    top: 0px;
-    /* Height of header */
+    top: 4px;
     z-index: 30;
-    background-color: color-mix(in srgb, var(--color-bg) 80%, transparent);
-    backdrop-filter: blur(12px);
-    padding: 16px 8px 8px 8px;
+    background-color: var(--color-bg);
+    padding: 4px 0;
     border-bottom: 1px solid var(--color-border);
 }
 
@@ -13,42 +11,53 @@
     display: flex;
     overflow-x: auto;
     gap: 8px;
-    padding: 0 8px;
+    padding: 4px 8px;
     scrollbar-width: none;
-    /* Firefox */
     -ms-overflow-style: none;
-    /* IE and Edge */
 }
 
 .tabScrollArea::-webkit-scrollbar {
     display: none;
-    /* Chrome, Safari and Opera */
 }
 
 .tabBtn {
     flex-shrink: 0;
-    padding: 8px 16px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    border-radius: var(--radius-lg);
-    transition: all var(--transition-base);
-    border: 1px solid transparent;
+    padding: 12px 24px;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    border-radius: var(--radius-xl);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--color-border);
     cursor: pointer;
     font-family: var(--font-ui);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--color-surface);
 }
 
 .tabBtn.active {
     background-color: var(--color-accent);
+    border-color: var(--color-accent);
     color: white;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 15px -3px rgba(212, 124, 58, 0.3);
+    transform: translateY(-2px);
 }
 
 .tabBtn.inactive {
-    background-color: transparent;
     color: var(--color-muted);
 }
 
 .tabBtn.inactive:hover {
-    background-color: var(--color-surface);
-    border-color: var(--color-border);
+    background-color: var(--color-bg);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.icon {
+    opacity: 0.8;
+}
+
+.tabBtn.active .icon {
+    opacity: 1;
 }
