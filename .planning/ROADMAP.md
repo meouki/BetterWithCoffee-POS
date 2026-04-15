@@ -19,12 +19,13 @@
     - Improved touch-responsiveness and visual consistency.
 - **Status**: Not Started
 
-### Phase 3: Reporting & Recovery
-- **Goal**: Fix existing reporting bugs and plan for production migrations.
+### Phase 3: Schema Migrations & Reporting Fix
+- **Goal**: Replace `sequelize.sync()` with a safe, production-grade Sequelize Migrations system, and fix 0-value reporting bugs.
 - **Requirements**: REQ-3.1, REQ-3.2
 - **Success Criteria**:
+    - `sequelize.sync()` is replaced with `sequelize-cli` migration system.
+    - `npm run migrate` applies schema changes without data loss.
     - KPI cards in Dashboard show accurate, non-zero data for historical periods.
-    - Migration strategy document finalized.
 - **Status**: Not Started
 
 ---

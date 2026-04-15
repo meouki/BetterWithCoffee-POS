@@ -50,9 +50,27 @@ if (cluster.isPrimary) {
         }
     }
 
-    sequelize.sync()
+    const { Umzug, SequelizeStorage } = require('umzug');
+    const umzug = new Umzug({
+        migrations: { 
+            glob: 'migrations/*.js', 
+            resolve: ({ name, path: mp, context }) => {
+                const migration = require(mp);
+                return { 
+                    name, 
+                    up: async () => migration.up(context, require('sequelize')), 
+                    down: async () => migration.down(context, require('sequelize')) 
+                };
+            }
+        },
+        context: sequelize.getQueryInterface(),
+        storage: new SequelizeStorage({ sequelize }),
+        logger: console,
+    });
+
+    umzug.up()
         .then(async () => {
-            console.log('✅ Database synced successfully.');
+            console.log('✅ Database migrations applied.');
             await seedDatabase();
 
             // Start Cloudflare Tunnel if enabled in .env
@@ -78,7 +96,7 @@ if (cluster.isPrimary) {
             });
         })
         .catch((err) => {
-            console.error('❌ Failed to sync database:', err.message);
+            console.error('❌ Failed to apply database migrations:', err.message);
         });
 }
 

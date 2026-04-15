@@ -68,10 +68,14 @@ export const ordersApi = {
             params.append('limit', 1000); 
 
             const response = await apiClient.get(`/api/orders?${params.toString()}`);
+            if (!response.ok) {
+                console.warn(`[Analytics] Failed with status ${response.status}:`, await response.text());
+                return [];
+            }
             const data = await response.json();
             return data.orders || [];
         } catch (error) {
-            console.error('Analytics fetch failed', error);
+            console.error('[Analytics] Network error fetching reports:', error);
             return [];
         }
     },
