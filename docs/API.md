@@ -73,7 +73,6 @@ Create a product. Supports `multipart/form-data` for image uploads. **Auth requi
 | `is_available` | boolean | Show/hide on POS |
 | `modifiers` | boolean | Enable modifier sheet (sugar, milk) |
 | `has_sugar_selector` | boolean | Show sugar level slider |
-| `has_milk_selector` | boolean | Show milk type options |
 | `addons` | JSON string | Array of `{ name, price }` addon objects |
 | `image` | file | Product image (any format → converted to WebP) |
 
@@ -142,7 +141,7 @@ Create an order with items in a single transaction. **Auth required.**
       "quantity": 2,
       "price": 75,
       "original_price": 75,
-      "modifiers": { "size": "Regular", "sugar": 75, "milk": "Whole" }
+      "modifiers": { "size": "Regular", "sugar": 75 }
     }
   ]
 }

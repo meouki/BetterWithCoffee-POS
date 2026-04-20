@@ -108,4 +108,78 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+// POST /api/inventory/check-stock - Validate inventory against a list of items
+router.post('/check-stock', async (req, res) => {
+    try {
+        const { items } = req.body; // Array of { id, quantity, modifiers }
+        if (!items || !items.length) return res.json({ shortages: [] });
+
+        const { Recipe, ProductSize, Inventory } = require('../models');
+        const shortages = [];
+        const requiredMap = {}; // { ingredientId: { name, required, current, unit } }
+
+        for (const item of items) {
+            let sizeName = null;
+            let modifications = [];
+            try {
+                modifications = typeof item.modifiers === 'string' ? JSON.parse(item.modifiers) : (item.modifiers || []);
+            } catch (e) {}
+
+            if (Array.isArray(modifications)) {
+                for (const mod of modifications) {
+                    if (mod.name && mod.name.startsWith('Size: ')) {
+                        sizeName = mod.name.replace('Size: ', '').trim();
+                        break;
+                    }
+                }
+            }
+
+            let sizeId = null;
+            if (sizeName) {
+                const productSize = await ProductSize.findOne({ where: { product_id: item.id, name: sizeName } });
+                if (productSize) sizeId = productSize.id;
+            }
+
+            const recipes = await Recipe.findAll({
+                where: {
+                    product_id: item.id,
+                    size_id: [null, sizeId].filter(id => id !== undefined)
+                }
+            });
+
+            for (const recipe of recipes) {
+                const qtyNeeded = recipe.quantity * (item.quantity || 1);
+                if (!requiredMap[recipe.inventory_id]) {
+                    const ing = await Inventory.findByPk(recipe.inventory_id);
+                    requiredMap[recipe.inventory_id] = {
+                        name: ing.name,
+                        required: 0,
+                        current: ing.stock,
+                        unit: ing.unit
+                    };
+                }
+                requiredMap[recipe.inventory_id].required += qtyNeeded;
+            }
+        }
+
+        for (const [id, data] of Object.entries(requiredMap)) {
+            if (data.current < data.required) {
+                shortages.push({
+                    ingredient_id: parseInt(id),
+                    name: data.name,
+                    needed: data.required,
+                    current: data.current,
+                    unit: data.unit,
+                    shortfall: data.required - data.current
+                });
+            }
+        }
+
+        res.json({ shortages });
+    } catch (error) {
+        console.error('Error checking stock:', error);
+        res.status(500).json({ error: 'Failed to check stock' });
+    }
+});
+
 module.exports = router;

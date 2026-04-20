@@ -64,7 +64,7 @@ export default function LandingPage() {
                                 <Coffee size={32} className={styles.icon} />
                             </div>
                             <h3 className={styles.cardTitle}>Complex Modifiers</h3>
-                            <p className={styles.cardText}>Sugar levels, milk alternatives, extra shots. Handle highly customized specialty orders effortlessly with our intuitive bottom sheets.</p>
+                            <p className={styles.cardText}>Sugar levels, extra shots, and more. Handle highly customized specialty orders effortlessly with our intuitive bottom sheets.</p>
                         </div>
 
                         {/* Prop 3 */}

@@ -179,15 +179,33 @@ export default function MenuManagementPage() {
                     <table className={styles.table}>
                         <thead>
                             <tr>
+                                <th className={styles.th}>Actions</th>
                                 <th className={styles.th}>Product</th>
                                 <th className={styles.th}>Base Price</th>
                                 <th className={styles.th}>Availability</th>
-                                <th className={styles.th}>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {filteredProducts.map(product => (
                                 <tr key={product.id} className={styles.tableRow}>
+                                    <td className={styles.td}>
+                                        <div className={styles.actionCell}>
+                                            <button
+                                                className={`${styles.iconBtn} ${styles.edit}`}
+                                                title="Edit product"
+                                                onClick={() => handleOpenEdit(product)}
+                                            >
+                                                <Edit2 size={16} />
+                                            </button>
+                                            <button
+                                                className={`${styles.iconBtn} ${styles.delete}`}
+                                                title="Delete product"
+                                                onClick={() => handleDelete(product.id)}
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    </td>
                                     <td className={styles.td}>
                                         <div className={styles.productCell}>
                                             <div className={styles.productAvatar}>
@@ -214,24 +232,6 @@ export default function MenuManagementPage() {
                                         >
                                             <div className={`${styles.toggleNub} ${product.is_available ? styles.toggleNubActive : styles.toggleNubInactive}`} />
                                         </button>
-                                    </td>
-                                    <td className={styles.td}>
-                                        <div className={styles.actionCell}>
-                                            <button
-                                                className={`${styles.iconBtn} ${styles.edit}`}
-                                                title="Edit product"
-                                                onClick={() => handleOpenEdit(product)}
-                                            >
-                                                <Edit2 size={16} />
-                                            </button>
-                                            <button
-                                                className={`${styles.iconBtn} ${styles.delete}`}
-                                                title="Delete product"
-                                                onClick={() => handleDelete(product.id)}
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
                                     </td>
                                 </tr>
                             ))}

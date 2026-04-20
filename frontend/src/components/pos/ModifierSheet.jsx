@@ -5,7 +5,6 @@ import styles from './ModifierSheet.module.css';
 
 export default function ModifierSheet({ isOpen, product, onClose, onAddToCart }) {
     const [sugarLevel, setSugarLevel] = useState('100%');
-    const [milkType, setMilkType] = useState('Regular');
     const [selectedAddons, setSelectedAddons] = useState([]); // Array of addon objects { name, price }
     
     // Sizing state
@@ -16,7 +15,6 @@ export default function ModifierSheet({ isOpen, product, onClose, onAddToCart })
     const [totalPrice, setTotalPrice] = useState(0);
 
     const hasSugar = !!product?.has_sugar_selector;
-    const hasMilk = !!product?.has_milk_selector;
     const hasSizes = !!product?.has_sizes;
     
     // Safety parse in case Sequelize getter hasn't run on the frontend object
@@ -32,7 +30,6 @@ export default function ModifierSheet({ isOpen, product, onClose, onAddToCart })
             setTotalPrice(product.base_price);
             // Reset selections
             setSugarLevel('100%');
-            setMilkType('Regular');
             setSelectedAddons([]);
             setSelectedSize(null);
             
@@ -58,12 +55,6 @@ export default function ModifierSheet({ isOpen, product, onClose, onAddToCart })
 
         let extraCost = 0;
 
-        // Milk options
-        if (hasMilk) {
-            if (milkType === 'Oat Milk') extraCost += 20;
-            if (milkType === 'Almond Milk') extraCost += 25;
-        }
-
         // Dynamic Add-ons
         selectedAddons.forEach(addon => {
             extraCost += parseFloat(addon.price || 0);
@@ -71,7 +62,7 @@ export default function ModifierSheet({ isOpen, product, onClose, onAddToCart })
 
         const activeBasePrice = selectedSize ? (product.base_price + parseFloat(selectedSize.price_adjustment || 0)) : product.base_price;
         setTotalPrice(activeBasePrice + extraCost);
-    }, [sugarLevel, milkType, selectedAddons, selectedSize, product, hasMilk]);
+    }, [sugarLevel, selectedAddons, selectedSize, product]);
 
     if (!isOpen || !product) return null;
 
@@ -94,9 +85,6 @@ export default function ModifierSheet({ isOpen, product, onClose, onAddToCart })
         
         if (hasSugar && sugarLevel !== '100%') {
             selectedMods.push({ name: `Sugar: ${sugarLevel}`, price: 0 });
-        }
-        if (hasMilk && milkType !== 'None') {
-            selectedMods.push({ name: `Milk: ${milkType}`, price: 0 });
         }
         if (selectedAddons.length > 0) {
             selectedMods.push(...selectedAddons.map(a => ({ 
@@ -179,34 +167,6 @@ export default function ModifierSheet({ isOpen, product, onClose, onAddToCart })
                         </div>
                     )}
 
-                    {hasMilk && (
-                        <div className={styles.group}>
-                            <h3 className={styles.groupTitle}>Milk Alternative</h3>
-                            <div className={styles.grid2}>
-                                <button
-                                    onClick={() => setMilkType('Regular')}
-                                    className={`${styles.modBtn} ${milkType === 'Regular' ? styles.active : ''}`}
-                                >
-                                    Regular
-                                </button>
-                                <button
-                                    onClick={() => setMilkType('Oat Milk')}
-                                    className={`${styles.modBtn} ${milkType === 'Oat Milk' ? styles.active : ''}`}
-                                >
-                                    <span>Oat Milk</span>
-                                    <span className={styles.modCost}>+₱20</span>
-                                </button>
-                                <button
-                                    onClick={() => setMilkType('Almond Milk')}
-                                    className={`${styles.modBtn} ${milkType === 'Almond Milk' ? styles.active : ''}`}
-                                >
-                                    <span>Almond Milk</span>
-                                    <span className={styles.modCost}>+₱25</span>
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
                     {addons.length > 0 && (
                         <div className={styles.group}>
                             <h3 className={styles.groupTitle}>Add-ons</h3>
@@ -230,7 +190,7 @@ export default function ModifierSheet({ isOpen, product, onClose, onAddToCart })
                         </div>
                     )}
 
-                    {!hasSizes && !hasSugar && !hasMilk && addons.length === 0 && (
+                    {!hasSizes && !hasSugar && addons.length === 0 && (
                         <div className={styles.emptyMods}>
                             No specific customizations defined for this item.
                         </div>

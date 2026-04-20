@@ -115,6 +115,87 @@ function IngredientDrawer({ isOpen, ingredient, onClose, onSaved, existingCatego
     );
 }
 
+function StockUpdateModal({ isOpen, item, onClose, onSaved }) {
+    const [addAmount, setAddAmount] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
+
+    useEffect(() => {
+        if (isOpen) setAddAmount('');
+    }, [isOpen]);
+
+    if (!isOpen || !item) return null;
+
+    const handleConfirm = async () => {
+        const val = parseFloat(addAmount);
+        if (isNaN(val) || val <= 0) return toast.error('Please enter a valid amount.');
+        
+        setIsSaving(true);
+        try {
+            const updated = await inventoryApi.update(item.id, {
+                stock: item.stock + val,
+                reason: 'restock'
+            });
+            onSaved(updated, 'edit');
+            toast.success(`Restocked ${item.name}`);
+            onClose();
+        } catch (err) {
+            toast.error(err.message);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    return (
+        <>
+            <div className={styles.drawerBackdrop} onClick={onClose} />
+            <div className={`${styles.drawer} ${styles.stockModal}`} role="dialog">
+                <div className={styles.drawerHeader}>
+                    <h2 className={styles.drawerTitle}>Restock Ingredient</h2>
+                    <button className={styles.drawerCloseBtn} onClick={onClose}><X size={20} /></button>
+                </div>
+                <div className={styles.drawerBody}>
+                    <div className={styles.stockInfoPanel}>
+                        <div className={styles.infoTitle}>{item.name}</div>
+                        <div className={styles.infoGrid}>
+                            <div className={styles.infoItem}>
+                                <label>Current Stock</label>
+                                <span>{item.stock} {item.unit}</span>
+                            </div>
+                            <div className={styles.infoItem}>
+                                <label>Threshold</label>
+                                <span>{item.threshold} {item.unit}</span>
+                            </div>
+                            <div className={styles.infoItem}>
+                                <label>Last Updated</label>
+                                <span>{item.last_updated ? new Date(item.last_updated).toLocaleDateString() : '—'}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className={styles.fieldGroup}>
+                        <label className={styles.label}>Quantity to Add ({item.unit})</label>
+                        <input 
+                            className={styles.input} 
+                            type="number" 
+                            autoFocus
+                            placeholder="0.00" 
+                            value={addAmount} 
+                            onChange={e => setAddAmount(e.target.value)} 
+                            onKeyDown={e => e.key === 'Enter' && handleConfirm()}
+                        />
+                    </div>
+                </div>
+                <div className={styles.drawerFooter}>
+                    <button className={styles.cancelBtn} onClick={onClose}>Cancel</button>
+                    <button className={styles.saveBtn} onClick={handleConfirm} disabled={isSaving}>
+                        {isSaving ? 'Updating...' : 'Confirm Restock'}
+                    </button>
+                </div>
+            </div>
+        </>
+    );
+}
+
 function StockLogPanel({ logs, isLoading, onRefresh }) {
     const getReasonBadge = (reason) => {
         switch (reason) {
@@ -176,7 +257,9 @@ export default function InventoryPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isLogsLoading, setIsLogsLoading] = useState(false);
     const [drawerOpen, setDrawerOpen] = useState(false);
+    const [stockModalOpen, setStockModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
+    const [stockItem, setStockItem] = useState(null);
 
     const loadIngredients = useCallback(async () => {
         setIsLoading(true);
@@ -267,12 +350,12 @@ export default function InventoryPage() {
                             <table className={styles.table}>
                                 <thead>
                                     <tr>
+                                        <th className={styles.th}>Actions</th>
                                         <th className={styles.th}>Ingredient</th>
                                         <th className={styles.th}>Current Stock</th>
                                         <th className={styles.th}>Threshold</th>
                                         <th className={styles.th}>Status</th>
                                         <th className={styles.th}>Last Updated</th>
-                                        <th className={styles.th}>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -282,6 +365,19 @@ export default function InventoryPage() {
                                         const status = getStatus(item.stock, item.threshold);
                                         return (
                                             <tr key={item.id} className={styles.tableRow}>
+                                                <td className={styles.td}>
+                                                    <div className={styles.actionCell}>
+                                                        <button className={`${styles.iconBtn} ${styles.stockBtn}`} title="Restock" onClick={() => { setStockItem(item); setStockModalOpen(true); }}>
+                                                            <PackagePlus size={15} />
+                                                        </button>
+                                                        <button className={`${styles.iconBtn} ${styles.editBtn}`} title="Edit" onClick={() => { setEditingItem(item); setDrawerOpen(true); }}>
+                                                            <Edit2 size={15} />
+                                                        </button>
+                                                        <button className={`${styles.iconBtn} ${styles.deleteBtn}`} title="Delete" onClick={() => handleDelete(item.id)}>
+                                                            <Trash2 size={15} />
+                                                        </button>
+                                                    </div>
+                                                </td>
                                                 <td className={styles.td}>
                                                     <div className={styles.itemName}>{item.name}</div>
                                                     <div className={styles.itemCategory}>{item.category}</div>
@@ -303,16 +399,6 @@ export default function InventoryPage() {
                                                 <td className={`${styles.td} ${styles.dateText}`}>
                                                     {item.last_updated ? new Date(item.last_updated).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
                                                 </td>
-                                                <td className={styles.td}>
-                                                    <div className={styles.actionCell}>
-                                                        <button className={`${styles.iconBtn} ${styles.editBtn}`} title="Edit" onClick={() => { setEditingItem(item); setDrawerOpen(true); }}>
-                                                            <Edit2 size={15} />
-                                                        </button>
-                                                        <button className={`${styles.iconBtn} ${styles.deleteBtn}`} title="Delete" onClick={() => handleDelete(item.id)}>
-                                                            <Trash2 size={15} />
-                                                        </button>
-                                                    </div>
-                                                </td>
                                             </tr>
                                         );
                                     })}
@@ -326,6 +412,13 @@ export default function InventoryPage() {
             {activeTab === 'logs' && (
                 <StockLogPanel logs={logs} isLoading={isLogsLoading} onRefresh={loadLogs} />
             )}
+
+            <StockUpdateModal
+                isOpen={stockModalOpen}
+                item={stockItem}
+                onClose={() => setStockModalOpen(false)}
+                onSaved={handleSaved}
+            />
 
             <IngredientDrawer
                 isOpen={drawerOpen}

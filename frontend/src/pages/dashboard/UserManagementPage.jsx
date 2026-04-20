@@ -137,17 +137,35 @@ export default function UserManagementPage() {
                     <table className={styles.table}>
                         <thead>
                             <tr>
+                                <th className={styles.th}>Actions</th>
                                 <th className={styles.th}>User</th>
                                 <th className={styles.th}>Role</th>
                                 <th className={styles.th}>Status</th>
                                 <th className={styles.th}>Created</th>
                                 <th className={styles.th}>Last Login</th>
-                                <th className={styles.th}>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {users.map(user => (
                                 <tr key={user.id} className={styles.tableRow}>
+                                    <td className={styles.td}>
+                                        <div className={styles.actionCell}>
+                                            <button
+                                                className={`${styles.iconBtn} ${styles.edit}`}
+                                                title="Edit user"
+                                                onClick={() => handleOpenEdit(user)}
+                                            >
+                                                <Edit2 size={16} />
+                                            </button>
+                                            <button
+                                                className={`${styles.iconBtn} ${styles.delete}`}
+                                                title="Delete user"
+                                                onClick={() => deleteUser(user.id)}
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    </td>
                                     <td className={styles.td}>
                                         <div className={styles.userCell} onClick={() => handleOpenDTR(user)} style={{ cursor: 'pointer' }}>
                                             <div className={styles.avatar}>{user.name.charAt(0).toUpperCase()}</div>
@@ -177,24 +195,6 @@ export default function UserManagementPage() {
                                     </td>
                                     <td className={`${styles.td} ${styles.dateData}`} style={{ color: 'var(--color-muted)' }}>
                                         {user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}
-                                    </td>
-                                    <td className={styles.td}>
-                                        <div className={styles.actionCell}>
-                                            <button
-                                                className={`${styles.iconBtn} ${styles.edit}`}
-                                                title="Edit user"
-                                                onClick={() => handleOpenEdit(user)}
-                                            >
-                                                <Edit2 size={16} />
-                                            </button>
-                                            <button
-                                                className={`${styles.iconBtn} ${styles.delete}`}
-                                                title="Delete user"
-                                                onClick={() => deleteUser(user.id)}
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
                                     </td>
                                 </tr>
                             ))}

@@ -464,3 +464,67 @@
     from { transform: translateX(100%); }
     to { transform: translateX(0); }
 }
+
+.stockBtn:hover {
+    color: var(--color-success);
+    border-color: var(--color-success);
+    background-color: color-mix(in srgb, var(--color-success) 10%, transparent);
+}
+
+.stockModal {
+    max-height: 480px;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    bottom: auto !important;
+    right: auto !important;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    animation: zoomIn 0.2s ease-out;
+}
+
+@keyframes zoomIn {
+    from { transform: translate(-50%, -50%) scale(0.95); opacity: 0; }
+    to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+.stockInfoPanel {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 8px;
+}
+
+.infoTitle {
+    font-weight: 700;
+    font-family: var(--font-ui);
+    margin-bottom: 12px;
+    color: var(--color-accent);
+    font-size: 0.95rem;
+}
+
+.infoGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.infoItem {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.infoItem label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-muted);
+}
+
+.infoItem span {
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: var(--font-data);
+}

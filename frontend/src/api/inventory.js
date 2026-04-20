@@ -32,6 +32,12 @@ export const inventoryApi = {
         if (!response.ok) throw new Error('Failed to fetch stock logs');
         return response.json();
     },
+
+    checkStock: async (items) => {
+        const response = await apiClient.post('/api/inventory/check-stock', { items });
+        if (!response.ok) throw new Error('Failed to check stock');
+        return response.json();
+    }
 };
 
 export const recipesApi = {

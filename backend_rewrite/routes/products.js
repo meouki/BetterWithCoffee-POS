@@ -68,7 +68,6 @@ router.post('/', upload.single('image'), async (req, res) => {
             is_available: data.is_available === 'true' || data.is_available === true,
             modifiers: data.modifiers === 'true' || data.modifiers === true,
             has_sugar_selector: data.has_sugar_selector === 'true' || data.has_sugar_selector === true,
-            has_milk_selector: data.has_milk_selector === 'true' || data.has_milk_selector === true,
             has_sizes: data.has_sizes === 'true' || data.has_sizes === true,
             addons: data.addons, // Handled by model setter
             image_url: imageUrl
@@ -115,9 +114,6 @@ router.patch('/:id', upload.single('image'), async (req, res) => {
         }
         if (updates.has_sugar_selector !== undefined) {
             product.has_sugar_selector = updates.has_sugar_selector === 'true' || updates.has_sugar_selector === true;
-        }
-        if (updates.has_milk_selector !== undefined) {
-            product.has_milk_selector = updates.has_milk_selector === 'true' || updates.has_milk_selector === true;
         }
         if (updates.has_sizes !== undefined) {
             product.has_sizes = updates.has_sizes === 'true' || updates.has_sizes === true;

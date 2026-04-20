@@ -57,7 +57,6 @@ export default function POSInterface() {
         const hasCustomizations = 
             product.has_sizes ||
             product.has_sugar_selector || 
-            product.has_milk_selector || 
             addonCount > 0;
 
         if (hasCustomizations) {

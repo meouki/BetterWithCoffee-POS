@@ -12,7 +12,6 @@ const emptyForm = {
     is_available: true,
     modifiers: false,
     has_sugar_selector: false,
-    has_milk_selector: false,
     has_sizes: false,
     addons: [],
     image_url: '',
@@ -52,7 +51,6 @@ export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
                     is_available: product.is_available,
                     modifiers: product.modifiers || false,
                     has_sugar_selector: product.has_sugar_selector || false,
-                    has_milk_selector: product.has_milk_selector || false,
                     has_sizes: product.has_sizes || false,
                     addons: product.addons || [],
                     image_url: product.image_url || '',
@@ -144,9 +142,8 @@ export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
             base_price: parsedPrice,
             is_available: form.is_available,
             has_sizes: form.has_sizes,
-            modifiers: form.modifiers || form.addons.length > 0 || form.has_sugar_selector || form.has_milk_selector,
+            modifiers: form.modifiers || form.addons.length > 0 || form.has_sugar_selector,
             has_sugar_selector: form.has_sugar_selector,
-            has_milk_selector: form.has_milk_selector,
             addons: form.addons,
             image_url: form.image_url,
             imageFile: selectedFile,
@@ -387,20 +384,6 @@ export default function ProductDrawer({ isOpen, product, onClose, onSave }) {
                         </div>
                     </div>
 
-                    <div className={styles.fieldGroup}>
-                        <div className={styles.availRow}>
-                            <div>
-                                <div className={styles.availLabel}>Milk Alternative Selector</div>
-                                <div className={styles.availDesc}>Enable Oat/Almond options in POS</div>
-                            </div>
-                            <button
-                                className={`${styles.toggle} ${form.has_milk_selector ? styles.toggleOn : styles.toggleOff}`}
-                                onClick={() => handleChange('has_milk_selector', !form.has_milk_selector)}
-                            >
-                                <div className={`${styles.toggleNub} ${form.has_milk_selector ? styles.nubOn : styles.nubOff}`} />
-                            </button>
-                        </div>
-                    </div>
 
                     <div className={styles.fieldGroup}>
                         <div className={styles.addonHeader}>

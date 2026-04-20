@@ -35,10 +35,6 @@ const Product = sequelize.define('product', {
         type: DataTypes.BOOLEAN,
         defaultValue: false
     },
-    has_milk_selector: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false
-    },
     addons: {
         type: DataTypes.TEXT,
         defaultValue: '[]',

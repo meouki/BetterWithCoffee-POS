@@ -42,5 +42,11 @@ export const attendanceApi = {
         const response = await apiClient.get(url);
         if (!response.ok) throw new Error('Failed to fetch attendance logs');
         return response.json();
+    },
+
+    setDayOff: async (userId, date = null) => {
+        const response = await apiClient.post('/api/attendance/day-off', { user_id: userId, date });
+        if (!response.ok) throw new Error('Failed to set day off');
+        return response.json();
     }
 };

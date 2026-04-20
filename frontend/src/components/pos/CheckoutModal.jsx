@@ -1,11 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Receipt, CheckCircle2 } from 'lucide-react';
+import { X, Receipt, CheckCircle2, AlertCircle } from 'lucide-react';
+import { inventoryApi } from '../../api/inventory';
 import styles from './CheckoutModal.module.css';
 
 export default function CheckoutModal({ isOpen, onClose, cartItems, onComplete }) {
     const [paymentMethod, setPaymentMethod] = useState('Cash');
     const [tendered, setTendered] = useState('');
     const [animState, setAnimState] = useState(null);
+    const [shortages, setShortages] = useState([]);
+    const [isCheckingStock, setIsCheckingStock] = useState(false);
+    const [hasConsented, setHasConsented] = useState(false);
     const animTimeout = useRef(null);
 
     const triggerAnim = (type) => {
@@ -34,8 +38,17 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, onComplete }
         if (isOpen) {
             setPaymentMethod('Cash');
             setTendered('');
+            setShortages([]);
+            setHasConsented(false);
+            
+            // Check stock
+            setIsCheckingStock(true);
+            inventoryApi.checkStock(cartItems)
+                .then(res => setShortages(res.shortages))
+                .catch(err => console.error('Stock check failed', err))
+                .finally(() => setIsCheckingStock(false));
         }
-    }, [isOpen]);
+    }, [isOpen, cartItems]);
 
     if (!isOpen) return null;
 
@@ -172,16 +185,40 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, onComplete }
                         </div>
                     )}
 
+                    {shortages.length > 0 && (
+                        <div className={styles.inventoryWarning}>
+                            <div className={styles.warningHeader}>
+                                <AlertCircle size={18} />
+                                <span>Inventory Shortage</span>
+                            </div>
+                            <ul className={styles.shortageList}>
+                                {shortages.map((s, i) => (
+                                    <li key={i}>
+                                        <b>{s.name}</b>: Need {s.needed.toFixed(1)}, Have {s.current.toFixed(1)} {s.unit}
+                                    </li>
+                                ))}
+                            </ul>
+                            <label className={styles.consentRow}>
+                                <input 
+                                    type="checkbox" 
+                                    checked={hasConsented} 
+                                    onChange={e => setHasConsented(e.target.checked)} 
+                                />
+                                <span>I understand and wish to proceed anyway</span>
+                            </label>
+                        </div>
+                    )}
+
                 </div>
 
                 <div className={styles.footer}>
                     <button
                         className={`pos-btn ${styles.confirmBtn}`}
-                        disabled={!isCashValid}
+                        disabled={!isCashValid || isCheckingStock || (shortages.length > 0 && !hasConsented)}
                         onClick={handleConfirm}
                     >
                         <Receipt size={20} />
-                        Confirm & Print Receipt
+                        {isCheckingStock ? 'Checking...' : 'Confirm & Print Receipt'}
                     </button>
                 </div>
             </div>

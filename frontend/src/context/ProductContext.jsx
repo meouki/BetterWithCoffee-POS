@@ -64,7 +64,6 @@ export function ProductProvider({ children }) {
                 formData.append('is_available', coreData.is_available);
                 formData.append('modifiers', coreData.modifiers);
                 formData.append('has_sugar_selector', coreData.has_sugar_selector);
-                formData.append('has_milk_selector', coreData.has_milk_selector);
                 formData.append('has_sizes', coreData.has_sizes);
                 formData.append('addons', JSON.stringify(coreData.addons || []));
                 formData.append('image', productData.imageFile);
@@ -124,7 +123,6 @@ export function ProductProvider({ children }) {
                 formData.append('is_available', coreData.is_available);
                 formData.append('modifiers', coreData.modifiers);
                 formData.append('has_sugar_selector', coreData.has_sugar_selector);
-                formData.append('has_milk_selector', coreData.has_milk_selector);
                 formData.append('has_sizes', coreData.has_sizes);
                 formData.append('addons', JSON.stringify(coreData.addons || []));
                 formData.append('image', updateData.imageFile);

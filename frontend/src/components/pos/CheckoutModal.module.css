@@ -354,6 +354,65 @@
     color: var(--color-muted);
 }
 
+.inventoryWarning {
+    margin-top: 24px;
+    padding: 16px;
+    background-color: color-mix(in srgb, var(--color-error) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-error) 25%, transparent);
+    border-radius: var(--radius-md);
+    margin-bottom: 24px;
+}
+
+.warningHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-error);
+    margin-bottom: 12px;
+}
+
+.warningHeader span {
+    font-weight: 700;
+    font-size: 0.9rem;
+    font-family: var(--font-drama);
+    text-transform: uppercase;
+}
+
+.shortageList {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px 0;
+    font-size: 0.85rem;
+    color: var(--color-text);
+    opacity: 0.9;
+}
+
+.shortageList li {
+    margin-bottom: 4px;
+    padding-left: 8px;
+    border-left: 2px solid color-mix(in srgb, var(--color-error) 30%, transparent);
+}
+
+.consentRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    transition: color var(--transition-base);
+}
+
+.consentRow:hover {
+    color: var(--color-text);
+}
+
+.consentRow input {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
